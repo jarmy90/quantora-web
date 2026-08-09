@@ -1,16 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { activity, downloads, licenses, type DashboardLicense } from '../data';
+import { findProfile } from '../domain/product';
+import { useFavorites } from '../state/favorites';
 import { t } from '../i18n';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { EmptyState, Seo } from '../components/ui';
 import '../styles/app.css';
-
 const statusColor: Record<DashboardLicense['status'], string> = {
   Active: 'var(--lime)',
   Trial: 'var(--cyan)',
   Expired: 'var(--red)',
 };
-
 function Licenses() {
   if (licenses.length === 0) {
     return <p className="muted">{t('dashboard.emptyLicenses')}</p>;
@@ -54,7 +55,6 @@ function Licenses() {
     </div>
   );
 }
-
 function DownloadsList() {
   if (downloads.length === 0) {
     return <p className="muted">{t('dashboard.emptyDownloads')}</p>;
@@ -73,10 +73,8 @@ function DownloadsList() {
         <tbody>
           {downloads.map((d) => (
             <tr key={d.id}>
-              <td className="mono" style={{ color: 'var(--cyan)' }}>
-                {d.name}
-              </td>
-              <td>{d.format}</td>
+              <td style={{ fontWeight: 700 }}>{d.name}</td>
+              <td className="muted">{d.format}</td>
               <td className="muted">{d.size}</td>
               <td className="muted">{d.date}</td>
             </tr>
@@ -86,7 +84,6 @@ function DownloadsList() {
     </div>
   );
 }
-
 function History() {
   if (activity.length === 0) {
     return <p className="muted">{t('dashboard.emptyHistory')}</p>;
@@ -110,10 +107,58 @@ function History() {
     </ul>
   );
 }
-
+function Favorites() {
+  const { ids } = useFavorites();
+  const items = ids.map((id) => findProfile(id)).filter((p) => p !== undefined);
+  if (items.length === 0) {
+    return (
+      <EmptyState
+        title={t('dashboard.emptyFavorites')}
+        body={t('dashboard.emptyFavoritesBody')}
+        action={
+          <Link className="btn" to="/strategies">
+            {t('home.browse')} →
+          </Link>
+        }
+      />
+    );
+  }
+  return (
+    <div className="dash-table-wrap">
+      <table className="log dash-table">
+        <thead>
+          <tr>
+            <th>{t('nav.strategies')}</th>
+            <th>{t('common.powerScore')}</th>
+            <th>{t('common.risk')}</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((p) => (
+            <tr key={p.id}>
+              <td style={{ fontWeight: 700 }}>{p.name}</td>
+              <td className="mono">{p.metrics.powerScore.toFixed(1)} / 10</td>
+              <td className="muted">{p.riskLevel}</td>
+              <td>
+                <Link to="/strategies/$id" params={{ id: p.id }} className="dash-link">
+                  {t('dashboard.viewStrategy')} ↗
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 function Dashboard() {
   return (
     <>
+      <Seo
+        title="Your workspace — Quantora"
+        description="Demo workspace: favorites, licenses, downloads and activity. Nothing here is real — no authentication or payments."
+      />
       <Nav />
       <main className="wrap">
         <section className="catalog-head">
@@ -125,27 +170,29 @@ function Dashboard() {
             {t('dashboard.body')}
           </p>
         </section>
-
         <div className="card" style={{ borderColor: '#3a4a5a', background: '#0d141d', marginBottom: 22 }}>
           <p className="mono" style={{ fontSize: 12, color: 'var(--cyan)', margin: 0 }}>
             ◉ {t('dashboard.demo')}
           </p>
         </div>
-
+        <section className="card" style={{ marginBottom: 18 }}>
+          <div className="eyebrow" style={{ marginBottom: 16 }}>
+            ♥ {t('dashboard.favorites')}
+          </div>
+          <Favorites />
+        </section>
         <section className="card" style={{ marginBottom: 18 }}>
           <div className="eyebrow" style={{ marginBottom: 16 }}>
             {t('dashboard.licenses')}
           </div>
           <Licenses />
         </section>
-
         <section className="card" style={{ marginBottom: 18 }}>
           <div className="eyebrow" style={{ marginBottom: 16 }}>
             {t('dashboard.downloads')}
           </div>
           <DownloadsList />
         </section>
-
         <section className="card" style={{ marginBottom: 70 }}>
           <div className="eyebrow" style={{ marginBottom: 16 }}>
             {t('dashboard.history')}
@@ -157,5 +204,4 @@ function Dashboard() {
     </>
   );
 }
-
 export const Route = createFileRoute('/dashboard')({ component: Dashboard });

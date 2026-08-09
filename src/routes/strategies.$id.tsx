@@ -1,298 +1,249 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
-import { curveFor, findStrategy, type Asset } from '../data';
+import { createFileRoute, Link, useParams } from '@tanstack/react-router';
+import { findProfile } from '../domain/product';
 import { t } from '../i18n';
-import { Logo } from '../components/Logo';
+import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import {
+  BackLink,
+  DimensionBars,
+  MetricTile,
+  PowerScore,
+  PowerScoreExplain,
+  RiskNotice,
+  StatusBadge,
+  Seo,
+} from '../components/ui';
+import { useFavorites } from '../state/favorites';
+import { useCompare } from '../state/compare';
 import '../styles/app.css';
 
-/**
- * Interactive equity-curve chart. Ranges change the sampled window (mock),
- * hovering reveals the simulated index at a given period.
- */
-function Chart({
-  points,
-  color,
-}: {
-  points: number[];
-  color: string;
-}) {
-  const [range, setRange] = useState('1Y');
-  const [hover, setHover] = useState<number | null>(null);
-  // Simulated window slicing by range (mock only — same data, different view).
-  const shown = points.slice(Math.max(0, range === 'ALL' ? 0 : range === '1Y' ? 0 : range === '6M' ? Math.floor(points.length / 2) : Math.floor((points.length * 3) / 4)));
-  const total = shown.length;
-  const pts = shown
-    .map((p, i) => `${(i / (total - 1)) * 100},${95 - (p - 20) * 1.45}`)
-    .join(' ');
+const Spark = ({ points, color }: { points: number[]; color: string }) => (
+  <svg className="curve" viewBox="0 0 300 65" preserveAspectRatio="none" aria-hidden="true">
+    <polyline
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      points={points.map((p, i) => `${i * 15.7},${65 - (p - 20) * 1.1}`).join(' ')}
+    />
+  </svg>
+);
 
-  const hoverIndex = hover !== null ? Math.min(shown.length - 1, hover) : null;
-
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="mono" style={{ fontSize: 11, color: 'var(--muted)' }}>
-          {t('detail.curve')}
-        </span>
-        <div>
-          {['3M', '6M', '1Y', 'ALL'].map((x) => (
-            <button
-              key={x}
-              onClick={() => setRange(x)}
-              style={{
-                background: range === x ? '#26333c' : 'transparent',
-                color: range === x ? 'white' : 'var(--muted)',
-                border: 0,
-                padding: '6px 8px',
-                fontSize: 11,
-                cursor: 'pointer',
-              }}
-            >
-              {x}
-            </button>
-          ))}
-        </div>
+    <section className="card detail-section">
+      <div className="eyebrow" style={{ marginBottom: 14 }}>
+        {title}
       </div>
-      <svg
-        className="chart"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        onMouseMove={(e) =>
-          setHover(
-            Math.min(
-              total - 1,
-              Math.floor(
-                (e.nativeEvent.offsetX / Math.max(1, e.currentTarget.clientWidth)) * total,
-              ),
-            ),
-          )
-        }
-        onMouseLeave={() => setHover(null)}
-      >
-        <defs>
-          <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
-            <stop stopColor={color} stopOpacity=".22" />
-            <stop offset="1" stopColor={color} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <polygon fill="url(#fill)" points={`0,100 ${pts} 100,100`} />
-        <polyline fill="none" stroke={color} strokeWidth=".8" points={pts} />
-        {hoverIndex !== null && (
-          <>
-            <line
-              x1={(hoverIndex / (total - 1)) * 100}
-              x2={(hoverIndex / (total - 1)) * 100}
-              y1="5"
-              y2="100"
-              stroke="#ffffff66"
-              strokeDasharray="2"
-            />
-            <circle
-              cx={(hoverIndex / (total - 1)) * 100}
-              cy={95 - (shown[hoverIndex] - 20) * 1.45}
-              r="2"
-              fill={color}
-            />
-          </>
-        )}
-      </svg>
-      {hoverIndex !== null && (
-        <div className="mono" style={{ fontSize: 11, color }}>
-          {t('detail.period')} {hoverIndex + 1} · {t('detail.simulatedIndex')}{' '}
-          {shown[hoverIndex]}
-        </div>
-      )}
-    </>
-  );
-}
-
-function Nav() {
-  return (
-    <header className="wrap">
-      <nav className="nav">
-        <Logo />
-        <Link to="/strategies" className="btn">
-          {t('nav.backCatalog')}
-        </Link>
-      </nav>
-    </header>
-  );
-}
-
-/** Mock buy/rent license selector — visual only, no real purchase or license. */
-function LicensePicker() {
-  const [model, setModel] = useState<'rent' | 'buy'>('rent');
-  const options = [
-    { key: 'rent' as const, label: t('detail.rent'), desc: t('detail.rentDesc'), price: t('detail.rentPrice'), unit: t('detail.perMonth') },
-    { key: 'buy' as const, label: t('detail.buy'), desc: t('detail.buyDesc'), price: t('detail.buyPrice'), unit: t('detail.once') },
-  ];
-  return (
-    <div className="license-picker">
-      {options.map((o) => (
-        <button
-          key={o.key}
-          className={`license-opt ${model === o.key ? 'active' : ''}`}
-          onClick={() => setModel(o.key)}
-          type="button"
-        >
-          <span className="license-label">{o.label}</span>
-          <span className="license-desc">{o.desc}</span>
-          <span className="license-price">
-            {o.price} <em>{o.unit}</em>
-          </span>
-        </button>
-      ))}
-    </div>
+      {children}
+    </section>
   );
 }
 
 function Detail() {
-  const { id } = Route.useParams();
-  const s = findStrategy(id);
-  const [asset, setAsset] = useState<Asset | null>(null);
+  const { id } = useParams({ from: '/strategies/$id' });
+  const profile = findProfile(id);
+  const favorites = useFavorites();
+  const compare = useCompare();
 
-  // Not-found / placeholder fallback for unknown strategy slugs.
-  if (!s) {
+  if (!profile) {
     return (
       <>
         <Nav />
-        <main className="wrap" style={{ textAlign: 'center', padding: '90px 0' }}>
-          <div className="eyebrow">{t('detail.eyebrow')}</div>
-          <h1 style={{ fontSize: 'clamp(30px,5vw,52px)', margin: '14px 0' }}>
-            {t('detail.notFound')}
-          </h1>
-          <p className="muted" style={{ maxWidth: 520, margin: '0 auto 24px' }}>
-            {t('detail.notFoundBody')}
-          </p>
-          <Link className="btn primary" to="/strategies">
-            {t('detail.backCatalog')}
-          </Link>
+        <main className="wrap detail-hero">
+          <div className="card" style={{ marginTop: 40 }}>
+            <h1 style={{ fontSize: 28 }}>{t('detail.notFound')}</h1>
+            <p className="muted">{t('detail.notFoundBody')}</p>
+            <Link className="btn" to="/strategies">
+              {t('detail.backCatalog')}
+            </Link>
+          </div>
         </main>
         <Footer />
       </>
     );
   }
 
-  const current: Asset = asset ?? s.assets[0];
-  const curve = curveFor(s, current);
-  const log = s.log.filter((r) => s.assets.length > 1 ? r.asset === current : true);
+  const m = profile.metrics;
+  const isReal = profile.dataStatus === 'real';
+  const favourite = favorites.isFavorite(profile.id);
+  const inCompare = compare.isCompared(profile.id);
 
   return (
     <>
+      <Seo
+        title={`${profile.name} — Quantora`}
+        description={`${profile.tagline}. Power Score ${m.powerScore.toFixed(1)}/10. ${isReal ? 'Metrics provided by the owner.' : 'Mock demo data.'} Not investment advice.`}
+      />
       <Nav />
       <main className="wrap">
+        <div style={{ marginTop: 28 }}>
+          <BackLink />
+        </div>
+
         <section className="detail-hero">
-          <div className="eyebrow">{t('detail.eyebrow')}</div>
-          <h1 style={{ fontSize: 'clamp(34px,5vw,58px)', letterSpacing: '-.06em', margin: '15px 0 8px' }}>
-            {s.name}
-          </h1>
-          <p className="muted">{s.description}</p>
-          <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
-            {s.assets.map((a) => (
-              <button
-                className="badge"
-                onClick={() => setAsset(a)}
-                style={{
-                  background: current === a ? '#263a22' : 'transparent',
-                  color: current === a ? 'var(--lime)' : 'var(--muted)',
-                  cursor: 'pointer',
-                }}
-                key={a}
-              >
-                {a}
-              </button>
-            ))}
+          <div className="detail-head">
+            <div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <StatusBadge status={profile.dataStatus} />
+                {profile.assets.length > 0 && <span className="badge">{profile.assets.join(' · ')}</span>}
+                <span className="badge">{profile.marketContext}</span>
+                <span className="badge">{profile.riskLevel} risk</span>
+                <span className="badge">{profile.frequency} frequency</span>
+                <span className="badge">{profile.experienceLevel}</span>
+              </div>
+              <h1 style={{ fontSize: 'clamp(32px,5vw,54px)', letterSpacing: '-.05em', margin: '16px 0 6px' }}>
+                {profile.name}
+              </h1>
+              <p className="muted" style={{ fontSize: 16, maxWidth: 620 }}>
+                {profile.tagline}
+              </p>
+              <p style={{ maxWidth: 680, lineHeight: 1.7, color: 'var(--text)', marginTop: 14 }}>
+                {profile.description}
+              </p>
+            </div>
+            <div className="detail-score">
+              <PowerScore score={m.powerScore} size="lg" />
+              <span className="mono score-tag">POWER SCORE / 10</span>
+            </div>
+          </div>
+          <div className="actions" style={{ marginTop: 18 }}>
+            <button
+              className={`btn ${favourite ? 'primary' : ''}`}
+              aria-pressed={favourite}
+              onClick={() => favorites.toggle(profile.id)}
+            >
+              {favourite ? '♥ ' + t('detail.favoriteRemove') : '♡ ' + t('detail.favoriteAdd')}
+            </button>
+            <button
+              className={`btn ${inCompare ? 'primary' : ''}`}
+              disabled={!inCompare && !compare.canAdd}
+              onClick={() => compare.toggle(profile.id)}
+            >
+              {inCompare ? '✓ ' + t('compare.inBasket') : '+ ' + t('compare.add')}
+            </button>
+            <Link className="btn" to="/compare">
+              {t('compare.view')} →
+            </Link>
           </div>
         </section>
 
         <div className="detail-layout">
-          <section>
-            <div className="card chart-card">
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                {t('detail.curveFor')} {current}
+          <div>
+            <Section title={t('detail.metrics')}>
+              <div className="metric-grid">
+                {profile.dataBehindScore.map((row) => (
+                  <MetricTile key={row.label} label={row.label} value={row.value} />
+                ))}
               </div>
-              <Chart points={curve} color={s.color} />
-            </div>
+              {isReal ? (
+                <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
+                  {t('detail.metricsNote')}
+                </p>
+              ) : (
+                <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
+                  {t('detail.mockMetricsNote')}
+                </p>
+              )}
+            </Section>
 
-            <div className="card" style={{ marginTop: 15 }}>
-              <div className="eyebrow">{t('detail.snapshot')}</div>
-              <div className="stats" style={{ marginTop: 22 }}>
-                {(
-                  [
-                    [t('common.demoReturn'), `+${s.returnPct}%`],
-                    [t('detail.sharpe'), s.sharpe],
-                    [t('detail.maxDrawdown'), s.maxDrawdown],
-                    [t('detail.winRate'), s.winRate],
-                    [t('detail.totalTrades'), s.trades],
-                    [t('detail.dataStatus'), 'MOCK'],
-                  ] as [string, string][]
-                ).map(([a, b]) => (
-                  <div key={a}>
-                    <small>{a}</small>
-                    <strong style={{ color: a === 'Data status' ? 'var(--lime)' : 'white' }}>{b}</strong>
+            {!isReal && profile.curve && (
+              <Section title={t('detail.curveMock')}>
+                <Spark points={profile.curve} color={profile.color} />
+                <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
+                  {t('detail.curveMockNote')}
+                </p>
+              </Section>
+            )}
+            {isReal && (
+              <Section title={t('detail.curvePending')}>
+                <p className="muted" style={{ lineHeight: 1.7 }}>
+                  {t('detail.curvePendingBody')}
+                </p>
+              </Section>
+            )}
+
+            <Section title={t('detail.howItWorks')}>
+              <ol className="steps-list">
+                {profile.howItWorks.map((step, i) => (
+                  <li key={i}>
+                    <span className="step-num mono">{String(i + 1).padStart(2, '0')}</span>
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </Section>
+
+            <Section title={t('detail.dimensions')}>
+              <DimensionBars dimensions={profile.dimensions} />
+              <p className="muted" style={{ fontSize: 11, marginTop: 12 }}>
+                {t('detail.dimensionsNote')}
+              </p>
+            </Section>
+
+            <Section title={t('detail.methodology')}>
+              <ul className="plain-list">
+                {profile.methodology.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </Section>
+
+            <Section title={t('detail.limitations')}>
+              <ul className="plain-list warn">
+                {profile.limitations.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </Section>
+
+            <Section title={t('detail.evidence')}>
+              <table className="log">
+                <tbody>
+                  {profile.evidence.map((row) => (
+                    <tr key={row.label}>
+                      <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{row.label}</td>
+                      <td className="muted">{row.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
+
+            <div className="card score-card">
+              <PowerScoreExplain />
+            </div>
+          </div>
+
+          <aside>
+            <div className="card buy" style={{ position: 'sticky', top: 20 }}>
+              <div className="eyebrow">{t('detail.fitsTitle')}</div>
+              <div className="fits-list">
+                {profile.fitsYou.map((f) => (
+                  <div className="fit-item" key={f.label}>
+                    <strong>{f.label}</strong>
+                    <p className="muted">{f.detail}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="card" style={{ marginTop: 15, overflowX: 'auto' }}>
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                {t('detail.tradeLog')}
-                {s.assets.length > 1 && <span style={{ color: s.color, marginLeft: 8 }}>· {current}</span>}
-              </div>
-              <table className="log">
-                <thead>
-                  <tr>
-                    <th>{t('detail.date')}</th>
-                    <th>{t('detail.asset')}</th>
-                    <th>{t('detail.side')}</th>
-                    <th>{t('detail.demoPnL')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {log.map((r) => (
-                    <tr key={`${r.date}-${r.asset}`}>
-                      <td>{r.date}</td>
-                      <td>{r.asset}</td>
-                      <td>{r.side}</td>
-                      <td style={{ color: r.pnl.startsWith('-') ? 'var(--red)' : 'var(--lime)' }}>
-                        {r.pnl}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="card" style={{ marginTop: 15 }}>
+              <div className="eyebrow">{t('detail.contextTitle')}</div>
+              <h3 style={{ fontSize: 15, margin: '10px 0 6px', color: 'var(--lime)' }}>✓ {t('detail.suitable')}</h3>
+              <ul className="plain-list">
+                {profile.suitableFor.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <h3 style={{ fontSize: 15, margin: '16px 0 6px', color: 'var(--red)' }}>✕ {t('detail.notSuitable')}</h3>
+              <ul className="plain-list">
+                {profile.notSuitableFor.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
-          </section>
 
-          <aside className="card buy">
-            <div className="eyebrow">{t('detail.access')}</div>
-            <h2 style={{ fontSize: 23 }}>{t('detail.model')}</h2>
-            <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
-              {t('detail.modelBody')}
-            </p>
-
-            <label className="tag" style={{ display: 'block', margin: '14px 0 8px' }}>
-              {t('detail.licenseOption')}
-            </label>
-            <LicensePicker />
-
-            <label className="tag" style={{ display: 'block', margin: '16px 0 8px' }}>
-              {t('detail.allocation')}
-            </label>
-            <input className="input" value="$10,000" readOnly />
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 18 }}>
-              <span className="muted">{t('detail.fee')}</span>
-              <span>{s.fee} / year</span>
-            </div>
-            <button
-              className="btn primary"
-              style={{ width: '100%' }}
-              onClick={() => alert(t('detail.alert'))}
-            >
-              {t('detail.simulate')}
-            </button>
+            <RiskNotice />
           </aside>
         </div>
       </main>

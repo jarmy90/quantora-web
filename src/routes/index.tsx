@@ -1,58 +1,45 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { strategies } from '../data';
+import { profiles } from '../domain/product';
 import { t } from '../i18n';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { StrategyCard } from '../components/StrategyCard';
+import { PowerScoreExplain, SectionTitle, EducationBlock, Seo } from '../components/ui';
 import '../styles/app.css';
 
-const Spark = ({ points, color }: { points: number[]; color: string }) => (
-  <svg className="curve" viewBox="0 0 300 65" preserveAspectRatio="none">
-    <polyline
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      points={points.map((p, i) => `${i * 15.7},${65 - (p - 20) * 1.1}`).join(' ')}
-    />
-  </svg>
-);
-
-function StrategyCard({ s }: { s: (typeof strategies)[number] }) {
-  return (
-    <Link to="/strategies/$id" params={{ id: s.id }} className="card">
-      <div className="strategy-top">
-        <div>
-          <span className="badge">{s.type}</span>
-          <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
-          <div className="tag">{s.tagline}</div>
-        </div>
-        <span style={{ color: s.color, fontSize: 20 }}>↗</span>
-      </div>
-      <Spark points={s.curve} color={s.color} />
-      <div className="stats">
-        <div>
-          <small>{t('common.demoReturn')}</small>
-          <strong style={{ color: 'var(--lime)' }}>+{s.returnPct}%</strong>
-        </div>
-        <div>
-          <small>{t('common.risk')}</small>
-          <strong>{s.risk}</strong>
-        </div>
-        <div>
-          <small>{t('common.maxDD')}</small>
-          <strong>{s.maxDrawdown}</strong>
-        </div>
-      </div>
-    </Link>
-  );
-}
+const EDU_ITEMS = [
+  {
+    title: 'What is a backtest?',
+    body: 'A simulation of how a strategy would have behaved on historical data. Useful for research — never a guarantee of what happens next.',
+  },
+  {
+    title: 'Why drawdown matters',
+    body: 'Drawdown is how much your equity falls from a peak. If you cannot tolerate the historical drawdown, the strategy is likely a poor fit for you.',
+  },
+  {
+    title: 'Profit factor, simply',
+    body: 'Gross profit divided by gross loss. Above 1.0 the strategy made more than it lost in the sample; 1.25 is generally considered healthy.',
+  },
+  {
+    title: 'Sample size and trust',
+    body: 'A 145-operation sample tells you less than 421. The more operations and the deeper the data, the more you can learn — and the more you should still doubt.',
+  },
+];
 
 function Home() {
+  const featured = profiles.filter((p) => p.dataStatus === 'real');
+
   return (
     <>
+      <Seo
+        title="Quantora — Algorithmic strategy discovery & evaluation"
+        description="Discover and evaluate algorithmic MetaTrader 5 strategies with transparent, auditable Power Scores. Demo product — not investment advice."
+      />
       <Nav
         extra={
           <>
-            <a href="#how">{t('nav.howItWorks')}</a>
+            <a href="#power-score">{t('nav.powerScore')}</a>
+            <a href="#learn">{t('nav.learn')}</a>
             <a href="#trust">{t('nav.trustRisk')}</a>
           </>
         }
@@ -70,9 +57,12 @@ function Home() {
             <Link className="btn primary" to="/strategies">
               {t('home.browse')}
             </Link>
-            <a className="btn" href="#how">
-              {t('home.seeHow')}
-            </a>
+            <Link className="btn" to="/matcher">
+              {t('home.matcherCta')}
+            </Link>
+            <Link className="btn" to="/publish">
+              {t('home.publishCta')}
+            </Link>
           </div>
           <p className="mono" style={{ fontSize: 11, marginTop: 28, color: '#65717d' }}>
             {t('home.mockNotice')}
@@ -80,34 +70,29 @@ function Home() {
         </section>
 
         <section className="section wrap">
-          <div className="eyebrow">{t('home.curated')}</div>
-          <h2>{t('home.signals')}</h2>
-          <p className="muted">{t('home.startingPoint')}</p>
+          <SectionTitle eyebrow={t('home.curated')} title={t('home.signals')} body={t('home.startingPoint')} />
           <div className="grid" style={{ marginTop: 25 }}>
-            {strategies.slice(0, 3).map((s) => (
-              <StrategyCard key={s.id} s={s} />
+            {featured.map((p) => (
+              <StrategyCard key={p.id} profile={p} />
             ))}
           </div>
         </section>
 
-        <section id="how" className="section wrap">
-          <div className="eyebrow">{t('home.workflow')}</div>
-          <h2>{t('home.workflowTitle')}</h2>
-          <div className="steps" style={{ marginTop: 25 }}>
-            {[
-              ['01', 'home.stepExplore', 'home.stepExploreBody'],
-              ['02', 'home.stepInspect', 'home.stepInspectBody'],
-              ['03', 'home.stepDecide', 'home.stepDecideBody'],
-            ].map(([n, title, body]) => (
-              <div className="card" key={n}>
-                <div className="step-num mono">{n}</div>
-                <h3>{t(title as Parameters<typeof t>[0])}</h3>
-                <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
-                  {t(body as Parameters<typeof t>[0])}
-                </p>
-              </div>
-            ))}
+        <section id="power-score" className="section wrap">
+          <SectionTitle eyebrow={t('home.scoreEyebrow')} title={t('home.scoreTitle')} body={t('home.scoreBody')} />
+          <div className="card score-card">
+            <PowerScoreExplain />
+            <div className="actions" style={{ marginTop: 16 }}>
+              <Link className="btn" to="/strategies">
+                {t('catalog.title')} →
+              </Link>
+            </div>
           </div>
+        </section>
+
+        <section id="learn" className="section wrap">
+          <SectionTitle eyebrow={t('home.learnEyebrow')} title={t('home.learnTitle')} body={t('home.learnBody')} />
+          <EducationBlock items={EDU_ITEMS} />
         </section>
 
         <section id="trust" className="section wrap">
@@ -117,6 +102,11 @@ function Home() {
             <p className="muted" style={{ maxWidth: 700, lineHeight: 1.7 }}>
               {t('trust.body')}
             </p>
+            <div className="actions">
+              <Link className="btn primary" to="/publish">
+                {t('home.publishCta')} →
+              </Link>
+            </div>
           </div>
         </section>
       </main>

@@ -2,11 +2,11 @@ import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { Logo } from './Logo';
 import { t } from '../i18n';
-
 /**
  * Global site header. Renders the Quantora logo, primary navigation and a
  * persistent "mock environment" badge so every page is clearly a demo.
  * `extra` allows pages (e.g. the landing page) to add in-page anchor links.
+ * NOTE: the admin base is intentionally NOT linked from public navigation.
  */
 export function Nav({ extra }: { extra?: ReactNode }) {
   return (
@@ -16,6 +16,9 @@ export function Nav({ extra }: { extra?: ReactNode }) {
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
+          <Link to="/matcher">{t('nav.matcher')}</Link>
+          <Link to="/publish">{t('nav.publish')}</Link>
+          <Link to="/creator">{t('nav.creator')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
           {extra}
         </div>
@@ -29,7 +32,6 @@ export function Nav({ extra }: { extra?: ReactNode }) {
     </header>
   );
 }
-
 export function CatalogNav() {
   return (
     <header className="wrap">
@@ -37,6 +39,8 @@ export function CatalogNav() {
         <Logo />
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
+          <Link to="/matcher">{t('nav.matcher')}</Link>
+          <Link to="/publish">{t('nav.publish')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
         </div>
         <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>

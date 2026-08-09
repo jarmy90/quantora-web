@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
 import { Nav } from './Nav';
 import { Footer } from './Footer';
 import { t } from '../i18n';
