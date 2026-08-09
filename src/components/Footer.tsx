@@ -19,6 +19,9 @@ export function Footer() {
         <div className="footer-col">
           <h4>{t('footer.product')}</h4>
           <Link to="/strategies">{t('nav.strategies')}</Link>
+          <Link to="/matcher">{t('nav.matcher')}</Link>
+          <Link to="/publish">{t('nav.publish')}</Link>
+          <Link to="/creator">{t('nav.creator')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
         </div>
         <div className="footer-col">
