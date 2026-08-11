@@ -7,7 +7,7 @@ function mockCurveToSeries(curve: number[], baseDate: string): EquitySeries {
   return curve.map((v, i) => ({ timestamp: new Date(start + i * step).toISOString(), equity: v }));
 }
 export function analyticsForProfile(profile: StrategyProfile): StrategyAnalytics {
-  if (profile.id === 'stocherextreme-adaptive') return stochExtremeAmpSea2575();
+  if (profile.id === 'stochextreme-adaptive') return stochExtremeAmpSea2575();
   if (profile.id === 'first-triangle-adaptive') return firstTriangleBranch5();
   const economic: EconomicMetrics = { netProfitUsd: profile.metrics.netProfitUsd, profitFactor: profile.metrics.profitFactor, avgPerTradeUsd: profile.metrics.avgProfitPerTradeUsd ?? (profile.metrics.netProfitUsd !== undefined && profile.metrics.tradeCount ? profile.metrics.netProfitUsd / profile.metrics.tradeCount : undefined) };
   const structural: StructuralMetrics | undefined = profile.structuralFacts ? { ...profile.structuralFacts, total: profile.structuralFacts.winCount + profile.structuralFacts.lossCount, winRate: profile.structuralFacts.winCount / (profile.structuralFacts.winCount + profile.structuralFacts.lossCount) } : undefined;

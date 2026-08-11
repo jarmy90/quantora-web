@@ -1,11 +1,12 @@
 /**
  * Unified strategy card used on the home page, catalog and matcher results.
  * Metrics come exclusively from the profile model — no duplication in routes.
- * V2B: renders a mini equity visualization only when a curve is available
- * (legacy mock fixtures); real profiles show an honest "pending" mini mark.
+ * V2B: mini equity is read from the normalized analytics adapter whenever
+ * audited evidence exists; absent datasets retain an honest pending state.
  */
 import { Link } from '@tanstack/react-router';
 import type { StrategyProfile } from '../domain/product';
+import { analyticsForProfile } from '../domain/strategy-analytics';
 import { useFavorites } from '../state/favorites';
 import { useCompare } from '../state/compare';
 import { PowerScore, StatusBadge } from './ui';
@@ -20,6 +21,9 @@ export function StrategyCard({ profile }: { profile: StrategyProfile }) {
   const favourite = favorites.isFavorite(profile.id);
   const inCompare = compare.isCompared(profile.id);
   const isReal = profile.dataStatus === 'real';
+  // The adapter is authoritative for audited series. `profile.curve` remains
+  // mock-only, so it is never used to stand in for a real historical curve.
+  const equity = analyticsForProfile(profile).equity?.map((point) => point.equity);
 
   return (
     <article className="card strategy-card">
@@ -44,8 +48,8 @@ export function StrategyCard({ profile }: { profile: StrategyProfile }) {
           {profile.assets.length > 0 && <span className="badge">{profile.assets.join(' · ')}</span>}
         </div>
         <div className="mini-equity-row" aria-hidden="true">
-          {profile.curve && profile.curve.length ? (
-            <MiniSpark points={profile.curve} color={profile.color} />
+          {equity && equity.length ? (
+            <MiniSpark points={equity} color={profile.color} />
           ) : (
             <MiniPending label={isReal ? 'Equity pending dataset' : 'No curve'} />
           )}

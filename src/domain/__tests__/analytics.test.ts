@@ -136,15 +136,20 @@ test('paginate returns the expected slice', () => {
   expect(paginate(items, 10, 3)).toEqual([]);
 });
 
-test('analyticsForProfile returns pending evidence for real strategies', () => {
-  const a = analyticsForProfile(findProfile('stochextreme-adaptive')!);
-  expect(a.evidence.status).toBe('pending');
-  expect(a.evidence.hasSeries).toBe(false);
-  expect(a.equity).toBeUndefined();
-  expect(a.trades).toBeUndefined();
-  expect(a.economic?.profitFactor).toBe(1.1514);
-  expect(a.structural?.winCount).toBe(200);
-  expect(a.structural?.lossCount).toBe(221);
+test('analyticsForProfile routes audited real profiles through their adapter series', () => {
+  const stoch = analyticsForProfile(findProfile('stochextreme-adaptive')!);
+  expect(stoch.evidence.status).toBe('real');
+  expect(stoch.evidence.hasSeries).toBe(true);
+  expect(stoch.equity).toHaveLength(1197);
+  expect(stoch.trades).toHaveLength(421);
+  expect(stoch.economic?.profitFactor).toBeCloseTo(1.1514, 4);
+  expect(stoch.structural?.winCount).toBe(200);
+  expect(stoch.structural?.lossCount).toBe(221);
+
+  const triangle = analyticsForProfile(findProfile('first-triangle-adaptive')!);
+  expect(triangle.evidence.status).toBe('real');
+  expect(triangle.equity).toHaveLength(145);
+  expect(triangle.trades).toHaveLength(145);
 });
 
 test('analyticsForProfile builds a mock series for legacy fixtures', () => {
