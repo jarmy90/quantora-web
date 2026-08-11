@@ -264,13 +264,13 @@ function TradeLog({
                   <th>Qty</th>
                   <th>Entry</th>
                   <th>Exit</th>
-                  <th>P&L (USD)</th>
+                  <th>P&L (USD / R)</th>
                   <th>Structural</th>
                 </tr>
               </thead>
               <tbody>
                 {pageRows.map((tr) => (
-                  <tr key={tr.id}>
+                  <tr key={tr.id} title={`Exit: ${tr.exitReason ?? 'not supplied'} · R: ${tr.rMultiple ?? 'not supplied'}${tr.riskPoints ? ` · initial risk: ${tr.riskPoints} points` : ''}`}>
                     <td className="mono">{tr.id}</td>
                     <td>{tr.openedAt.slice(0, 16).replace('T', ' ')}</td>
                     <td>{tr.closedAt ? tr.closedAt.slice(0, 16).replace('T', ' ') : '—'}</td>

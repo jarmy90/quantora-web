@@ -36,6 +36,11 @@ export type NormalizedTrade = {
   feesUsd?: number;
   /** Structural outcome by the strategy rule (e.g. K>=80 BUY WIN), not the economic result. */
   structural?: StructuralOutcome;
+  /** Optional source-provided R multiple; never inferred from USD P&L. */
+  rMultiple?: number;
+  /** Source-provided exit context, shown as evidence tooltip. */
+  exitReason?: string;
+  riskPoints?: number;
 };
 
 /** A point on the equity / drawdown series (from equity.csv). */
@@ -478,7 +483,7 @@ export function buildAnalytics(args: {
     economic: args.economic,
     duration: trades.length ? buildDuration(trades) : undefined,
     direction: trades.length ? buildDirection(trades) : undefined,
-    concentration: trades.length ? buildConcentration(trades) : undefined,
+    concentration: trades.length ? buildConcentration(trades, 'day') : undefined,
     streaks: trades.length ? buildStreaks(trades) : undefined,
   };
 }

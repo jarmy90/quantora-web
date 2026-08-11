@@ -189,7 +189,7 @@ export const profiles: StrategyProfile[] = [
     description:
       'A rules-based strategy that detects triangle consolidation patterns, waits for a confirmed breakout and trades it in the direction of the prevailing trend. Position size adapts to market conditions and every operation follows the same entry, stop and exit rules. All figures shown come from the owner\u2019s delivery.',
     dataStatus: 'real',
-    sourceLabel: 'Owner-provided data',
+    sourceLabel: 'Historical Backtest',
     evidenceSource: 'Owner Supplied',
     assets: [],
     marketContext: 'multi',
@@ -197,7 +197,7 @@ export const profiles: StrategyProfile[] = [
     experienceLevel: 'beginner',
     frequency: 'low',
     datasetStatusNote:
-      'Per-trade series have not been delivered yet. Aggregate metrics are owner-supplied and shown verbatim; the equity curve is not invented and will populate when the series arrive.',
+      'Audited Historical Backtest derivatives are available for the selected First Triangle branch 5 only. Owner Supplied remains evidence provenance; no other branches are published.',
     metrics: {
       powerScore: 7.2,
       profitFactor: 1.2559,
@@ -208,8 +208,8 @@ export const profiles: StrategyProfile[] = [
     },
     dimensions: realDimensions(7.2, [
       { id: 'returns', score: 8.0, why: 'Solid net result (+6,687.50 USD) with a high average per operation (+46.12 USD).' },
-      { id: 'risk', score: 6.5, why: 'Drawdown is controlled in absolute terms but not negligible (4,474.80 USD).' },
-      { id: 'data', score: 7.0, why: 'Owner-provided summary metrics; equity curve and trade log still pending.' },
+      { id: 'risk', score: 6.5, why: 'Official maximum drawdown is 4,474.80 USD MTM; the closed-trade-only reconstruction is separately labelled.' },
+      { id: 'data', score: 7.0, why: 'Audited branch-5-only trade and equity derivatives are available; other candidate branches are excluded.' },
       { id: 'consistency', score: 7.0, why: 'Positive average per operation across a modest 145-operation sample.' },
       { id: 'robustness', score: 7.0, why: 'Adaptive rules suggest regime awareness; small sample limits confidence.' },
       { id: 'execution', score: 7.0, why: 'Low frequency and a simple rule set keep operational complexity low.' },
@@ -242,7 +242,7 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', value: '145' },
       { label: 'Net result', value: '+6,687.50 USD' },
       { label: 'Average per operation', value: '+46.12 USD' },
-      { label: 'Max drawdown', value: '4,474.80 USD' },
+      { label: 'Official max drawdown', value: '4,474.80 USD MTM' },
     ],
     methodology: METHODOLOGY_SHARED,
     limitations: [
@@ -265,11 +265,11 @@ export const profiles: StrategyProfile[] = [
     name: 'StochExtreme Adaptive',
     tagline: 'Specialist in sideways markets',
     description:
-      'A stochastic mean-reversion system specialized in sideways markets. It trades extreme overbought and oversold zones on USTEC, adapting its thresholds to recent volatility and respecting a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is tracked separately from economic result (post-cost P&L), because a structural WIN can still close negative after execution costs. All figures shown come from the owner\u2019s delivery.',
+      'A stochastic mean-reversion system specialized in sideways Nasdaq-100 markets. Historical instrument: AMP @ENQ (not USTEC). It adapts thresholds to recent volatility and applies a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is separate from post-cost economic result.',
     dataStatus: 'real',
-    sourceLabel: 'Owner-provided data',
+    sourceLabel: 'Historical Backtest',
     evidenceSource: 'Owner Supplied',
-    assets: ['USTEC'],
+    assets: ['Nasdaq-100'],
     marketContext: 'range',
     riskLevel: 'high',
     experienceLevel: 'advanced',
@@ -279,7 +279,7 @@ export const profiles: StrategyProfile[] = [
       winCount: 200,
       lossCount: 221,
       winRule: 'BUY counts as a structural WIN only when K \u2265 80; SELL counts as a structural WIN only when K \u2264 20.',
-      lossRule: 'A structural LOSS is recorded only on a definitive stop touch (USTEC, 100 points).',
+      lossRule: 'A structural LOSS is recorded only on the final configured 100-point stop (AMP @ENQ); it is never inferred from P&L.',
       stopPoints: 100,
     },
     scheduleFacts: {
@@ -294,7 +294,7 @@ export const profiles: StrategyProfile[] = [
       ],
     },
     datasetStatusNote:
-      'Pending dataset delivery: trades.csv, equity.csv, manifest.csv, coverage.csv, strategy_config.csv, events.csv and symbol_specifications.csv are not present in the repository. Aggregate metrics are owner-supplied and shown verbatim; the equity curve, drawdown, monthly heatmap and trade log will populate when the per-trade series arrive.',
+      'Audited Historical Backtest derivatives are available: trades, reduced equity/drawdown, heatmap and evidence. Original archives remain immutable outside the public bundle; historical instrument is AMP @ENQ.',
     metrics: {
       powerScore: 6.1,
       profitFactor: 1.1514,
@@ -309,16 +309,16 @@ export const profiles: StrategyProfile[] = [
     dimensions: realDimensions(6.1, [
       { id: 'returns', score: 6.5, why: 'Positive net result (+6,582 USD) but a thin average edge spread over 421 operations.' },
       { id: 'risk', score: 5.5, why: 'Large historical drawdown (26.53% / USD 4,690) weighs heavily on the score.' },
-      { id: 'data', score: 6.5, why: 'Rich tick evidence (509,489,041 ticks) but no equity curve or trade log yet.' },
+      { id: 'data', score: 6.5, why: 'Rich tick evidence (509,489,041 ticks) with audited equity and trade-log derivatives.' },
       { id: 'consistency', score: 6.0, why: 'Profit factor 1.1514 is modest; high turnover implies many losing runs are possible.' },
       { id: 'robustness', score: 6.0, why: 'Adaptive thresholds help across regimes; overfitting cannot be ruled out from summaries.' },
       { id: 'execution', score: 6.0, why: 'High turnover increases execution costs and operational complexity.' },
     ]),
     howItWorks: [
-      'Tracks the stochastic oscillator (K) and flags extreme overbought/oversold zones on USTEC.',
+      'Tracks the stochastic oscillator (K) and flags extreme overbought/oversold zones on Nasdaq-100.',
       'Adapts the extreme thresholds to recent volatility so signals stay relevant in sideways conditions.',
       'A BUY counts as a structural WIN only when K \u2265 80; a SELL counts as a structural WIN only when K \u2264 20.',
-      'A structural LOSS is recorded only on a definitive stop touch (USTEC, 100 points) \u2014 separate from the economic result after execution costs.',
+      'A structural LOSS is recorded only on a definitive stop touch (Nasdaq-100, 100 points) \u2014 separate from the economic result after execution costs.',
       'Trades only inside the allowed ET sessions (03:00\u201311:30 and 14:00\u201318:00); no trades 11:30\u201314:00 or 18:00\u201303:00.',
       '421 operations in the provided sample (v1.07 filtered, 01/08/2025 \u2013 07/08/2026).',
     ],
@@ -334,7 +334,7 @@ export const profiles: StrategyProfile[] = [
       'Trend-following or breakout-seeking traders \u2014 this is a sideways-market specialist.',
     ],
     fitsYou: [
-      { label: 'Positioning', detail: 'Specialist in sideways markets \u2014 best in range-bound USTEC sessions.' },
+      { label: 'Positioning', detail: 'Specialist in sideways markets \u2014 best in range-bound Nasdaq-100 sessions.' },
       { label: 'Risk tolerance', detail: 'High \u2014 historical max drawdown 26.53% / USD 4,690.' },
       { label: 'Experience', detail: 'Advanced \u2014 requires discipline under large drawdowns.' },
       { label: 'Time commitment', detail: 'High \u2014 \u2248 421 operations in the sample period (01/08/2025 \u2013 07/08/2026).' },
@@ -365,7 +365,7 @@ export const profiles: StrategyProfile[] = [
       { label: 'Sample period', detail: '01/08/2025 \u2013 07/08/2026 \u2014 provided by the owner' },
       { label: 'Ticks processed', detail: '509,489,041 \u2014 provided by the owner' },
       { label: 'Version', detail: 'v1.07 filtered \u2014 provided by the owner' },
-      { label: 'Per-trade series', detail: 'Pending delivery (trades.csv, equity.csv, manifest.csv, coverage.csv, strategy_config.csv, events.csv, symbol_specifications.csv)' },
+      { label: 'Audited derivatives', detail: 'trade log, monthly aggregation and reduced equity series; immutable originals excluded from bundle' },
     ],
     color: '#ffb86b',
     updatedAt: '2026-08-09',

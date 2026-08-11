@@ -39,7 +39,7 @@ export type StochExtremeFacts = {
   winRule: string;
   /** Structural LOSS rule. */
   lossRule: string;
-  /** Definitive stop distance (USTEC points). */
+  /** Definitive stop distance (AMP @ENQ points). */
   stopPoints: number;
   positioning: string;
   /** Short description used on the detail page. */
@@ -50,7 +50,7 @@ export type StochExtremeFacts = {
 
 export const STOCHEXTREME_FACTS: StochExtremeFacts = {
   version: 'v1.07 filtered',
-  symbol: 'USTEC',
+  symbol: 'AMP @ENQ',
   periodStart: '2025-08-01',
   periodEnd: '2026-08-07',
   tradeCount: 421,
@@ -71,13 +71,13 @@ export const STOCHEXTREME_FACTS: StochExtremeFacts = {
     { start: '18:00', end: '03:00' },
   ],
   winRule: 'BUY counts as a structural WIN only when K ≥ 80; SELL counts as a structural WIN only when K ≤ 20.',
-  lossRule: 'A structural LOSS is recorded only on a definitive stop touch (USTEC, 100 points).',
+  lossRule: 'A structural LOSS is recorded only on a definitive stop touch (AMP @ENQ, 100 points).',
   stopPoints: 100,
   positioning: 'Specialist in sideways markets',
   description:
-    'A stochastic mean-reversion system specialized in sideways markets. It trades extreme overbought and oversold zones on USTEC, adapting its thresholds to recent volatility and respecting a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is tracked separately from economic result (post-cost P&L), because a structural WIN can still close negative after execution costs.',
+    'A stochastic mean-reversion system specialized in sideways markets. It trades extreme overbought and oversold zones on AMP @ENQ, adapting its thresholds to recent volatility and respecting a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is tracked separately from economic result (post-cost P&L), because a structural WIN can still close negative after execution costs.',
   fitNote:
-    'Best suited to sideways, range-bound USTEC sessions within the allowed ET windows; not a trend-following or breakout system.',
+    'Best suited to sideways, range-bound Nasdaq-100 sessions (historical AMP @ENQ) within the allowed ET windows; not a trend-following or breakout system.',
 };
 
 /**
