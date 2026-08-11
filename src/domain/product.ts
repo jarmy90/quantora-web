@@ -113,7 +113,7 @@ export type StrategyProfile = {
     allowed: { start: string; end: string }[];
     excluded: { start: string; end: string }[];
   };
-  /** V2B — honest note when per-trade series are pending delivery. */
+  /** V2B — audited historical dataset and provenance note. */
   datasetStatusNote?: string;
   /** V2B — discrete evidence source label (e.g. "Owner Supplied"). */
   evidenceSource?: string;
@@ -149,7 +149,7 @@ const METHODOLOGY_SHARED = [
 ];
 
 const LIMITATION_SHARED = [
-  'Only summary metrics were provided for this strategy \u2014 the equity curve and trade log are still pending delivery, so curve shape, losing streaks and drawdown timing cannot be validated yet.',
+  'Historical dataset available: browser views use audited derivatives while immutable source archives remain outside the public bundle.',
   'Historical results, as provided by the owner, are not a guarantee of future performance.',
   'Backtests can contain biases that are invisible in summary statistics.',
 ];
@@ -197,7 +197,7 @@ export const profiles: StrategyProfile[] = [
     experienceLevel: 'beginner',
     frequency: 'low',
     datasetStatusNote:
-      'Audited Historical Backtest derivatives are available for the selected First Triangle branch 5 only. Owner Supplied remains evidence provenance; no other branches are published.',
+      'Historical dataset available for the selected First Triangle branch 5 only. Official maximum drawdown is 4,474.80 USD MTM; the 4,151.50 USD closed-trade reconstruction is shown separately. Immutable source evidence remains outside the public bundle.',
     metrics: {
       powerScore: 7.2,
       profitFactor: 1.2559,
@@ -248,6 +248,7 @@ export const profiles: StrategyProfile[] = [
     limitations: [
       ...LIMITATION_SHARED,
       'The 145-operation sample is small; statistical confidence is limited.',
+      'Official MTM maximum drawdown is 4,474.80 USD. The 4,151.50 USD closed-trade drawdown is a separate reconstruction, not a substitute for the official MTM figure.',
     ],
     evidence: [
       { label: 'Power Score', detail: '7.2 — provided by the owner' },
@@ -255,7 +256,9 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', detail: '145 — provided by the owner' },
       { label: 'Net result', detail: '+6,687.50 USD — provided by the owner' },
       { label: 'Average per operation', detail: '+46.12 USD — provided by the owner' },
-      { label: 'Max drawdown', detail: '4,474.80 USD — provided by the owner' },
+      { label: 'Official MTM max drawdown', detail: '4,474.80 USD — provided by the owner' },
+      { label: 'Closed-trade drawdown', detail: '4,151.50 USD — separate reconstruction; not substituted for official MTM drawdown' },
+      { label: 'Branch scope', detail: 'Selected branch 5 only; no branch selector or other branches are published' },
     ],
     color: '#c9ff5a',
     updatedAt: '2026-08-09',
@@ -294,7 +297,7 @@ export const profiles: StrategyProfile[] = [
       ],
     },
     datasetStatusNote:
-      'Audited Historical Backtest derivatives are available: trades, reduced equity/drawdown, heatmap and evidence. Original archives remain immutable outside the public bundle; historical instrument is AMP @ENQ.',
+      'Historical dataset available: audited trade log, monthly heatmap, and a reduced MTM equity series (361,248 → 1,197 points) that retains the final value, extrema, and maximum-drawdown path. Immutable source archives remain outside the public bundle; historical instrument is AMP @ENQ.',
     metrics: {
       powerScore: 6.1,
       profitFactor: 1.1514,

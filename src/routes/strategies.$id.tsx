@@ -28,7 +28,6 @@ import {
   EquityChart,
   DrawdownChart,
   MonthlyHeatmap,
-  DistributionBars,
   ChartSection,
   PendingPanel,
 } from '../components/charts';
@@ -48,6 +47,13 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 const PAGE_SIZE = 12;
+
+const formatUsd = (value?: number, digits = 2) =>
+  value === undefined ? '—' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })} USD`;
+const formatNumber = (value?: number, digits = 2) =>
+  value === undefined ? '—' : value.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const formatTradeDate = (value?: string) => (value ? `${value.slice(0, 16).replace('T', ' ')} UTC` : '—');
+const economicOutcome = (pnl?: number) => (pnl === undefined ? '—' : pnl > 0 ? 'PROFIT' : pnl < 0 ? 'LOSS' : 'BREAKEVEN');
 
 function Disclaimer() {
   return <p className="mono chart-disclaimer">{PERFORMANCE_DISCLAIMER}</p>;
@@ -192,7 +198,7 @@ function TradeLog({
     return (
       <ChartSection title={t('detail.tradeLog')}>
         <PendingPanel
-          title="Trade log — pending dataset"
+          title="Trade log — dataset unavailable"
           body="The per-trade log is sourced from trades.csv. Quantora never invents trades; the log will appear here when the owner delivers the per-trade series."
         />
       </ChartSection>
@@ -252,43 +258,38 @@ function TradeLog({
         <p className="muted">{t('detail.tradeEmpty')}</p>
       ) : (
         <>
-          <div className="dash-table-wrap">
+          <div className="dash-table-wrap tradelog-scroll">
             <table className="log dash-table tradelog-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Opened</th>
-                  <th>Closed</th>
-                  <th>Side</th>
-                  <th>Symbol</th>
-                  <th>Qty</th>
-                  <th>Entry</th>
-                  <th>Exit</th>
-                  <th>P&L (USD / R)</th>
-                  <th>Structural</th>
+                  <th>ID</th><th>Opened</th><th>Closed</th><th>Side</th><th>Symbol</th><th>Qty</th>
+                  <th>Entry</th><th>Exit</th><th>Fees</th><th>Economic P&L</th><th>R</th>
+                  <th>Economic outcome</th><th>Structural outcome</th><th>Exit reason</th><th>Risk (points)</th>
                 </tr>
               </thead>
               <tbody>
-                {pageRows.map((tr) => (
-                  <tr key={tr.id} title={`Exit: ${tr.exitReason ?? 'not supplied'} · R: ${tr.rMultiple ?? 'not supplied'}${tr.riskPoints ? ` · initial risk: ${tr.riskPoints} points` : ''}`}>
-                    <td className="mono">{tr.id}</td>
-                    <td>{tr.openedAt.slice(0, 16).replace('T', ' ')}</td>
-                    <td>{tr.closedAt ? tr.closedAt.slice(0, 16).replace('T', ' ') : '—'}</td>
-                    <td>
-                      <Badge tone={tr.side === 'buy' ? 'lime' : 'red'}>{tr.side.toUpperCase()}</Badge>
-                    </td>
-                    <td>{tr.symbol}</td>
-                    <td className="mono">{tr.quantity}</td>
-                    <td className="mono">{tr.entryPrice}</td>
-                    <td className="mono">{tr.exitPrice ?? '—'}</td>
-                    <td className={`mono ${(tr.pnlUsd ?? 0) >= 0 ? 'pos' : 'neg'}`}>
-                      {tr.pnlUsd !== undefined
-                        ? `${tr.pnlUsd >= 0 ? '+' : '−'}${Math.abs(tr.pnlUsd).toFixed(2)}`
-                        : '—'}
-                    </td>
-                    <td>{tr.structural ? <Badge tone={tr.structural === 'win' ? 'lime' : 'red'}>{tr.structural.toUpperCase()}</Badge> : '—'}</td>
-                  </tr>
-                ))}
+                {pageRows.map((tr) => {
+                  const outcome = economicOutcome(tr.pnlUsd);
+                  return (
+                    <tr key={tr.id}>
+                      <td className="mono">{tr.id}</td>
+                      <td className="mono">{formatTradeDate(tr.openedAt)}</td>
+                      <td className="mono">{formatTradeDate(tr.closedAt)}</td>
+                      <td><Badge tone={tr.side === 'buy' ? 'lime' : 'red'}>{tr.side.toUpperCase()}</Badge></td>
+                      <td className="mono">{tr.symbol}</td>
+                      <td className="mono">{formatNumber(tr.quantity, 2)}</td>
+                      <td className="mono">{formatNumber(tr.entryPrice, 2)}</td>
+                      <td className="mono">{formatNumber(tr.exitPrice, 2)}</td>
+                      <td className="mono">{tr.feesUsd === undefined ? '—' : `${Math.abs(tr.feesUsd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`}</td>
+                      <td className={`mono ${(tr.pnlUsd ?? 0) > 0 ? 'pos' : (tr.pnlUsd ?? 0) < 0 ? 'neg' : ''}`}>{formatUsd(tr.pnlUsd)}</td>
+                      <td className={`mono ${(tr.rMultiple ?? 0) > 0 ? 'pos' : (tr.rMultiple ?? 0) < 0 ? 'neg' : ''}`}>{tr.rMultiple === undefined ? '—' : `${tr.rMultiple >= 0 ? '+' : '−'}${Math.abs(tr.rMultiple).toFixed(2)} R`}</td>
+                      <td>{outcome === '—' ? '—' : <Badge tone={outcome === 'PROFIT' ? 'lime' : outcome === 'LOSS' ? 'red' : 'cyan'}>{outcome}</Badge>}</td>
+                      <td>{tr.structural ? <Badge tone={tr.structural === 'win' ? 'lime' : 'red'}>STRUCTURAL {tr.structural.toUpperCase()}</Badge> : '—'}</td>
+                      <td className="mono">{tr.exitReason ?? '—'}</td>
+                      <td className="mono">{tr.riskPoints === undefined ? '—' : `${tr.riskPoints.toLocaleString('en-US')} pts`}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -321,103 +322,6 @@ function TradeLog({
       )}
       <Disclaimer />
     </ChartSection>
-  );
-}
-
-function SecondaryModules({
-  analytics,
-}: {
-  analytics: ReturnType<typeof analyticsForProfile>;
-}) {
-  const dir = analytics.direction;
-  const dur = analytics.duration;
-  const conc = analytics.concentration;
-  const stk = analytics.streaks;
-  const trades = analytics.trades ?? [];
-  const wins = trades.filter((t) => (t.pnlUsd ?? 0) > 0).length;
-  const losses = trades.filter((t) => (t.pnlUsd ?? 0) < 0).length;
-  const be = trades.filter((t) => (t.pnlUsd ?? 0) === 0).length;
-
-  return (
-    <div className="secondary-modules">
-      <ChartSection title={t('detail.pnlDistribution')}>
-        <DistributionBars trades={trades} />
-      </ChartSection>
-      <ChartSection title={t('detail.direction')}>
-        {dir ? (
-          <div className="se-stats">
-            <div className="se-stat pos"><small>BUY</small><strong>{dir.buyCount}</strong></div>
-            <div className="se-stat neg"><small>SELL</small><strong>{dir.sellCount}</strong></div>
-            {dir.buyPnlUsd !== undefined && (
-              <div className="se-stat"><small>BUY P&L</small><strong className={dir.buyPnlUsd >= 0 ? 'pos' : 'neg'}>{dir.buyPnlUsd >= 0 ? '+' : '−'}{Math.abs(dir.buyPnlUsd).toFixed(0)}</strong></div>
-            )}
-            {dir.sellPnlUsd !== undefined && (
-              <div className="se-stat"><small>SELL P&L</small><strong className={dir.sellPnlUsd >= 0 ? 'pos' : 'neg'}>{dir.sellPnlUsd >= 0 ? '+' : '−'}{Math.abs(dir.sellPnlUsd).toFixed(0)}</strong></div>
-            )}
-          </div>
-        ) : (
-          <PendingPanel title="BUY / SELL — pending dataset" body="Direction breakdown is computed from trades.csv and will appear when the series arrive." />
-        )}
-      </ChartSection>
-      <ChartSection title={t('detail.winLossBreakeven')}>
-        {trades.length ? (
-          <div className="se-stats">
-            <div className="se-stat pos"><small>Wins</small><strong>{wins}</strong></div>
-            <div className="se-stat neg"><small>Losses</small><strong>{losses}</strong></div>
-            <div className="se-stat"><small>Breakeven</small><strong>{be}</strong></div>
-          </div>
-        ) : (
-          <PendingPanel title="Win / Loss / Breakeven — pending dataset" body="Counts are computed from trades.csv and will appear when the series arrive." />
-        )}
-      </ChartSection>
-      <ChartSection title={t('detail.duration')}>
-        {dur && dur.avgDurationMinutes !== undefined ? (
-          <div className="se-stats">
-            <div className="se-stat"><small>Avg (min)</small><strong>{dur.avgDurationMinutes.toFixed(1)}</strong></div>
-            <div className="se-stat"><small>Shortest (min)</small><strong>{dur.shortestMinutes?.toFixed(1) ?? '—'}</strong></div>
-            <div className="se-stat"><small>Longest (min)</small><strong>{dur.longestMinutes?.toFixed(1) ?? '—'}</strong></div>
-          </div>
-        ) : (
-          <PendingPanel title="Trade duration — pending dataset" body="Duration statistics are computed from trades.csv open/close timestamps." />
-        )}
-      </ChartSection>
-      <ChartSection title={t('detail.concentration')}>
-        {conc && conc.top5.length ? (
-          <div className="concentration-list">
-            <h4 className="se-head">Top 5 by |P&L|</h4>
-            <ul className="plain-list">
-              {conc.top5.map((c) => (
-                <li key={c.label}>
-                  <span className="mono">{c.label}</span> — {c.trades} ops ·{' '}
-                  <span className={c.pnlUsd >= 0 ? 'pos' : 'neg'}>
-                    {c.pnlUsd >= 0 ? '+' : '−'}{Math.abs(c.pnlUsd).toFixed(0)} USD
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {conc.bestTradeUsd !== undefined && (
-              <p className="muted">
-                Best trade: <span className="pos">+{conc.bestTradeUsd.toFixed(0)}</span> · Worst trade:{' '}
-                <span className="neg">{conc.worstTradeUsd?.toFixed(0)}</span>
-              </p>
-            )}
-          </div>
-        ) : (
-          <PendingPanel title="Concentration — pending dataset" body="Top-N concentration is computed from trades.csv and will appear when the series arrive." />
-        )}
-      </ChartSection>
-      <ChartSection title={t('detail.streaks')}>
-        {stk ? (
-          <div className="se-stats">
-            <div className="se-stat pos"><small>Max win streak</small><strong>{stk.maxWinStreak}</strong></div>
-            <div className="se-stat neg"><small>Max loss streak</small><strong>{stk.maxLossStreak}</strong></div>
-            <div className="se-stat"><small>Current</small><strong>{stk.currentStreak > 0 ? `+${stk.currentStreak}` : stk.currentStreak < 0 ? `${stk.currentStreak}` : '0'}</strong></div>
-          </div>
-        ) : (
-          <PendingPanel title="Streaks — pending dataset" body="Streak statistics are computed from trades.csv and will appear when the series arrive." />
-        )}
-      </ChartSection>
-    </div>
   );
 }
 
@@ -539,7 +443,7 @@ function Detail() {
           ))}
         </nav>
 
-        <div className="detail-layout">
+        <div className={`detail-layout ${tab === 'overview' ? '' : 'detail-layout--focused'}`}>
           <div>
             {tab === 'overview' && (
               <>
@@ -559,33 +463,6 @@ function Detail() {
                     </p>
                   )}
                 </ChartSection>
-                {profile.datasetStatusNote && (
-                  <ChartSection title={t('detail.datasetPending')}>
-                    <p className="muted" style={{ lineHeight: 1.7 }}>
-                      {profile.datasetStatusNote}
-                    </p>
-                  </ChartSection>
-                )}
-                <ChartSection title={t('detail.howItWorks')}>
-                  <ol className="steps-list">
-                    {profile.howItWorks.map((step, i) => (
-                      <li key={i}>
-                        <span className="step-num mono">{String(i + 1).padStart(2, '0')}</span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </ChartSection>
-                {profile.structuralFacts && (
-                  <StructuralVsEconomic
-                    profile={profile}
-                    analytics={analytics}
-                    onExpand={() =>
-                      track({ category: 'engagement', action: ANALYTICS_ACTIONS.expandStructuralEconomic, label: profile.id })
-                    }
-                  />
-                )}
-                {profile.scheduleFacts && <ScheduleFacts profile={profile} />}
               </>
             )}
 
@@ -598,18 +475,8 @@ function Detail() {
                   <DrawdownChart series={analytics.drawdown} />
                 </ChartSection>
                 <ChartSection title={t('detail.monthlyHeatmap')}>
-                  <MonthlyHeatmap monthly={analytics.monthly} />
+                  <MonthlyHeatmap monthly={analytics.monthly} trades={analytics.trades} />
                 </ChartSection>
-                {profile.structuralFacts && (
-                  <StructuralVsEconomic
-                    profile={profile}
-                    analytics={analytics}
-                    onExpand={() =>
-                      track({ category: 'engagement', action: ANALYTICS_ACTIONS.expandStructuralEconomic, label: profile.id })
-                    }
-                  />
-                )}
-                <SecondaryModules analytics={analytics} />
               </>
             )}
 
@@ -627,6 +494,14 @@ function Detail() {
                     ))}
                   </ol>
                 </ChartSection>
+                {profile.structuralFacts && (
+                  <StructuralVsEconomic
+                    profile={profile}
+                    analytics={analytics}
+                    onExpand={() => track({ category: 'engagement', action: ANALYTICS_ACTIONS.expandStructuralEconomic, label: profile.id })}
+                  />
+                )}
+                {profile.scheduleFacts && <ScheduleFacts profile={profile} />}
                 <ChartSection title={t('detail.dimensions')}>
                   <DimensionBars dimensions={profile.dimensions} />
                   <p className="muted" style={{ fontSize: 11, marginTop: 12 }}>
@@ -684,6 +559,7 @@ function Detail() {
             )}
           </div>
 
+          {tab === 'overview' && (
           <aside>
             <div className="card buy" style={{ position: 'sticky', top: 20 }}>
               <div className="eyebrow">{t('detail.fitsTitle')}</div>
@@ -713,7 +589,9 @@ function Detail() {
             </div>
             <RiskNotice />
           </aside>
+          )}
         </div>
+        {tab !== 'overview' && <div className="detail-risk-inline"><RiskNotice /></div>}
       </main>
       <Footer />
     </>

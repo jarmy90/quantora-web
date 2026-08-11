@@ -51,7 +51,7 @@ export function StrategyCard({ profile }: { profile: StrategyProfile }) {
           {equity && equity.length ? (
             <MiniSpark points={equity} color={profile.color} />
           ) : (
-            <MiniPending label={isReal ? 'Equity pending dataset' : 'No curve'} />
+            <MiniPending label={isReal ? 'No audited curve' : 'No curve'} />
           )}
           <span className="mini-equity-label mono">
             {isReal ? 'Historical Backtest' : 'Mock demo'}

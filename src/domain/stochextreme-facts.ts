@@ -80,11 +80,6 @@ export const STOCHEXTREME_FACTS: StochExtremeFacts = {
     'Best suited to sideways, range-bound Nasdaq-100 sessions (historical AMP @ENQ) within the allowed ET windows; not a trend-following or breakout system.',
 };
 
-/**
- * Honest evidence-status note shared by the UI: the seven CSV datasets named
- * in the brief are not present in the repository, so series-dependent modules
- * (equity curve, drawdown, monthly heatmap, trade log) render a neutral
- * pending state. Aggregate metrics are owner-supplied and shown verbatim.
- */
+/** Audited browser-derivative scope for the delivered historical dataset. */
 export const STOCHEXTREME_DATASET_STATUS =
-  'Pending dataset delivery: trades.csv, equity.csv, manifest.csv, coverage.csv, strategy_config.csv, events.csv and symbol_specifications.csv are not present in the repository. Aggregate metrics below are owner-supplied and shown verbatim; the equity curve, drawdown, monthly heatmap and trade log will populate when the per-trade series arrive.';
+  'Historical dataset available: audited trades, monthly aggregation and a reduced MTM equity series (361,248 → 1,197 points) retaining the final value, extrema and maximum-drawdown path. Immutable source archives remain outside the public bundle.';

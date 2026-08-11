@@ -82,7 +82,7 @@ export function EquityChart({ series, color = POS, unit = 'USD' }: EquityChartPr
   if (!filtered || !filtered.length) {
     return (
       <PendingPanel
-        title="Equity curve — pending dataset"
+        title="Equity curve — dataset unavailable"
         body="The per-trade equity series has not been delivered yet. Quantora never invents a curve: this chart will render from equity.csv as soon as the owner supplies it."
       />
     );
@@ -292,7 +292,7 @@ export function DrawdownChart({ series }: { series?: EquitySeries }) {
   if (!series || !series.length) {
     return (
       <PendingPanel
-        title="Historical Drawdown — pending dataset"
+        title="Historical Drawdown — dataset unavailable"
         body="The drawdown series is derived from equity.csv. It is not invented; it will appear here when the owner delivers the per-trade equity series."
       />
     );
@@ -360,11 +360,11 @@ export function DrawdownChart({ series }: { series?: EquitySeries }) {
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function MonthlyHeatmap({ monthly }: { monthly?: MonthlyReturns }) {
+export function MonthlyHeatmap({ monthly, trades = [] }: { monthly?: MonthlyReturns; trades?: NormalizedTrade[] }) {
   if (!monthly || !monthly.length) {
     return (
       <PendingPanel
-        title="Monthly heatmap — pending dataset"
+        title="Monthly heatmap — dataset unavailable"
         body="The monthly P&L heatmap is computed from trades.csv. It is not invented; it will appear when the owner delivers the per-trade series."
       />
     );
@@ -382,6 +382,12 @@ export function MonthlyHeatmap({ monthly }: { monthly?: MonthlyReturns }) {
 
   const get = (year: number, month: number) =>
     monthly.find((m) => m.year === year && m.month === month);
+  const rFor = (year: number, month?: number) => trades
+    .filter((trade) => {
+      const date = new Date(trade.closedAt ?? trade.openedAt);
+      return date.getUTCFullYear() === year && (month === undefined || date.getUTCMonth() === month);
+    })
+    .reduce((sum, trade) => sum + (trade.rMultiple ?? 0), 0);
 
   return (
     <div className="heatmap-wrap" role="region" aria-label="Monthly returns heatmap">
@@ -417,15 +423,17 @@ export function MonthlyHeatmap({ monthly }: { monthly?: MonthlyReturns }) {
                         </td>
                       );
                     }
+                    const monthR = rFor(year, mi);
                     return (
                       <td
                         key={mi}
                         style={{ background: cellColor(b.pnlUsd) }}
                         className="heatmap-cell"
+                        title={`${MONTH_LABELS[mi]} ${year} · USD ${b.pnlUsd >= 0 ? '+' : '−'}${Math.abs(b.pnlUsd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · R ${monthR >= 0 ? '+' : '−'}${Math.abs(monthR).toFixed(2)}`}
                       >
                         <span className={b.pnlUsd >= 0 ? 'pos' : 'neg'}>
                           {b.pnlUsd >= 0 ? '+' : '−'}
-                          {fmtUsd(b.pnlUsd)}
+                          {fmtUsd(Math.abs(b.pnlUsd))}
                         </span>
                         <span className="heatmap-meta muted">
                           {b.trades} ops · {(b.wins / Math.max(1, b.trades) * 100).toFixed(0)}% win
@@ -433,10 +441,10 @@ export function MonthlyHeatmap({ monthly }: { monthly?: MonthlyReturns }) {
                       </td>
                     );
                   })}
-                  <td className="heatmap-total">
+                  <td className="heatmap-total" title={`${year} total · USD ${yearTotal >= 0 ? '+' : '−'}${Math.abs(yearTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · R ${rFor(year) >= 0 ? '+' : '−'}${Math.abs(rFor(year)).toFixed(2)}`}>
                     <strong className={yearTotal >= 0 ? 'pos' : 'neg'}>
                       {yearTotal >= 0 ? '+' : '−'}
-                      {fmtUsd(yearTotal)}
+                      {fmtUsd(Math.abs(yearTotal))}
                     </strong>
                   </td>
                 </tr>
@@ -448,7 +456,7 @@ export function MonthlyHeatmap({ monthly }: { monthly?: MonthlyReturns }) {
       <div className="heatmap-legend">
         <span className="heatmap-swatch" style={{ background: `rgba(201,255,90,0.6)` }} /> Positive month
         <span className="heatmap-swatch" style={{ background: `rgba(255,113,133,0.6)` }} /> Negative month
-        <span className="heatmap-swatch heatmap-swatch-empty" /> No trades
+        <span className="heatmap-swatch heatmap-swatch-empty" /> No trades <span className="heatmap-tooltip-note">Hover a cell for year, month, USD and R.</span>
       </div>
       <p className="mono chart-disclaimer">{PERFORMANCE_DISCLAIMER}</p>
     </div>
@@ -465,7 +473,7 @@ export function DistributionBars({
   if (!trades || !trades.length) {
     return (
       <PendingPanel
-        title="P&L distribution — pending dataset"
+        title="P&L distribution — dataset unavailable"
         body="The P&L distribution histogram is computed from trades.csv and will appear when the per-trade series arrive."
       />
     );
@@ -530,8 +538,8 @@ export function MiniSpark({
 
 export function MiniPending({ label }: { label: string }) {
   return (
-    <div className="mini-pending" role="img" aria-label={`${label} — pending dataset`}>
-      <span className="mono">pending</span>
+    <div className="mini-pending" role="img" aria-label={`${label} — dataset unavailable`}>
+      <span className="mono">unavailable</span>
     </div>
   );
 }

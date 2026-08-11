@@ -86,12 +86,12 @@ function Home() {
           <SectionTitle
             eyebrow="Interactive analytics"
             title="Equity, drawdown and trade behavior — at a glance."
-            body="Open any strategy to explore its performance tab: range-selectable equity, historical drawdown, a monthly heatmap and a filterable trade log. Real series render when delivered; pending datasets show an honest neutral state — never an invented curve."
+            body="Open any strategy to explore its performance tab: range-selectable equity, historical drawdown, a monthly heatmap and a filterable trade log. Audited historical series render where available; demo views remain clearly labelled and no curve is invented."
           />
           <div className="home-mini-grid">
             {topForViz.map((p) => {
               // Prefer an audited adapter series. Mock profiles keep their clearly
-              // labelled illustrative curve; absent evidence remains pending.
+              // labelled illustrative curve; absent evidence is shown neutrally.
               const equity = analyticsForProfile(p).equity?.map((point) => point.equity);
               return (
                 <Link key={p.id} to="/strategies/$id" params={{ id: p.id }} className="card home-mini-card">
@@ -105,7 +105,7 @@ function Home() {
                     {equity && equity.length ? (
                       <MiniSpark points={equity} color={p.color} height={56} />
                     ) : (
-                      <MiniPending label="Equity pending dataset" />
+                      <MiniPending label="No audited curve" />
                     )}
                   </div>
                   <div className="home-mini-meta mono">

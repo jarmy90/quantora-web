@@ -371,3 +371,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,te
   .home-mini-grid{grid-template-columns:1fr}
   .chart-kpi{min-width:calc(50% - 6px)}
 }
+
+/* V2C: full-width evidence views keep performance charts and the trade table primary. */
+.detail-layout--focused{grid-template-columns:minmax(0,1fr)}
+.detail-risk-inline{margin-top:18px}
+.tradelog-scroll{max-width:100%;border:1px solid var(--line);border-radius:8px}
+.tradelog-table{min-width:1540px;font-size:11px}
+.tradelog-table th{white-space:nowrap;vertical-align:bottom}
+.tradelog-table td{white-space:nowrap;vertical-align:middle}
+.heatmap-scroll{max-width:100%;overflow-x:auto;padding-bottom:2px}
+.heatmap-table{min-width:760px}
+.heatmap-tooltip-note{font-size:10px;color:var(--muted);margin-left:2px}
+@media(max-width:820px){.detail-layout--focused{display:block}.tradelog-table{min-width:1420px}.heatmap-table{min-width:720px}.tradelog-controls .select{flex:1;min-width:130px}}
