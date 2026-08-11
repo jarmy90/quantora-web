@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { PublishDraft } from '../domain/publish';
 import { CONSENT_STATEMENTS, emptyDraft, validateStep } from '../domain/publish';
 import { useDrafts } from '../state/drafts';
 import { LOCAL_PERSISTENCE_NOTICE } from '../state/storage';
+import { previewCsv, detectEntity, withinPreviewLimits, type CsvParseResult } from '../domain/csv-import';
 import { t } from '../i18n';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -80,6 +81,20 @@ function Publish() {
   };
 
   const errorFor = (field: string) => errors.find((e) => e.field === field)?.message;
+
+  /** V2B CSV preview state — validation runs in-browser, nothing is uploaded. */
+  const [csvName, setCsvName] = useState('');
+  const [csvText, setCsvText] = useState('');
+  const csvPreview: CsvParseResult<unknown> | null = useMemo(() => {
+    if (!csvText.trim()) return null;
+    const entity = detectEntity(csvName) ?? 'trades';
+    const res = previewCsv(entity, csvText);
+    const limit = withinPreviewLimits(csvText, res.rawRowCount);
+    if (limit) {
+      return { rows: [], errors: [{ row: 0, message: limit }], rawRowCount: res.rawRowCount };
+    }
+    return res;
+  }, [csvText, csvName]);
 
   if (!loaded) {
     return (
@@ -282,6 +297,71 @@ function Publish() {
                     ))}
                   </ul>
                 )}
+                <div className="csv-preview-block">
+                  <h3 style={{ fontSize: 16, margin: '18px 0 4px' }}>{t('publish.csvPreview')}</h3>
+                  <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+                    {t('publish.csvPreviewHint')}
+                  </p>
+                  <div className="form-grid">
+                    <Field id="csvName" label="CSV filename (for entity detection)">
+                      <input
+                        id="csvName"
+                        className="input"
+                        value={csvName}
+                        onChange={(e) => setCsvName(e.target.value)}
+                        placeholder="e.g. trades.csv"
+                      />
+                    </Field>
+                  </div>
+                  <textarea
+                    className="input csv-textarea"
+                    rows={6}
+                    value={csvText}
+                    onChange={(e) => {
+                      setCsvText(e.target.value);
+                      track({ category: 'wizard', action: 'csv_preview_change', label: detectEntity(csvName) ?? 'unknown' });
+                    }}
+                    placeholder={'id,side,openedAt,symbol,quantity,entryPrice,pnlUsd,structural\nt1,buy,2025-08-01T09:30:00Z,USTEC,1,18000.5,120.5,win'}
+                    aria-label={t('publish.csvPreview')}
+                  />
+                  {csvPreview ? (
+                    <div className="csv-preview-result">
+                      <div className="csv-preview-stats">
+                        <span className="badge badge-cyan">
+                          {t('publish.csvParsed')}: {csvPreview.rawRowCount}
+                        </span>
+                        <span className="badge badge-lime">
+                          {t('publish.csvValidRows')}: {csvPreview.rows.length}
+                        </span>
+                        <span className="badge badge-red">
+                          {t('publish.csvInvalidRows')}: {Math.max(0, csvPreview.rawRowCount - csvPreview.rows.length)}
+                        </span>
+                      </div>
+                      {csvPreview.errors.length > 0 && (
+                        <ul className="csv-errors" aria-label={t('publish.csvErrors')}>
+                          {csvPreview.errors.slice(0, 20).map((e, i) => (
+                            <li key={i} className="mono">
+                              {e.row > 0 ? `row ${e.row}` : 'header'}
+                              {e.column ? ` · ${e.column}` : ''}: {e.message}
+                            </li>
+                          ))}
+                          {csvPreview.errors.length > 20 && (
+                            <li className="muted">…and {csvPreview.errors.length - 20} more.</li>
+                          )}
+                        </ul>
+                      )}
+                      {csvPreview.rows.length > 0 && (
+                        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
+                          ✓ {csvPreview.rows.length} valid row(s) parsed. Calculated metrics will be compared against your declared evidence on review.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+                      {t('publish.csvNoFile')}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

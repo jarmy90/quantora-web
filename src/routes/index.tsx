@@ -5,6 +5,8 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { StrategyCard } from '../components/StrategyCard';
 import { PowerScoreExplain, SectionTitle, EducationBlock, Seo } from '../components/ui';
+import { MiniSpark, MiniPending } from '../components/charts';
+import { PERFORMANCE_DISCLAIMER } from '../domain/analytics';
 import '../styles/app.css';
 
 const EDU_ITEMS = [
@@ -28,12 +30,13 @@ const EDU_ITEMS = [
 
 function Home() {
   const featured = profiles.filter((p) => p.dataStatus === 'real');
+  const topForViz = profiles.slice(0, 4);
 
   return (
     <>
       <Seo
         title="Quantora — Algorithmic strategy discovery & evaluation"
-        description="Discover and evaluate algorithmic MetaTrader 5 strategies with transparent, auditable Power Scores. Demo product — not investment advice."
+        description="Discover and evaluate algorithmic MetaTrader 5 strategies with transparent, auditable Power Scores. Historical backtest evidence — not investment advice."
       />
       <Nav
         extra={
@@ -76,6 +79,39 @@ function Home() {
               <StrategyCard key={p.id} profile={p} />
             ))}
           </div>
+        </section>
+
+        <section className="section wrap" id="visual-preview">
+          <SectionTitle
+            eyebrow="Interactive analytics"
+            title="Equity, drawdown and trade behavior — at a glance."
+            body="Open any strategy to explore its performance tab: range-selectable equity, historical drawdown, a monthly heatmap and a filterable trade log. Real series render when delivered; pending datasets show an honest neutral state — never an invented curve."
+          />
+          <div className="home-mini-grid">
+            {topForViz.map((p) => (
+              <Link key={p.id} to="/strategies/$id" params={{ id: p.id }} className="card home-mini-card">
+                <div className="home-mini-head">
+                  <strong>{p.name}</strong>
+                  <span className={`badge ${p.dataStatus === 'real' ? 'badge-cyan' : 'badge-amber'}`}>
+                    {p.dataStatus === 'real' ? 'Historical Backtest' : 'Mock demo'}
+                  </span>
+                </div>
+                <div className="home-mini-viz">
+                  {p.curve && p.curve.length ? (
+                    <MiniSpark points={p.curve} color={p.color} height={56} />
+                  ) : (
+                    <MiniPending label="Equity pending dataset" />
+                  )}
+                </div>
+                <div className="home-mini-meta mono">
+                  PF {p.metrics.profitFactor?.toFixed(4) ?? '—'} · {p.metrics.tradeCount ?? '—'} ops
+                </div>
+              </Link>
+            ))}
+          </div>
+          <p className="mono chart-disclaimer" style={{ marginTop: 18 }}>
+            {PERFORMANCE_DISCLAIMER}
+          </p>
         </section>
 
         <section id="power-score" className="section wrap">

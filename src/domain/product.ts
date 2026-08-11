@@ -97,6 +97,26 @@ export type StrategyProfile = {
   /** Mock-only illustrative curve; real profiles have none (never invented). */
   curve?: number[];
   updatedAt: string;
+  /** V2B — owner-supplied positioning line (e.g. "Specialist in sideways markets"). */
+  positioning?: string;
+  /** V2B — structural vs. economic outcome facts (WIN/LOSS rules, counts). */
+  structuralFacts?: {
+    winCount: number;
+    lossCount: number;
+    winRule: string;
+    lossRule: string;
+    stopPoints?: number;
+  };
+  /** V2B — allowed/excluded trading hours (owner-supplied, timezone-labeled). */
+  scheduleFacts?: {
+    timezone: string;
+    allowed: { start: string; end: string }[];
+    excluded: { start: string; end: string }[];
+  };
+  /** V2B — honest note when per-trade series are pending delivery. */
+  datasetStatusNote?: string;
+  /** V2B — discrete evidence source label (e.g. "Owner Supplied"). */
+  evidenceSource?: string;
 };
 
 /** Deterministic mock decomposition so legacy demo scores look consistent. */
@@ -170,11 +190,14 @@ export const profiles: StrategyProfile[] = [
       'A rules-based strategy that detects triangle consolidation patterns, waits for a confirmed breakout and trades it in the direction of the prevailing trend. Position size adapts to market conditions and every operation follows the same entry, stop and exit rules. All figures shown come from the owner\u2019s delivery.',
     dataStatus: 'real',
     sourceLabel: 'Owner-provided data',
+    evidenceSource: 'Owner Supplied',
     assets: [],
     marketContext: 'multi',
     riskLevel: 'medium',
     experienceLevel: 'beginner',
     frequency: 'low',
+    datasetStatusNote:
+      'Per-trade series have not been delivered yet. Aggregate metrics are owner-supplied and shown verbatim; the equity curve is not invented and will populate when the series arrive.',
     metrics: {
       powerScore: 7.2,
       profitFactor: 1.2559,
@@ -240,16 +263,38 @@ export const profiles: StrategyProfile[] = [
   {
     id: 'stochextreme-adaptive',
     name: 'StochExtreme Adaptive',
-    tagline: 'Stochastic mean reversion with aggressive risk',
+    tagline: 'Specialist in sideways markets',
     description:
-      'A stochastic-oscillator strategy that trades extreme overbought/oversold conditions and adapts its thresholds to recent volatility. Higher turnover and a larger historical drawdown than First Triangle Adaptive. All figures shown come from the owner\u2019s delivery.',
+      'A stochastic mean-reversion system specialized in sideways markets. It trades extreme overbought and oversold zones on USTEC, adapting its thresholds to recent volatility and respecting a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is tracked separately from economic result (post-cost P&L), because a structural WIN can still close negative after execution costs. All figures shown come from the owner\u2019s delivery.',
     dataStatus: 'real',
     sourceLabel: 'Owner-provided data',
-    assets: [],
+    evidenceSource: 'Owner Supplied',
+    assets: ['USTEC'],
     marketContext: 'range',
     riskLevel: 'high',
     experienceLevel: 'advanced',
     frequency: 'high',
+    positioning: 'Specialist in sideways markets',
+    structuralFacts: {
+      winCount: 200,
+      lossCount: 221,
+      winRule: 'BUY counts as a structural WIN only when K \u2265 80; SELL counts as a structural WIN only when K \u2264 20.',
+      lossRule: 'A structural LOSS is recorded only on a definitive stop touch (USTEC, 100 points).',
+      stopPoints: 100,
+    },
+    scheduleFacts: {
+      timezone: 'ET',
+      allowed: [
+        { start: '03:00', end: '11:30' },
+        { start: '14:00', end: '18:00' },
+      ],
+      excluded: [
+        { start: '11:30', end: '14:00' },
+        { start: '18:00', end: '03:00' },
+      ],
+    },
+    datasetStatusNote:
+      'Pending dataset delivery: trades.csv, equity.csv, manifest.csv, coverage.csv, strategy_config.csv, events.csv and symbol_specifications.csv are not present in the repository. Aggregate metrics are owner-supplied and shown verbatim; the equity curve, drawdown, monthly heatmap and trade log will populate when the per-trade series arrive.',
     metrics: {
       powerScore: 6.1,
       profitFactor: 1.1514,
@@ -270,11 +315,12 @@ export const profiles: StrategyProfile[] = [
       { id: 'execution', score: 6.0, why: 'High turnover increases execution costs and operational complexity.' },
     ]),
     howItWorks: [
-      'Tracks the stochastic oscillator and flags extreme overbought/oversold zones.',
-      'Adapts the extreme thresholds to recent volatility so signals stay relevant.',
-      'Enters reversals with tight targets; stops are based on the recent range.',
-      'Trades frequently — 421 operations in the provided sample.',
-      'Exits at target, stop or invalidation, strictly following the rules.',
+      'Tracks the stochastic oscillator (K) and flags extreme overbought/oversold zones on USTEC.',
+      'Adapts the extreme thresholds to recent volatility so signals stay relevant in sideways conditions.',
+      'A BUY counts as a structural WIN only when K \u2265 80; a SELL counts as a structural WIN only when K \u2264 20.',
+      'A structural LOSS is recorded only on a definitive stop touch (USTEC, 100 points) \u2014 separate from the economic result after execution costs.',
+      'Trades only inside the allowed ET sessions (03:00\u201311:30 and 14:00\u201318:00); no trades 11:30\u201314:00 or 18:00\u201303:00.',
+      '421 operations in the provided sample (v1.07 filtered, 01/08/2025 \u2013 07/08/2026).',
     ],
     suitableFor: [
       'Traders comfortable with frequent operations and screen time.',
@@ -282,14 +328,16 @@ export const profiles: StrategyProfile[] = [
       'Users who want a large sample of operations to judge behavior quickly.',
     ],
     notSuitableFor: [
-      'Beginners — the risk profile is aggressive and drawdowns are large.',
+      'Beginners \u2014 the risk profile is high and drawdowns are large.',
       'Accounts that cannot absorb a 26.53% historical drawdown.',
-      'Anyone expecting smooth equity — this system has sharp drawdown phases.',
+      'Anyone expecting smooth equity \u2014 this system has sharp drawdown phases.',
+      'Trend-following or breakout-seeking traders \u2014 this is a sideways-market specialist.',
     ],
     fitsYou: [
-      { label: 'Risk tolerance', detail: 'High — historical max drawdown 26.53% / USD 4,690.' },
-      { label: 'Experience', detail: 'Advanced — requires discipline under large drawdowns.' },
-      { label: 'Time commitment', detail: 'High — \u2248 421 operations in the sample period (01/08/2025 – 07/08/2026).' },
+      { label: 'Positioning', detail: 'Specialist in sideways markets \u2014 best in range-bound USTEC sessions.' },
+      { label: 'Risk tolerance', detail: 'High \u2014 historical max drawdown 26.53% / USD 4,690.' },
+      { label: 'Experience', detail: 'Advanced \u2014 requires discipline under large drawdowns.' },
+      { label: 'Time commitment', detail: 'High \u2014 \u2248 421 operations in the sample period (01/08/2025 \u2013 07/08/2026).' },
     ],
     dataBehindScore: [
       { label: 'Power Score', value: '6.1 / 10' },
@@ -297,22 +345,27 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', value: '421' },
       { label: 'Net result', value: '+6,582 USD' },
       { label: 'Max drawdown', value: '26.53% / 4,690 USD' },
-      { label: 'Sample period', value: '01/08/2025 – 07/08/2026' },
+      { label: 'Structural WIN / LOSS', value: '200 / 221' },
+      { label: 'Sample period', value: '01/08/2025 \u2013 07/08/2026' },
       { label: 'Ticks processed', value: '509,489,041' },
     ],
     methodology: METHODOLOGY_SHARED,
     limitations: [
       ...LIMITATION_SHARED,
       'A 26.53% drawdown means the strategy is aggressive: a large part of the profit can be given back in adverse phases.',
+      'Structural WIN/LOSS (200/221) is separate from economic result: a structural WIN can still lose money after costs.',
     ],
     evidence: [
-      { label: 'Power Score', detail: '6.1 — provided by the owner' },
-      { label: 'Profit factor', detail: '1.1514 — provided by the owner' },
-      { label: 'Operations', detail: '421 — provided by the owner' },
-      { label: 'Net result', detail: '+6,582 USD — provided by the owner' },
-      { label: 'Max drawdown', detail: '26.53% / 4,690 USD — provided by the owner' },
-      { label: 'Sample period', detail: '01/08/2025 – 07/08/2026 — provided by the owner' },
-      { label: 'Ticks processed', detail: '509,489,041 — provided by the owner' },
+      { label: 'Power Score', detail: '6.1 \u2014 provided by the owner' },
+      { label: 'Profit factor', detail: '1.1514 \u2014 provided by the owner' },
+      { label: 'Operations', detail: '421 \u2014 provided by the owner' },
+      { label: 'Net result', detail: '+6,582 USD \u2014 provided by the owner' },
+      { label: 'Max drawdown', detail: '26.53% / 4,690 USD \u2014 provided by the owner' },
+      { label: 'Structural WIN / LOSS', detail: '200 / 221 \u2014 provided by the owner' },
+      { label: 'Sample period', detail: '01/08/2025 \u2013 07/08/2026 \u2014 provided by the owner' },
+      { label: 'Ticks processed', detail: '509,489,041 \u2014 provided by the owner' },
+      { label: 'Version', detail: 'v1.07 filtered \u2014 provided by the owner' },
+      { label: 'Per-trade series', detail: 'Pending delivery (trades.csv, equity.csv, manifest.csv, coverage.csv, strategy_config.csv, events.csv, symbol_specifications.csv)' },
     ],
     color: '#ffb86b',
     updatedAt: '2026-08-09',
