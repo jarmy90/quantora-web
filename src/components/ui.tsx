@@ -2,7 +2,7 @@
  * Shared UI primitives for the Phase 1 product expansion. Kept dependency-free
  * (pure props + existing CSS classes) so any route can compose them.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
 import { POWER_SCORE_EXPLANATION, type ScoreDimension } from '../domain/product';
@@ -169,11 +169,33 @@ export function EducationBlock({ items }: { items: { title: string; body: string
 
 export function ConsentBanner() {
   const [state, setState] = useState<'undecided' | 'accepted' | 'declined'>(() => getConsent());
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  // Reserve exactly the banner height while consent is undecided, so a fixed
+  // mobile prompt never hides the last action or disclosure on a page.
+  useEffect(() => {
+    if (state !== 'undecided' || !bannerRef.current) return;
+    const banner = bannerRef.current;
+    const reserveSpace = () => {
+      document.body.style.paddingBottom = `${banner.offsetHeight}px`;
+    };
+    reserveSpace();
+    const observer = new ResizeObserver(reserveSpace);
+    observer.observe(banner);
+    return () => {
+      observer.disconnect();
+      document.body.style.paddingBottom = '';
+    };
+  }, [state]);
+
   if (state !== 'undecided') return null;
   return (
-    <div className="consent-banner" role="region" aria-label={t('analytics.consentLabel')}>
+    <div ref={bannerRef} className="consent-banner" role="region" aria-label={t('analytics.consentLabel')}>
       <p>{CONSENT_TEXT}</p>
       <div className="consent-actions">
+        <Link className="consent-learn" to="/legal/privacy">
+          Learn more
+        </Link>
         <button
           className="btn primary"
           onClick={() => {
@@ -200,15 +222,36 @@ export function ConsentBanner() {
 /* ------------------------------ Wizard primitives -------------------------- */
 
 export function ProgressSteps({ steps, current }: { steps: string[]; current: number }) {
+  const step = current + 1;
+  const progress = (step / steps.length) * 100;
   return (
-    <ol className="progress">
-      {steps.map((label, i) => (
-        <li key={label} className={i <= current ? 'done' : ''} aria-current={i === current ? 'step' : undefined}>
-          <span className="progress-dot mono">{i + 1}</span>
-          <span className="progress-label">{label}</span>
-        </li>
-      ))}
-    </ol>
+    <>
+      <div className="progress-mobile" aria-label={`Step ${step} of ${steps.length}: ${steps[current]}`}>
+        <div>
+          <span className="mono">Step {step} of {steps.length}</span>
+          <strong>{steps[current]}</strong>
+        </div>
+        <div
+          className="progress-mobile-track"
+          role="progressbar"
+          aria-label="Publish draft progress"
+          aria-valuemin={1}
+          aria-valuemax={steps.length}
+          aria-valuenow={step}
+          aria-valuetext={`Step ${step} of ${steps.length}`}
+        >
+          <span style={{ width: `${progress}%` }} />
+        </div>
+      </div>
+      <ol className="progress">
+        {steps.map((label, i) => (
+          <li key={label} className={i <= current ? 'done' : ''} aria-current={i === current ? 'step' : undefined}>
+            <span className="progress-dot mono">{i + 1}</span>
+            <span className="progress-label">{label}</span>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
 
@@ -311,9 +354,9 @@ export function CompareChip({ ids, onView }: { ids: string[]; onView?: () => voi
   );
 }
 
-export function BackLink({ to = '/strategies', label = t('nav.backCatalog') }: { to?: string; label?: string }) {
+export function BackLink({ to = '/strategies', label = 'Back to strategies' }: { to?: string; label?: string }) {
   return (
-    <Link to={to} className="btn btn-sm">
+    <Link to={to} className="btn btn-sm detail-back-link">
       ← {label}
     </Link>
   );

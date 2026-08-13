@@ -383,3 +383,78 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,te
 .heatmap-table{min-width:760px}
 .heatmap-tooltip-note{font-size:10px;color:var(--muted);margin-left:2px}
 @media(max-width:820px){.detail-layout--focused{display:block}.tradelog-table{min-width:1420px}.heatmap-table{min-width:720px}.tradelog-controls .select{flex:1;min-width:130px}}
+
+/* ============================================================
+   V2D — mobile navigation and conversion safeguards
+   ============================================================ */
+body{overflow-x:clip}
+.nav-wrap{position:relative;z-index:70}
+.nav-menu-trigger{display:none;width:44px;height:44px;padding:0;border:1px solid var(--line);border-radius:8px;background:#0b1016;color:var(--text);cursor:pointer;align-items:center;justify-content:center}
+.nav-menu-icon{font-size:23px;line-height:1}
+.mobile-nav-panel{display:none}
+.progress-mobile{display:none}
+.chart-hint-tap{display:none}
+
+/* Keep the chart hint inside the plotting area, never across the KPI row. */
+.chart-overlay-rows{top:auto;bottom:42px;left:72px;right:20px;justify-content:flex-start}
+.chart-tooltip{max-width:min(320px,calc(100% - 8px));overflow-wrap:anywhere}
+
+@media(max-width:820px){
+  .wrap{padding-left:20px;padding-right:20px}
+  .nav{height:68px}
+  .nav-links-desktop,.nav-actions>.nav-badge,.nav-actions>.btn{display:none}
+  .nav-menu-trigger{display:inline-flex}
+  .mobile-nav-panel{position:fixed;z-index:80;top:68px;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;background:rgba(8,11,16,.985);border-top:1px solid var(--line);padding:20px max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));overflow-y:auto;overscroll-behavior:contain}
+  .mobile-nav-links{display:flex;flex-direction:column;gap:4px}
+  .mobile-nav-links>a,.mobile-nav-extra>a{display:flex;align-items:center;min-height:48px;padding:10px 12px;border-radius:8px;color:var(--text);font-size:17px;font-weight:700}
+  .mobile-nav-links>a:hover,.mobile-nav-extra>a:hover{background:var(--panel2)}
+  .mobile-nav-extra{display:flex;flex-direction:column;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .mobile-nav-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:20px}
+  .mobile-nav-footer .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+  .hero{padding-top:58px;padding-bottom:48px}
+  .hero .actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:26px}
+  .hero .actions .btn{min-height:48px;text-align:center;display:flex;align-items:center;justify-content:center}
+  .actions{gap:10px}
+  .detail-hero .actions .btn{min-height:44px;display:flex;align-items:center;justify-content:center}
+  .detail-back-link{min-height:44px;display:inline-flex;align-items:center}
+  .detail-tabs{scrollbar-width:thin;margin-left:-4px;margin-right:-4px;padding:0 4px}
+  .detail-tab{min-height:44px;padding:10px 14px}
+  .progress{display:none}
+  .progress-mobile{display:block;margin:0 0 20px;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#0b1016}
+  .progress-mobile>div:first-child{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .progress-mobile .mono{font-size:11px;color:var(--lime);white-space:nowrap}
+  .progress-mobile strong{font-size:13px;text-align:right}
+  .progress-mobile-track{height:6px;border-radius:99px;background:#222c38;overflow:hidden}
+  .progress-mobile-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--lime),var(--cyan));transition:width .2s ease}
+  .publish-actions{display:grid;grid-template-columns:1fr;gap:10px}
+  .publish-actions .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .consent-banner{padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));gap:10px;align-items:stretch}
+  .consent-banner p{max-width:none;font-size:11px;line-height:1.5}
+  .consent-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%}
+  .consent-actions .btn,.consent-learn{min-height:44px;padding:9px 8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}
+  .consent-learn{border:1px solid var(--line);border-radius:7px;color:#b7c3ce;font-weight:700}
+  .chart-kpis{gap:8px}
+  .chart-kpi{min-width:0;flex:1 1 calc(50% - 4px);padding:8px 9px}
+  .chart-kpi strong{font-size:13px;overflow-wrap:anywhere}
+  .chart-overlay-rows{left:72px;right:12px;bottom:34px;justify-content:flex-start}
+  .chart-tooltip{min-width:0;font-size:10.5px;padding:7px 9px}
+  .chart-hint-hover{display:none}
+  .chart-hint-tap{display:inline}
+  .equity-hover-layer{touch-action:manipulation}
+  .tradelog-scroll,.heatmap-scroll,.dash-table-wrap,.compare-wrap{overscroll-behavior-x:contain}
+}
+@media(max-width:375px){
+  .wrap{padding-left:16px;padding-right:16px}
+  .mobile-nav-panel{padding-left:16px;padding-right:16px}
+  .consent-actions{gap:6px}
+  .consent-actions .btn,.consent-learn{font-size:11px;padding-left:5px;padding-right:5px}
+  .hero h1{font-size:clamp(38px,12vw,48px)}
+}
+@media(hover:hover) and (pointer:fine){
+  .chart-hint-hover{display:inline}
+  .chart-hint-tap{display:none}
+}
+@media(hover:none), (pointer:coarse){
+  .chart-hint-hover{display:none}
+  .chart-hint-tap{display:inline}
+}

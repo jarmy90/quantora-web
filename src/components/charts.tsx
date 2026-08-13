@@ -257,7 +257,10 @@ export function EquityChart({ series, color = POS, unit = 'USD' }: EquityChartPr
             )}
           </div>
         ) : (
-          <div className="chart-tooltip muted">Hover the curve to inspect a point.</div>
+          <div className="chart-tooltip muted">
+            <span className="chart-hint-hover">Hover the curve to inspect a point.</span>
+            <span className="chart-hint-tap">Tap the curve to inspect a point.</span>
+          </div>
         )}
       </div>
       <svg
@@ -272,13 +275,19 @@ export function EquityChart({ series, color = POS, unit = 'USD' }: EquityChartPr
           width={plotW}
           height={plotH}
           fill="transparent"
-          onMouseMove={(e) => {
+          onPointerMove={(e) => {
             const rect = (e.currentTarget.ownerSVGElement ?? e.currentTarget).getBoundingClientRect();
             const px = ((e.clientX - rect.left) / rect.width) * W;
             const i = Math.round(((px - padL) / plotW) * (filtered.length - 1));
             setHover(Math.max(0, Math.min(filtered.length - 1, i)));
           }}
-          onMouseLeave={() => setHover(null)}
+          onPointerDown={(e) => {
+            const rect = (e.currentTarget.ownerSVGElement ?? e.currentTarget).getBoundingClientRect();
+            const px = ((e.clientX - rect.left) / rect.width) * W;
+            const i = Math.round(((px - padL) / plotW) * (filtered.length - 1));
+            setHover(Math.max(0, Math.min(filtered.length - 1, i)));
+          }}
+          onPointerLeave={() => setHover(null)}
         />
       </svg>
       <p className="mono chart-disclaimer">{PERFORMANCE_DISCLAIMER}</p>

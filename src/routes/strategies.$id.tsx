@@ -406,7 +406,7 @@ function Detail() {
               <span className="mono score-tag">POWER SCORE / 10</span>
             </div>
           </div>
-          <div className="actions" style={{ marginTop: 18 }}>
+          <div className="actions detail-actions" style={{ marginTop: 18 }}>
             <button
               className={`btn ${favourite ? 'primary' : ''}`}
               aria-pressed={favourite}
