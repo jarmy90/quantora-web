@@ -1,53 +1,69 @@
-# Quantora — Phase 1 product expansion
+# Quantora — Phase 1 catalog and V2B performance analytics UX
 
-Ampliación de producto Fase 1 sobre la base existente (TanStack Start + React 19 + Vite + Tailwind 4, TypeScript strict, `src/i18n` en-US). **No se ha desplegado producción**; el preview público sigue en el puerto 3000 del workspace.
+Premium fintech UI for discovery and evaluation of MetaTrader 5 algorithmic strategies. Built with TanStack Start, React, Vite, Tailwind and strict TypeScript. This is a **Phase 1 interface**: it does not provide trading, licensing, payments, authentication, strategy validation or automatic publication.
 
-## Qué añade esta iteración
+## V2B scope completed
 
-- **Modelo tipado extensible** (`src/domain/product.ts`): catálogo de estrategias con Power Score 1–10, 6 dimensiones ponderadas, contexto/riesgo/experiencia/frecuencia, métricas tipadas y provenance `real`/`mock`. Única fuente de verdad — los componentes no duplican métricas.
-- **Datos exactos del propietario** (provenance `real`, etiquetados "Owner-provided data"):
-  - First Triangle Adaptive: Power Score 7.2 · PF 1.2559 · 145 ops · +6,687.50 USD · +46.12 USD/op · DD 4,474.80 USD.
-  - StochExtreme Adaptive: Power Score 6.1 · PF 1.1514 · 421 ops · +6,582 USD · DD 26.53% / 4,690 USD · 01/08/2025–07/08/2026 · 509,489,041 ticks.
-  - Las 4 estrategias legacy siguen como fixtures MOCK claramente etiquetados.
-- **Explicación obligatoria del Power Score** (`POWER_SCORE_EXPLANATION`) renderizada literalmente en home, catálogo, ficha y comparador; lenguaje no-promisorio en todo el producto.
-- **Catálogo** (`/strategies`): hero + cards con Power Score, filtros contexto/riesgo/experiencia/frecuencia + orden, skeletons, empty state, CTA explorar y CTA "Publish your strategy", compare tray.
-- **Fichas completas** (`/strategies/$id`): score, métricas, cómo funciona, contexto adecuado/no adecuado, "¿Te encaja?", desglose de 6 dimensiones, datos detrás del score, metodología, limitaciones y evidencia. Para estrategias reales **no se inventa curva**: se muestra "pendiente de entrega".
-- **Comparador** (`/compare`) hasta 3 estrategias con tabla de métricas.
-- **Selector guiado** (`/matcher`): 4 preguntas (movimiento, riesgo, experiencia, frecuencia) con resultados explicados y aviso explícito de que no es recomendación financiera.
-- **Wizard "Publica tu estrategia"** (`/publish`): 5 pasos, autoguardado local, reanudación (`?draft=<id>`), drag-drop (solo metadatos), validación amigable, progreso, consentimiento, estado privado, **sin publicación automática**; "Request review" solo cambia un flag local.
-- **Área creador** (`/creator`): lista de borradores privados con reanudar/eliminar.
-- **Base de admin** (`/admin`): protegida por rol (`RequireRole`), NO enlazada públicamente, con switcher de rol demo claramente marcado; cola de revisión de solo lectura.
-- **Contratos sustituibles**: roles `visitor/user/creator/admin` (`src/auth/session.tsx`), favoritos, borradores y comparador (`src/state/*`), analytics con consentimiento y sin datos sensibles (`src/analytics/analytics.ts`).
-- **SEO/OpenGraph**: `Seo` por ruta (title/description/OG) + `head` raíz; páginas de estrategia con título dinámico.
-- **Dashboard** (`/dashboard`): panel de favoritos añadido (localStorage) sobre la sección existente de licencias/descargas/actividad.
+V2B closes the performance-analytics presentation layer without manufacturing historical evidence:
 
-## Arquitectura
+- Detail-page tabs: Overview, Performance, Trades, How it works and Evidence.
+- Reusable SVG charts and modules for equity, drawdown, monthly returns, trade log, P&L distribution, direction, duration, concentration and streaks.
+- An explicit `Structural vs. Economic` presentation for StochExtreme: rule-based WIN/LOSS facts are separate from post-cost P&L.
+- Owner-supplied aggregate metrics continue to be rendered verbatim for real profiles.
+- If discrete evidence is absent, series-dependent modules render a neutral pending state; they never draw an invented equity curve, drawdown, heatmap or trade log for a real strategy.
+- CSV preview parser in the local publish wizard. It validates a pasted CSV in the browser only and does not upload or activate a dataset.
+- Analytics interaction events remain anonymous/local interface telemetry; no third-party collector or sensitive data is added.
 
-- `src/domain/` — modelo de producto y lógica pura (product, matcher, compare, publish). Sin React.
-- `src/state/` — client state (favorites, drafts, compare) sobre localStorage con wrapper SSR-safe; **fallback explícito, nunca un backend fingido**.
-- `src/auth/` — contrato de sesión/roles sustituible; sin autenticación real (fuera de alcance).
-- `src/analytics/` — capa de analytics consentida y anónima; sin recopilador externo en Fase 1.
-- `src/components/` — primitivas UI + StrategyCard + CompareTray + Seo.
-- `src/routes/` — rutas TanStack (todas las nuevas rutas listadas arriba).
+Legacy demo profiles can render their pre-existing illustrative curve only as **Mock demo**. That path is intentionally separate from real historical data.
 
-## Verificación ejecutada
+## Data status and provenance
 
-- `bun run build` (producción) — OK (client + SSR).
-- `bun run typecheck` (`tsc --noEmit`) — limpio; `serve.ts` (script runtime Bun) queda excluido del chequeo por tipado de Bun (preexistente).
-- `bun test` — 7 tests de dominio (métricas exactas del propietario, consistencia de dimensiones, explicación del Power Score, límite del comparador, matcher, validación del wizard).
-- Smoke: rutas `/`, `/strategies`, `/strategies/first-triangle-adaptive`, `/strategies/stochextreme-adaptive`, `/compare`, `/matcher`, `/publish`, `/creator`, `/admin`, `/dashboard` responden HTTP 200 en el preview.
+| Item | Status in this repository | Product behavior |
+| --- | --- | --- |
+| First Triangle Adaptive aggregate metrics | Owner-supplied aggregate values in the typed catalog | Displayed with `real` provenance; no invented series |
+| StochExtreme Adaptive aggregate metrics and structural facts | Owner-supplied aggregate values/facts in the typed catalog | Displayed with `real` provenance; structural and economic outcomes separated |
+| `trades.csv` | **Not present** | Trade log, distribution, direction, duration, concentration and streak modules remain pending for real profiles |
+| `equity.csv` | **Not present** | Equity, drawdown and monthly-return modules remain pending for real profiles |
+| `manifest.csv`, `coverage.csv`, `strategy_config.csv`, `events.csv`, `symbol_specifications.csv` | **Not present** | No claim of imported coverage/configuration/event/specification evidence |
+| Screenshots/captures of real backtests | **Not present** | No screenshot-backed performance assertion is made |
 
-## Decisiones
+The workspace was inspected on **August 11, 2026**: there are no CSV datasets under `/home` outside dependencies, and no real CSV has been imported or activated. Consequently, **this release does not claim to show real equity history**. The exact limitation is exposed in `src/domain/stochextreme-facts.ts` through `STOCHEXTREME_DATASET_STATUS` and in the real-strategy evidence UI.
 
-- **UI en inglés**: coherente con el producto existente (`src/i18n` solo en-US); la localización ES es un siguiente paso, no un cambio de esta iteración.
-- **El filtro de activos legacy** se sustituyó por los 4 filtros del encargo (contexto/riesgo/experiencia/frecuencia); el activo sigue visible como badge en las cards.
-- **Sin curvas inventadas** para estrategias reales (solo métricas del propietario).
-- **Sin panel de compra/licencia** en la ficha (el antiguo panel simulado se eliminó; no hay pagos en Fase 1).
-- **Dimensiones del score**: desglose indicativo del modelo Quantora calibrado a la suma del total del propietario, etiquetado como tal.
-- **Persistencia local** (localStorage) marcada explícitamente como fallback demo en cada superficie.
+See `docs/REAL_DATA_IMPORT.md` for the Phase 2A import contracts. Supplying the listed files is required before real time-series analytics can be populated.
 
-## Próximos pasos (bloqueantes reales)
+## Architecture
 
-1. El propietario debe entregar **curvas de equity y trade logs** de las 2 estrategias para activarlas vía el importador Phase 2A (formato en `docs/REAL_DATA_IMPORT.md`).
-2. Autenticación real y backend para drafts/favoritos (los contratos ya están definidos; solo falta el provider).
-3. Revisión legal de las páginas legales placeholder (preexistente).
+- `src/domain/product.ts` — single typed source of strategy profiles, provenance, aggregate metrics and factual profile notes.
+- `src/domain/analytics.ts` — pure types and calculations for trades, equity series, summaries, filtering, aggregation and evidence status.
+- `src/domain/strategy-analytics.ts` — provenance boundary: real profiles pass aggregate data through with pending series; mock fixtures alone may use illustrative curves.
+- `src/domain/csv-import.ts` — defensive CSV parsing, entity detection and preview limits. It does not persist data.
+- `src/domain/stochextreme-facts.ts` — rule/economic definitions and the explicit missing-dataset status.
+- `src/components/charts.tsx` — reusable visual components with neutral empty/pending states.
+- `src/routes/strategies.$id.tsx` — strategy evidence experience and tabbed analytics UX.
+- `src/routes/publish.tsx` — local draft flow plus client-side CSV preview only.
+- `src/domain/__tests__/analytics.test.ts` — domain and CSV parser tests.
+
+The existing Phase 1 catalog, comparator, matcher, favorites, drafts and demo admin surfaces remain modular. Local persistence is explicitly a browser-only fallback, not a backend.
+
+## Commands and verification
+
+```bash
+bun test
+bun run typecheck
+bun run build
+git diff --check
+```
+
+Current V2B verification:
+
+- `bun test` — **33 passing** tests (catalog plus analytics/CSV parsing).
+- `bun run typecheck` — passes with `tsc --noEmit`.
+- `bun run build` — production client and SSR build passes.
+- `git diff --check` — no whitespace errors.
+- Smoke verification after publishing covers `/`, `/strategies/stochextreme-adaptive`, `/publish`, and `/admin`; browser console is checked for runtime errors.
+
+## Boundaries and next input
+
+Historical results do not predict future performance. The UI does not make guarantees or recommendations.
+
+The next required owner input is the actual per-trade and equity evidence listed above, conforming to `docs/REAL_DATA_IMPORT.md`. Until then, aggregate values may be presented as owner-supplied, but all series-dependent real analytics stay pending.

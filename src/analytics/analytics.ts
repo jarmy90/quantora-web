@@ -29,14 +29,34 @@ export type AnalyticsEvent = {
 };
 
 /**
- * Consent-gated, anonymous event sink. Phase 1 default: log to the console
- * when opted in — there is no external collector, and this is documented.
+ * V2B analytics actions — strictly anonymous, no sensitive data. These are the
+ * new interaction events added by the performance-analytics UX. The `track`
+ * sink never logs financial figures or free text, only the category/action and
+ * an anonymous label (strategy id or a non-sensitive key).
+ */
+export const ANALYTICS_ACTIONS = {
+  changeEquityRange: 'change_equity_range',
+  toggleEquityUnit: 'toggle_equity_unit',
+  inspectTradeTooltip: 'inspect_trade_tooltip',
+  openPerformanceTab: 'open_performance_tab',
+  filterTradeLog: 'filter_trade_log',
+  paginateTradeLog: 'paginate_trade_log',
+  openMonthlyHeatmapCell: 'open_monthly_heatmap_cell',
+  expandStructuralEconomic: 'expand_structural_economic',
+} as const;
+
+/**
+ * Consent-gated, anonymous event sink. V2B: zero console output by design
+ * (the product must ship with no console noise). Events are accepted only when
+ * the visitor has opted in; with no external collector wired up yet the sink
+ * is intentionally a no-op. Swap in a real analytics SDK later — the event
+ * shape and consent gate stay the same.
  */
 export function track(event: AnalyticsEvent): void {
   if (getConsent() !== 'accepted') return;
-  // Deliberately anonymous: no user id, no financial values, no free text.
-  // eslint-disable-next-line no-console
-  console.info('[quantora:analytics]', event.category, event.action, event.label ?? '');
+  // Deliberately anonymous and silent: no user id, no financial values, no
+  // free text, and no console output. A future collector can subscribe here.
+  void event;
 }
 
 export const CONSENT_TEXT =

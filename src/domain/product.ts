@@ -97,6 +97,26 @@ export type StrategyProfile = {
   /** Mock-only illustrative curve; real profiles have none (never invented). */
   curve?: number[];
   updatedAt: string;
+  /** V2B — owner-supplied positioning line (e.g. "Specialist in sideways markets"). */
+  positioning?: string;
+  /** V2B — structural vs. economic outcome facts (WIN/LOSS rules, counts). */
+  structuralFacts?: {
+    winCount: number;
+    lossCount: number;
+    winRule: string;
+    lossRule: string;
+    stopPoints?: number;
+  };
+  /** V2B — allowed/excluded trading hours (owner-supplied, timezone-labeled). */
+  scheduleFacts?: {
+    timezone: string;
+    allowed: { start: string; end: string }[];
+    excluded: { start: string; end: string }[];
+  };
+  /** V2B — audited historical dataset and provenance note. */
+  datasetStatusNote?: string;
+  /** V2B — discrete evidence source label (e.g. "Owner Supplied"). */
+  evidenceSource?: string;
 };
 
 /** Deterministic mock decomposition so legacy demo scores look consistent. */
@@ -129,7 +149,7 @@ const METHODOLOGY_SHARED = [
 ];
 
 const LIMITATION_SHARED = [
-  'Only summary metrics were provided for this strategy \u2014 the equity curve and trade log are still pending delivery, so curve shape, losing streaks and drawdown timing cannot be validated yet.',
+  'Historical dataset available: browser views use audited derivatives while immutable source archives remain outside the public bundle.',
   'Historical results, as provided by the owner, are not a guarantee of future performance.',
   'Backtests can contain biases that are invisible in summary statistics.',
 ];
@@ -169,12 +189,15 @@ export const profiles: StrategyProfile[] = [
     description:
       'A rules-based strategy that detects triangle consolidation patterns, waits for a confirmed breakout and trades it in the direction of the prevailing trend. Position size adapts to market conditions and every operation follows the same entry, stop and exit rules. All figures shown come from the owner\u2019s delivery.',
     dataStatus: 'real',
-    sourceLabel: 'Owner-provided data',
+    sourceLabel: 'Historical Backtest',
+    evidenceSource: 'Owner Supplied',
     assets: [],
     marketContext: 'multi',
     riskLevel: 'medium',
     experienceLevel: 'beginner',
     frequency: 'low',
+    datasetStatusNote:
+      'Historical dataset available for the selected First Triangle branch 5 only. Official maximum drawdown is 4,474.80 USD MTM; the 4,151.50 USD closed-trade reconstruction is shown separately. Immutable source evidence remains outside the public bundle.',
     metrics: {
       powerScore: 7.2,
       profitFactor: 1.2559,
@@ -185,8 +208,8 @@ export const profiles: StrategyProfile[] = [
     },
     dimensions: realDimensions(7.2, [
       { id: 'returns', score: 8.0, why: 'Solid net result (+6,687.50 USD) with a high average per operation (+46.12 USD).' },
-      { id: 'risk', score: 6.5, why: 'Drawdown is controlled in absolute terms but not negligible (4,474.80 USD).' },
-      { id: 'data', score: 7.0, why: 'Owner-provided summary metrics; equity curve and trade log still pending.' },
+      { id: 'risk', score: 6.5, why: 'Official maximum drawdown is 4,474.80 USD MTM; the closed-trade-only reconstruction is separately labelled.' },
+      { id: 'data', score: 7.0, why: 'Audited branch-5-only trade and equity derivatives are available; other candidate branches are excluded.' },
       { id: 'consistency', score: 7.0, why: 'Positive average per operation across a modest 145-operation sample.' },
       { id: 'robustness', score: 7.0, why: 'Adaptive rules suggest regime awareness; small sample limits confidence.' },
       { id: 'execution', score: 7.0, why: 'Low frequency and a simple rule set keep operational complexity low.' },
@@ -219,12 +242,13 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', value: '145' },
       { label: 'Net result', value: '+6,687.50 USD' },
       { label: 'Average per operation', value: '+46.12 USD' },
-      { label: 'Max drawdown', value: '4,474.80 USD' },
+      { label: 'Official max drawdown', value: '4,474.80 USD MTM' },
     ],
     methodology: METHODOLOGY_SHARED,
     limitations: [
       ...LIMITATION_SHARED,
       'The 145-operation sample is small; statistical confidence is limited.',
+      'Official MTM maximum drawdown is 4,474.80 USD. The 4,151.50 USD closed-trade drawdown is a separate reconstruction, not a substitute for the official MTM figure.',
     ],
     evidence: [
       { label: 'Power Score', detail: '7.2 — provided by the owner' },
@@ -232,7 +256,9 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', detail: '145 — provided by the owner' },
       { label: 'Net result', detail: '+6,687.50 USD — provided by the owner' },
       { label: 'Average per operation', detail: '+46.12 USD — provided by the owner' },
-      { label: 'Max drawdown', detail: '4,474.80 USD — provided by the owner' },
+      { label: 'Official MTM max drawdown', detail: '4,474.80 USD — provided by the owner' },
+      { label: 'Closed-trade drawdown', detail: '4,151.50 USD — separate reconstruction; not substituted for official MTM drawdown' },
+      { label: 'Branch scope', detail: 'Selected branch 5 only; no branch selector or other branches are published' },
     ],
     color: '#c9ff5a',
     updatedAt: '2026-08-09',
@@ -240,16 +266,38 @@ export const profiles: StrategyProfile[] = [
   {
     id: 'stochextreme-adaptive',
     name: 'StochExtreme Adaptive',
-    tagline: 'Stochastic mean reversion with aggressive risk',
+    tagline: 'Specialist in sideways markets',
     description:
-      'A stochastic-oscillator strategy that trades extreme overbought/oversold conditions and adapts its thresholds to recent volatility. Higher turnover and a larger historical drawdown than First Triangle Adaptive. All figures shown come from the owner\u2019s delivery.',
+      'A stochastic mean-reversion system specialized in sideways Nasdaq-100 markets. Historical instrument: AMP @ENQ (not USTEC). It adapts thresholds to recent volatility and applies a strict intraday session filter. Structural outcome (WIN/LOSS by rule) is separate from post-cost economic result.',
     dataStatus: 'real',
-    sourceLabel: 'Owner-provided data',
-    assets: [],
+    sourceLabel: 'Historical Backtest',
+    evidenceSource: 'Owner Supplied',
+    assets: ['Nasdaq-100'],
     marketContext: 'range',
     riskLevel: 'high',
     experienceLevel: 'advanced',
     frequency: 'high',
+    positioning: 'Specialist in sideways markets',
+    structuralFacts: {
+      winCount: 200,
+      lossCount: 221,
+      winRule: 'BUY counts as a structural WIN only when K \u2265 80; SELL counts as a structural WIN only when K \u2264 20.',
+      lossRule: 'A structural LOSS is recorded only on the final configured 100-point stop (AMP @ENQ); it is never inferred from P&L.',
+      stopPoints: 100,
+    },
+    scheduleFacts: {
+      timezone: 'ET',
+      allowed: [
+        { start: '03:00', end: '11:30' },
+        { start: '14:00', end: '18:00' },
+      ],
+      excluded: [
+        { start: '11:30', end: '14:00' },
+        { start: '18:00', end: '03:00' },
+      ],
+    },
+    datasetStatusNote:
+      'Historical dataset available: audited trade log, monthly heatmap, and a reduced MTM equity series (361,248 → 1,197 points) that retains the final value, extrema, and maximum-drawdown path. Immutable source archives remain outside the public bundle; historical instrument is AMP @ENQ.',
     metrics: {
       powerScore: 6.1,
       profitFactor: 1.1514,
@@ -264,17 +312,18 @@ export const profiles: StrategyProfile[] = [
     dimensions: realDimensions(6.1, [
       { id: 'returns', score: 6.5, why: 'Positive net result (+6,582 USD) but a thin average edge spread over 421 operations.' },
       { id: 'risk', score: 5.5, why: 'Large historical drawdown (26.53% / USD 4,690) weighs heavily on the score.' },
-      { id: 'data', score: 6.5, why: 'Rich tick evidence (509,489,041 ticks) but no equity curve or trade log yet.' },
+      { id: 'data', score: 6.5, why: 'Rich tick evidence (509,489,041 ticks) with audited equity and trade-log derivatives.' },
       { id: 'consistency', score: 6.0, why: 'Profit factor 1.1514 is modest; high turnover implies many losing runs are possible.' },
       { id: 'robustness', score: 6.0, why: 'Adaptive thresholds help across regimes; overfitting cannot be ruled out from summaries.' },
       { id: 'execution', score: 6.0, why: 'High turnover increases execution costs and operational complexity.' },
     ]),
     howItWorks: [
-      'Tracks the stochastic oscillator and flags extreme overbought/oversold zones.',
-      'Adapts the extreme thresholds to recent volatility so signals stay relevant.',
-      'Enters reversals with tight targets; stops are based on the recent range.',
-      'Trades frequently — 421 operations in the provided sample.',
-      'Exits at target, stop or invalidation, strictly following the rules.',
+      'Tracks the stochastic oscillator (K) and flags extreme overbought/oversold zones on Nasdaq-100.',
+      'Adapts the extreme thresholds to recent volatility so signals stay relevant in sideways conditions.',
+      'A BUY counts as a structural WIN only when K \u2265 80; a SELL counts as a structural WIN only when K \u2264 20.',
+      'A structural LOSS is recorded only on a definitive stop touch (Nasdaq-100, 100 points) \u2014 separate from the economic result after execution costs.',
+      'Trades only inside the allowed ET sessions (03:00\u201311:30 and 14:00\u201318:00); no trades 11:30\u201314:00 or 18:00\u201303:00.',
+      '421 operations in the provided sample (v1.07 filtered, 01/08/2025 \u2013 07/08/2026).',
     ],
     suitableFor: [
       'Traders comfortable with frequent operations and screen time.',
@@ -282,14 +331,16 @@ export const profiles: StrategyProfile[] = [
       'Users who want a large sample of operations to judge behavior quickly.',
     ],
     notSuitableFor: [
-      'Beginners — the risk profile is aggressive and drawdowns are large.',
+      'Beginners \u2014 the risk profile is high and drawdowns are large.',
       'Accounts that cannot absorb a 26.53% historical drawdown.',
-      'Anyone expecting smooth equity — this system has sharp drawdown phases.',
+      'Anyone expecting smooth equity \u2014 this system has sharp drawdown phases.',
+      'Trend-following or breakout-seeking traders \u2014 this is a sideways-market specialist.',
     ],
     fitsYou: [
-      { label: 'Risk tolerance', detail: 'High — historical max drawdown 26.53% / USD 4,690.' },
-      { label: 'Experience', detail: 'Advanced — requires discipline under large drawdowns.' },
-      { label: 'Time commitment', detail: 'High — \u2248 421 operations in the sample period (01/08/2025 – 07/08/2026).' },
+      { label: 'Positioning', detail: 'Specialist in sideways markets \u2014 best in range-bound Nasdaq-100 sessions.' },
+      { label: 'Risk tolerance', detail: 'High \u2014 historical max drawdown 26.53% / USD 4,690.' },
+      { label: 'Experience', detail: 'Advanced \u2014 requires discipline under large drawdowns.' },
+      { label: 'Time commitment', detail: 'High \u2014 \u2248 421 operations in the sample period (01/08/2025 \u2013 07/08/2026).' },
     ],
     dataBehindScore: [
       { label: 'Power Score', value: '6.1 / 10' },
@@ -297,22 +348,27 @@ export const profiles: StrategyProfile[] = [
       { label: 'Operations', value: '421' },
       { label: 'Net result', value: '+6,582 USD' },
       { label: 'Max drawdown', value: '26.53% / 4,690 USD' },
-      { label: 'Sample period', value: '01/08/2025 – 07/08/2026' },
+      { label: 'Structural WIN / LOSS', value: '200 / 221' },
+      { label: 'Sample period', value: '01/08/2025 \u2013 07/08/2026' },
       { label: 'Ticks processed', value: '509,489,041' },
     ],
     methodology: METHODOLOGY_SHARED,
     limitations: [
       ...LIMITATION_SHARED,
       'A 26.53% drawdown means the strategy is aggressive: a large part of the profit can be given back in adverse phases.',
+      'Structural WIN/LOSS (200/221) is separate from economic result: a structural WIN can still lose money after costs.',
     ],
     evidence: [
-      { label: 'Power Score', detail: '6.1 — provided by the owner' },
-      { label: 'Profit factor', detail: '1.1514 — provided by the owner' },
-      { label: 'Operations', detail: '421 — provided by the owner' },
-      { label: 'Net result', detail: '+6,582 USD — provided by the owner' },
-      { label: 'Max drawdown', detail: '26.53% / 4,690 USD — provided by the owner' },
-      { label: 'Sample period', detail: '01/08/2025 – 07/08/2026 — provided by the owner' },
-      { label: 'Ticks processed', detail: '509,489,041 — provided by the owner' },
+      { label: 'Power Score', detail: '6.1 \u2014 provided by the owner' },
+      { label: 'Profit factor', detail: '1.1514 \u2014 provided by the owner' },
+      { label: 'Operations', detail: '421 \u2014 provided by the owner' },
+      { label: 'Net result', detail: '+6,582 USD \u2014 provided by the owner' },
+      { label: 'Max drawdown', detail: '26.53% / 4,690 USD \u2014 provided by the owner' },
+      { label: 'Structural WIN / LOSS', detail: '200 / 221 \u2014 provided by the owner' },
+      { label: 'Sample period', detail: '01/08/2025 \u2013 07/08/2026 \u2014 provided by the owner' },
+      { label: 'Ticks processed', detail: '509,489,041 \u2014 provided by the owner' },
+      { label: 'Version', detail: 'v1.07 filtered \u2014 provided by the owner' },
+      { label: 'Audited derivatives', detail: 'trade log, monthly aggregation and reduced equity series; immutable originals excluded from bundle' },
     ],
     color: '#ffb86b',
     updatedAt: '2026-08-09',
