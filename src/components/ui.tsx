@@ -171,6 +171,12 @@ export function ConsentBanner() {
   const [state, setState] = useState<'undecided' | 'accepted' | 'declined'>(() => getConsent());
   const bannerRef = useRef<HTMLDivElement>(null);
 
+  // SSR renders the undecided fallback; reconcile with persistent browser
+  // consent after hydration so a prior choice remains dismissed on reload.
+  useEffect(() => {
+    setState(getConsent());
+  }, []);
+
   // Reserve exactly the banner height while consent is undecided, so a fixed
   // mobile prompt never hides the last action or disclosure on a page.
   useEffect(() => {
