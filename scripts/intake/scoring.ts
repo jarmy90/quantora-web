@@ -20,8 +20,16 @@
  * average over the *available* components. When a component's data is missing
  * it is treated neutrally (excluded) and the reported `confidence` drops
  * accordingly — a missing value is never invented.
+ *
+ * Profit Factor tiering (a general rule, not a strategy-specific one): the
+ * minimum publishable PF is 1.15 (enforced by the publication filter). A PF of
+ * 1.20 or higher is the *favorable* tier and earns a documented +5 bonus on the
+ * Profit Factor component (capped at 100).
  */
 import type { QuantoraScore, QuantoraScoreComponent } from '../../src/domain/publicStrategy.ts';
+
+export const FAVORABLE_PROFIT_FACTOR = 1.2;
+export const FAVORABLE_PF_BONUS = 5;
 
 export type ScoreInput = {
   profitFactor?: number;
@@ -49,7 +57,7 @@ const WEIGHTS = {
 } as const;
 
 export const SCORE_FORMULA =
-  '0-100 weighted average: Profit Factor 25%, Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.';
+  '0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.';
 
 const clamp = (value: number, min = 0, max = 1): number => Math.min(max, Math.max(min, value));
 
@@ -119,11 +127,15 @@ function component(
 export function computeQuantoraScore(input: ScoreInput): QuantoraScore {
   const equity = input.equity ?? [];
 
-  // Profit Factor: 1.0 (break-even) = 50, rising to 100 at PF ≥ 2.0, falling to 0 at PF ≤ 0.
-  const pfPoints =
+  // Profit Factor: 1.0 (break-even) = 50, rising to 100 at PF ≥ 2.0. A PF of
+  // 1.20 or higher is the favorable tier and earns a documented +5 bonus.
+  const pfBase =
     finite(input.profitFactor) && input.profitFactor! > 0
       ? (0.5 + (input.profitFactor! - 1.0) * 0.5) * 100
       : null;
+  const pfFavorable = finite(input.profitFactor) && input.profitFactor! >= FAVORABLE_PROFIT_FACTOR;
+  const pfPoints = pfBase === null ? null : clamp(pfBase + (pfFavorable ? FAVORABLE_PF_BONUS : 0), 0, 100);
+  const pfNote = pfFavorable ? `PF >= ${FAVORABLE_PROFIT_FACTOR.toFixed(2)} (favorable tier)` : undefined;
 
   // Drawdown relative to result: drawdown / net. 0 → 100, ratio 1.5 → 0.
   const ddPoints =
@@ -161,7 +173,7 @@ export function computeQuantoraScore(input: ScoreInput): QuantoraScore {
       : null;
 
   const components: QuantoraScoreComponent[] = [
-    component('profitFactor', 'Profit Factor', WEIGHTS.profitFactor, pfPoints),
+    component('profitFactor', 'Profit Factor', WEIGHTS.profitFactor, pfPoints, pfNote),
     component('drawdown', 'Drawdown vs result', WEIGHTS.drawdown, ddPoints),
     component('equityStability', 'Equity stability', WEIGHTS.equityStability, stabilityPoints),
     component('trades', 'Trade count', WEIGHTS.trades, tradesPoints),

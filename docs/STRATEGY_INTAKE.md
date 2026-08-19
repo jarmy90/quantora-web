@@ -77,7 +77,9 @@ bun run strategies:validate   # validate incoming + accepted manifests
 bun run strategies:build      # build public-strategies/catalog.json
 bun run strategies:report     # write strategy-intake/reports/*.md|json
 bun run strategies:intake     # full pipeline: validate -> hash -> catalog -> reports
-bun run strategies:ingest     # re-import the First Triangle source files into its manifest
+bun run strategies:ingest     # re-import First Triangle + StochExtreme sources into their manifests
+bun run strategies:ingest:first-triangle
+bun run strategies:ingest:stochextreme
 ```
 
 `strategies:intake` is the one to run after dropping a new manifest. The
@@ -138,10 +140,15 @@ completeness** in an optional `results` block:
 ```
 
 `results.metrics` and `results.equity` are extracted or calculated from the
-source files by an importer (e.g. `scripts/intake/ingest-first-triangle.ts`);
-they are never hand-typed into components. This is the documented QNT-0002F
-incompatibility: the strict domain contract is reused where the source maps 1:1,
-and the faithful `results` block covers the fields it cannot represent.
+source files by an importer (`scripts/intake/ingest-first-triangle.ts` and
+`scripts/intake/ingest-stochextreme.ts`); they are never hand-typed into
+components. This is the documented QNT-0002F incompatibility: the strict domain
+contract is reused where the source maps 1:1, and the faithful `results` block
+covers the fields it cannot represent.
+
+The StochExtreme importer counts **only the 421 closed trades** in its trade
+log. Crosses, confirmations, cancelled signals and `SESSION_BLOCKED` events
+live in the events file and are never counted as trades.
 
 ## 11. Quantora Score
 
@@ -160,6 +167,11 @@ weights:
 | Costs | 5% |
 | Evidence completeness | 5% |
 
+Profit Factor tiering is a general rule: the minimum publishable PF is **1.15**
+(enforced by the filter), and a PF of **1.20 or higher** is the *favorable*
+tier, earning a documented +5 bonus on the Profit Factor component (capped at
+100).
+
 The final score is a weighted average over the **available** components. A
 missing component is excluded (neutral) and reduces the reported `confidence`;
 it is never invented. Drawdown is measured relative to net result, so a large
@@ -168,9 +180,11 @@ drawdown visibly lowers the score without acting as an automatic blocker.
 ## 12. Publication filter and public catalog
 
 The reusable filter in `scripts/intake/filter.ts` gates the **public** catalog.
-A real strategy must have a name, a Profit Factor above **1.20**, at least one
-closed trade, and an equity curve with at least two points. Drawdown is **not**
-a blocking rule yet. `bun run strategies:intake` writes only the strategies that
-pass to `public-strategies/catalog.json`, and strips every internal state
+A real strategy must have a name, a Profit Factor of at least **1.15**, at least
+one closed trade, and an equity curve with at least two points. A Profit Factor
+of **1.20 or higher is not mandatory** — it is simply treated as the more
+favorable tier by the Quantora Score. Drawdown is **not** a blocking rule yet.
+`bun run strategies:intake` writes only the strategies that pass to
+`public-strategies/catalog.json`, and strips every internal state
 (`dataStatus`, `validationStatus`, `status`) plus evidence hashes before that
 file is written. "Owner Supplied" / "Under Review" therefore never reach the UI.

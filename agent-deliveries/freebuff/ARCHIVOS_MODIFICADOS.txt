@@ -3,25 +3,27 @@ QUANTORA — QNT-0003 · Archivos modificados/creados (diff completo vs origin/m
 Modificados:
 - .gitignore
 - docs/REAL_DATA_IMPORT.md
-- docs/STRATEGY_INTAKE.md
 - package.json
-- scripts/intake/manifest.ts
-- scripts/intake/pipeline.ts
-- scripts/strategy-intake.ts
-- scripts/test-strategy-intake.ts
 - src/i18n/index.ts
 - src/routes/strategies.$id.tsx
 - src/routes/strategies.index.tsx
 - src/styles/app.css
 
 Nuevos:
+- docs/STRATEGY_INTAKE.md
 - public-strategies/catalog.json
 - public-strategies/datasets/README.md
 - public-strategies/manifests/README.md
 - public-strategies/manifests/first-triangle-adaptive.manifest.json
+- public-strategies/manifests/stochextreme-adaptive.manifest.json
 - scripts/intake/filter.ts
 - scripts/intake/ingest-first-triangle.ts
+- scripts/intake/ingest-stochextreme.ts
+- scripts/intake/manifest.ts
+- scripts/intake/pipeline.ts
 - scripts/intake/scoring.ts
+- scripts/strategy-intake.ts
+- scripts/test-strategy-intake.ts
 - src/catalog.ts
 - src/domain/publicStrategy.ts
 - src/format.ts
@@ -31,6 +33,13 @@ Nuevos:
 - strategy-intake/evidence/first-triangle/first_triangle_web_signals.csv
 - strategy-intake/evidence/first-triangle/first_triangle_web_summary.csv
 - strategy-intake/evidence/first-triangle/first_triangle_web_trades.csv
+- strategy-intake/evidence/stochextreme/README.md
+- strategy-intake/evidence/stochextreme/stochextreme_coverage.csv
+- strategy-intake/evidence/stochextreme/stochextreme_equity_daily.csv
+- strategy-intake/evidence/stochextreme/stochextreme_manifest.csv
+- strategy-intake/evidence/stochextreme/stochextreme_strategy_config.csv
+- strategy-intake/evidence/stochextreme/stochextreme_symbol_specifications.csv
+- strategy-intake/evidence/stochextreme/stochextreme_trades.csv
 - strategy-intake/examples/mock-minimal.manifest.json
 - strategy-intake/examples/real-under-review-minimal.manifest.json
 - strategy-intake/examples/real-under-review-with-metrics.manifest.json

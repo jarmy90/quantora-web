@@ -12,8 +12,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import process from 'node:process';
 import { strategies as mockStrategies } from '../src/data.ts';
-import { evaluatePublishFilter } from './intake/filter.ts';
+import { evaluatePublishFilter, MIN_PROFIT_FACTOR } from './intake/filter.ts';
 import { buildFirstTriangleManifest, MANIFEST_PATH } from './intake/ingest-first-triangle.ts';
+import { buildStochExtremeManifest, STOCHEXTREME_MANIFEST_PATH } from './intake/ingest-stochextreme.ts';
+import { computeQuantoraScore, FAVORABLE_PROFIT_FACTOR } from './intake/scoring.ts';
 import { validateManifest } from './intake/manifest.ts';
 import {
   buildCatalog,
@@ -415,12 +417,83 @@ test('non-passing strategy is excluded from public catalog', () => {
   const decision = evaluatePublishFilter({
     name: 'Weak',
     dataStatus: 'real',
-    profitFactor: 1.1,
+    profitFactor: 1.14,
     trades: 100,
     equityPointCount: 10,
   });
   assert(decision.publish === false, 'expected blocked');
-  assert(decision.reasons.some((r) => r.includes('1.20')), `expected PF reason: ${JSON.stringify(decision.reasons)}`);
+  assert(
+    decision.reasons.some((r) => r.includes(`${MIN_PROFIT_FACTOR.toFixed(2)}`)),
+    `expected PF reason: ${JSON.stringify(decision.reasons)}`,
+  );
+});
+
+// 23. Publication filter boundary: PF 1.14 blocked, 1.15/1.19/1.20 pass
+test('publication filter Profit Factor boundary (1.14, 1.15, 1.19, 1.20)', () => {
+  const base = { name: 'Boundary', dataStatus: 'real', trades: 100, equityPointCount: 10 };
+  assert(evaluatePublishFilter({ ...base, profitFactor: 1.14 }).publish === false, 'PF 1.14 must be blocked');
+  assert(evaluatePublishFilter({ ...base, profitFactor: 1.15 }).publish === true, 'PF 1.15 must pass');
+  assert(evaluatePublishFilter({ ...base, profitFactor: 1.19 }).publish === true, 'PF 1.19 must pass');
+  assert(evaluatePublishFilter({ ...base, profitFactor: 1.2 }).publish === true, 'PF 1.20 must pass');
+});
+
+// 24. Profit Factor favorable tier (>= 1.20) is rewarded in the score
+test('Profit Factor favorable tier (>= 1.20) is rewarded in the score', () => {
+  const below = computeQuantoraScore({ profitFactor: 1.19, netUsd: 1000, maxDrawdownUsd: 100, trades: 100 });
+  const at = computeQuantoraScore({ profitFactor: 1.2, netUsd: 1000, maxDrawdownUsd: 100, trades: 100 });
+  const belowPf = below.components.find((c) => c.key === 'profitFactor');
+  const atPf = at.components.find((c) => c.key === 'profitFactor');
+  assert(belowPf && atPf, 'profitFactor component must exist');
+  assert(atPf!.points > belowPf!.points, `PF 1.20 must score higher than 1.19 (${belowPf!.points} vs ${atPf!.points})`);
+  assert(
+    atPf!.note?.includes(FAVORABLE_PROFIT_FACTOR.toFixed(2)),
+    `favorable note missing: ${atPf!.note}`,
+  );
+  assert(belowPf!.note === undefined, `1.19 must not be favorable: ${belowPf!.note}`);
+});
+
+// 25. StochExtreme importer extracts the authorized metrics and counts only closed trades
+test('StochExtreme importer extracts authorized metrics', () => {
+  const manifest = buildStochExtremeManifest();
+  const m = manifest.results?.metrics;
+  assert(m, 'results.metrics must exist');
+  assert(m.profitFactor === 1.151392131381321, `profitFactor: ${m.profitFactor}`);
+  assert(m.trades === 421, `trades: ${m.trades}`);
+  assert(m.wins === 190, `economic wins: ${m.wins}`);
+  assert(m.losses === 231, `economic losses: ${m.losses}`);
+  assert(m.structuralWins === 200, `structural wins: ${m.structuralWins}`);
+  assert(m.structuralLosses === 221, `structural losses: ${m.structuralLosses}`);
+  assert(Math.abs(m.winRate! - 45.13064133016627) < 1e-9, `winRate: ${m.winRate}`);
+  assert(Math.abs(m.netUsd! - 6582.0) < 0.01, `netUsd: ${m.netUsd}`);
+  assert(Math.abs(m.maxDrawdownUsd! - 4690.0) < 0.01, `maxDrawdownUsd: ${m.maxDrawdownUsd}`);
+  assert(Math.abs(m.costPerTradeUsd! - 0.0) < 1e-9, `costPerTradeUsd: ${m.costPerTradeUsd}`);
+  assert(manifest.results?.equity?.length === 354, `equity points: ${manifest.results?.equity?.length}`);
+  assert(manifest.dataset.strategies[0]?.validationStatus === 'owner_supplied_under_review', 'validationStatus');
+  assert(manifest.dataset.strategies[0]?.provenance.dataStatus === 'real', 'dataStatus');
+});
+
+// 26. StochExtreme passes the publication filter (PF 1.1514 >= 1.15)
+test('StochExtreme passes filter with a drawdown-penalized score', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.issues.length === 0, `expected no issues: ${JSON.stringify(result.issues)}`);
+  assert(result.entry?.published === true, `expected published: ${JSON.stringify(result.entry?.filterReasons)}`);
+  const score = result.entry!.score!;
+  assert(score.value >= 0 && score.value <= 100, `score range: ${score.value}`);
+  const dd = score.components.find((c) => c.key === 'drawdown');
+  assert(dd?.available === true, 'drawdown component must be available');
+  assert(dd!.points < 80, `drawdown must visibly penalize, got ${dd!.points}`);
+});
+
+// 27. StochExtreme public catalog entry strips internal states
+test('StochExtreme public catalog strips internal states', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const publicList = buildPublicCatalog([result.entry!]);
+  assert(publicList.length === 1, `expected 1 published, got ${publicList.length}`);
+  const publicEntry = publicList[0]!;
+  assert(!('validationStatus' in publicEntry), 'no validationStatus');
+  assert(!('dataStatus' in publicEntry), 'no dataStatus');
+  assert(publicEntry.metrics?.profitFactor === 1.151392131381321, 'metrics preserved');
+  assert(publicEntry.equity?.points.length === 354, 'equity preserved');
 });
 
 // ---------------------------------------------------------------------------

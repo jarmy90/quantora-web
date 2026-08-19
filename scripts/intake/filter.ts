@@ -5,14 +5,15 @@
  * catalog. It is a shared rule for every strategy — never a strategy-specific
  * condition.
  *
- * The only performance threshold is the minimum Profit Factor of 1.20. Drawdown
+ * The only performance threshold is a minimum Profit Factor of 1.15. Drawdown
  * is deliberately **not** a blocking rule yet (no universal drawdown limit has
  * been fixed); instead it is surfaced on the card/detail and reduces the
- * Quantora Score.
+ * Quantora Score. A Profit Factor of 1.20 or higher is not mandatory — it is
+ * treated as the *favorable* tier by the Quantora Score (see scoring.ts).
  */
 import type { PublicStrategy } from '../../src/domain/publicStrategy.ts';
 
-export const MIN_PROFIT_FACTOR = 1.2;
+export const MIN_PROFIT_FACTOR = 1.15;
 
 export type PublishDecision = {
   publish: boolean;
@@ -41,9 +42,9 @@ export function evaluatePublishFilter(input: PublishFilterInput): PublishDecisio
 
   if (typeof input.profitFactor !== 'number' || !Number.isFinite(input.profitFactor)) {
     reasons.push('Profit Factor is missing.');
-  } else if (input.profitFactor <= MIN_PROFIT_FACTOR) {
+  } else if (input.profitFactor < MIN_PROFIT_FACTOR) {
     reasons.push(
-      `Profit Factor ${input.profitFactor.toFixed(4)} does not exceed the ${MIN_PROFIT_FACTOR.toFixed(2)} minimum.`,
+      `Profit Factor ${input.profitFactor.toFixed(4)} is below the ${MIN_PROFIT_FACTOR.toFixed(2)} minimum.`,
     );
   }
 

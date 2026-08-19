@@ -14,7 +14,9 @@
     "strategies:build": "bun run scripts/strategy-intake.ts build",
     "strategies:report": "bun run scripts/strategy-intake.ts report",
     "strategies:intake": "bun run scripts/strategy-intake.ts intake",
-    "strategies:ingest": "bun run scripts/intake/ingest-first-triangle.ts"
+    "strategies:ingest": "bun run scripts/intake/ingest-first-triangle.ts && bun run scripts/intake/ingest-stochextreme.ts",
+    "strategies:ingest:first-triangle": "bun run scripts/intake/ingest-first-triangle.ts",
+    "strategies:ingest:stochextreme": "bun run scripts/intake/ingest-stochextreme.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
