@@ -1,0 +1,852 @@
+{
+  "manifestVersion": "1.0",
+  "strategyId": "first-triangle-adaptive",
+  "tagline": "Rules-based triangle-breakout backtest on Nasdaq-100",
+  "type": "Historical backtest",
+  "market": "Nasdaq-100",
+  "instrument": "AMP @ENQ",
+  "rules": [
+    "Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)",
+    "Stop: FIXED_200PTS (fixed 200-point stop)",
+    "Exit: ADAPTIVE_MFE_GIVEBACK (adaptive trailing exit) or OPPOSITE_TRIANGLE (opposite triangle signal)"
+  ],
+  "limitations": [
+    "Period analyzed: 2025-08-14 to 2026-08-07",
+    "Single market: Nasdaq-100 (AMP @ENQ)",
+    "145 closed trades",
+    "Commission: 1.20 USD per trade",
+    "Maximum drawdown: 4,474.80 USD",
+    "Historical backtest reconstructed from owner-supplied data; Quantora has not independently reproduced it"
+  ],
+  "costs": {
+    "commission": "1.20 USD per trade"
+  },
+  "variant": "Long and short (FIRST_ALTERNATING_TRIANGLE)",
+  "configuration": "FIRST_ALTERNATING_TRIANGLE / FIXED_200PTS / ADAPTIVE_MFE_GIVEBACK",
+  "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
+  "evidence": [
+    {
+      "file": "../../strategy-intake/evidence/first-triangle/first_triangle_web_equity.csv",
+      "kind": "equity",
+      "classification": "public",
+      "sha256": "0017dfeef8888ab1d2cc9818cdabece831c45d06367b1ebb3bab2eea668f516c",
+      "note": "Closed-trade cumulative equity curve"
+    },
+    {
+      "file": "../../strategy-intake/evidence/first-triangle/first_triangle_web_manifest.json",
+      "kind": "source",
+      "classification": "private",
+      "sha256": "8c554408d0e1838781052382f16da370be5c836b57ca67d4da7c8acb7192dfcf",
+      "note": "Source run metadata and selection"
+    },
+    {
+      "file": "../../strategy-intake/evidence/first-triangle/first_triangle_web_summary.csv",
+      "kind": "summary",
+      "classification": "private",
+      "sha256": "010bc160b1804096fa23d9f4b38195ae8599d019a29f9979eba0546a24b6502a",
+      "note": "Closed-run summary metrics"
+    },
+    {
+      "file": "../../strategy-intake/evidence/first-triangle/first_triangle_web_trades.csv",
+      "kind": "trades",
+      "classification": "private",
+      "sha256": "acb4b745a9d0575a4c2b348b09e89ee13b8942ff13fb472b56add9727315d636",
+      "note": "Closed-trade log"
+    },
+    {
+      "file": "../../strategy-intake/evidence/first-triangle/first_triangle_web_signals.csv",
+      "kind": "signals",
+      "classification": "private",
+      "sha256": "2b629c39ab4abbaceb52629bdd0fe59416a920ce5fb2f73360dbd336bad15a91",
+      "note": "Signal/entry log"
+    }
+  ],
+  "results": {
+    "period": {
+      "start": "2025-08-14T01:30:00Z",
+      "end": "2026-08-07T13:16:28Z"
+    },
+    "metrics": {
+      "costPerTradeUsd": 1.2,
+      "expectancyUsd": 46.12068965517251,
+      "frequencyPerMonth": 12.31116653324116,
+      "grossLoss": 26130.20000000003,
+      "grossProfit": 32817.69999999996,
+      "losses": 71,
+      "maxDrawdownUsd": 4474.799999999998,
+      "netR": 17.15375,
+      "netUsd": 6687.500000000015,
+      "profitFactor": 1.2559299201689968,
+      "trades": 145,
+      "winRate": 51.03448275862069,
+      "wins": 74
+    },
+    "equity": [
+      {
+        "timestamp": "2025-08-14T01:30:00Z",
+        "equity": 88.8,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-08-20T16:26:19Z",
+        "equity": 1366.1,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-08-28T01:00:00Z",
+        "equity": 1292.3999999999999,
+        "drawdown": 73.70000000000005
+      },
+      {
+        "timestamp": "2025-08-28T13:31:05Z",
+        "equity": 891.1999999999998,
+        "drawdown": 474.9000000000001
+      },
+      {
+        "timestamp": "2025-08-29T13:46:01Z",
+        "equity": 489.99999999999983,
+        "drawdown": 876.1000000000001
+      },
+      {
+        "timestamp": "2025-09-02T13:46:22Z",
+        "equity": 988.2999999999998,
+        "drawdown": 377.80000000000007
+      },
+      {
+        "timestamp": "2025-09-05T14:18:49Z",
+        "equity": 1721.6,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-09-08T13:34:58Z",
+        "equity": 1320.3999999999999,
+        "drawdown": 401.20000000000005
+      },
+      {
+        "timestamp": "2025-09-10T09:30:00Z",
+        "equity": 1421.6999999999998,
+        "drawdown": 299.9000000000001
+      },
+      {
+        "timestamp": "2025-09-12T06:00:00Z",
+        "equity": 1126.4999999999998,
+        "drawdown": 595.1000000000001
+      },
+      {
+        "timestamp": "2025-09-17T02:30:07Z",
+        "equity": 1611.2999999999997,
+        "drawdown": 110.30000000000018
+      },
+      {
+        "timestamp": "2025-09-17T18:28:12Z",
+        "equity": 1761.0999999999997,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-09-19T00:19:37Z",
+        "equity": 1954.3999999999996,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-09-21T22:00:00Z",
+        "equity": 1553.1999999999996,
+        "drawdown": 401.20000000000005
+      },
+      {
+        "timestamp": "2025-09-23T19:30:00Z",
+        "equity": 1473.9999999999995,
+        "drawdown": 480.4000000000001
+      },
+      {
+        "timestamp": "2025-09-25T14:10:51Z",
+        "equity": 1931.2999999999995,
+        "drawdown": 23.100000000000136
+      },
+      {
+        "timestamp": "2025-09-29T16:57:40Z",
+        "equity": 2032.5999999999995,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-10-01T11:30:00Z",
+        "equity": 2078.3999999999996,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-10-02T13:49:35Z",
+        "equity": 2575.7,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-10-08T19:51:18Z",
+        "equity": 2174.5,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-10-10T10:00:00Z",
+        "equity": 2024.3,
+        "drawdown": 551.3999999999999
+      },
+      {
+        "timestamp": "2025-10-10T15:45:03Z",
+        "equity": 2791.1,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-10-14T05:39:09Z",
+        "equity": 2389.9,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-10-14T15:44:18Z",
+        "equity": 1988.7,
+        "drawdown": 802.3999999999999
+      },
+      {
+        "timestamp": "2025-10-14T19:45:28Z",
+        "equity": 1587.5,
+        "drawdown": 1203.6
+      },
+      {
+        "timestamp": "2025-10-16T13:45:45Z",
+        "equity": 1186.3,
+        "drawdown": 1604.8
+      },
+      {
+        "timestamp": "2025-10-21T13:57:11Z",
+        "equity": 1629.6,
+        "drawdown": 1161.5
+      },
+      {
+        "timestamp": "2025-10-22T16:41:53Z",
+        "equity": 2127.9,
+        "drawdown": 663.1999999999998
+      },
+      {
+        "timestamp": "2025-10-29T18:40:28Z",
+        "equity": 3732.7,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-10-30T13:50:31Z",
+        "equity": 3992.5,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-11-06T14:56:18Z",
+        "equity": 3591.3,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-11-07T18:25:07Z",
+        "equity": 4375.6,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-11-11T15:34:12Z",
+        "equity": 3974.4000000000005,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-11-13T15:08:42Z",
+        "equity": 4298.200000000001,
+        "drawdown": 77.39999999999964
+      },
+      {
+        "timestamp": "2025-11-16T23:02:29Z",
+        "equity": 3897.000000000001,
+        "drawdown": 478.59999999999945
+      },
+      {
+        "timestamp": "2025-11-18T05:10:33Z",
+        "equity": 4189.800000000001,
+        "drawdown": 185.79999999999927
+      },
+      {
+        "timestamp": "2025-11-20T09:46:39Z",
+        "equity": 4385.100000000001,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-11-20T18:15:00Z",
+        "equity": 3983.9000000000015,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-11-25T14:41:00Z",
+        "equity": 4535.700000000002,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2025-12-04T14:12:10Z",
+        "equity": 4134.500000000002,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2025-12-08T18:30:00Z",
+        "equity": 3889.300000000002,
+        "drawdown": 646.3999999999996
+      },
+      {
+        "timestamp": "2025-12-10T05:00:03Z",
+        "equity": 3759.600000000002,
+        "drawdown": 776.0999999999995
+      },
+      {
+        "timestamp": "2025-12-10T16:00:00Z",
+        "equity": 3504.9000000000024,
+        "drawdown": 1030.7999999999993
+      },
+      {
+        "timestamp": "2025-12-10T19:35:31Z",
+        "equity": 3103.7000000000025,
+        "drawdown": 1431.999999999999
+      },
+      {
+        "timestamp": "2025-12-11T02:05:20Z",
+        "equity": 2702.5000000000027,
+        "drawdown": 1833.199999999999
+      },
+      {
+        "timestamp": "2025-12-12T18:12:01Z",
+        "equity": 3204.800000000003,
+        "drawdown": 1330.8999999999987
+      },
+      {
+        "timestamp": "2025-12-17T15:44:02Z",
+        "equity": 2803.600000000003,
+        "drawdown": 1732.0999999999985
+      },
+      {
+        "timestamp": "2025-12-18T13:47:27Z",
+        "equity": 2402.4000000000033,
+        "drawdown": 2133.2999999999984
+      },
+      {
+        "timestamp": "2025-12-22T17:30:00Z",
+        "equity": 2503.2000000000035,
+        "drawdown": 2032.4999999999982
+      },
+      {
+        "timestamp": "2025-12-23T20:00:00Z",
+        "equity": 2305.0000000000036,
+        "drawdown": 2230.699999999998
+      },
+      {
+        "timestamp": "2025-12-29T03:00:08Z",
+        "equity": 2396.800000000004,
+        "drawdown": 2138.899999999998
+      },
+      {
+        "timestamp": "2025-12-30T16:30:00Z",
+        "equity": 2535.600000000004,
+        "drawdown": 2000.0999999999976
+      },
+      {
+        "timestamp": "2025-12-31T04:00:00Z",
+        "equity": 2218.400000000004,
+        "drawdown": 2317.2999999999975
+      },
+      {
+        "timestamp": "2026-01-02T19:25:05Z",
+        "equity": 2617.7000000000044,
+        "drawdown": 1917.9999999999973
+      },
+      {
+        "timestamp": "2026-01-07T20:31:27Z",
+        "equity": 3063.0000000000045,
+        "drawdown": 1472.699999999997
+      },
+      {
+        "timestamp": "2026-01-09T16:13:52Z",
+        "equity": 2661.8000000000047,
+        "drawdown": 1873.899999999997
+      },
+      {
+        "timestamp": "2026-01-12T01:34:56Z",
+        "equity": 2260.600000000005,
+        "drawdown": 2275.0999999999967
+      },
+      {
+        "timestamp": "2026-01-14T15:15:02Z",
+        "equity": 2620.900000000005,
+        "drawdown": 1914.7999999999965
+      },
+      {
+        "timestamp": "2026-01-20T20:14:57Z",
+        "equity": 2219.7000000000053,
+        "drawdown": 2315.9999999999964
+      },
+      {
+        "timestamp": "2026-01-23T15:48:45Z",
+        "equity": 1818.5000000000052,
+        "drawdown": 2717.199999999996
+      },
+      {
+        "timestamp": "2026-01-25T23:00:00Z",
+        "equity": 1417.3000000000052,
+        "drawdown": 3118.3999999999965
+      },
+      {
+        "timestamp": "2026-01-29T16:47:38Z",
+        "equity": 2264.100000000005,
+        "drawdown": 2271.5999999999967
+      },
+      {
+        "timestamp": "2026-02-03T14:56:02Z",
+        "equity": 1862.9000000000049,
+        "drawdown": 2672.7999999999965
+      },
+      {
+        "timestamp": "2026-02-03T20:32:01Z",
+        "equity": 2105.700000000005,
+        "drawdown": 2429.999999999997
+      },
+      {
+        "timestamp": "2026-02-09T01:57:18Z",
+        "equity": 2277.500000000005,
+        "drawdown": 2258.1999999999966
+      },
+      {
+        "timestamp": "2026-02-11T15:52:16Z",
+        "equity": 2414.300000000005,
+        "drawdown": 2121.3999999999965
+      },
+      {
+        "timestamp": "2026-02-17T02:00:00Z",
+        "equity": 2076.1000000000054,
+        "drawdown": 2459.5999999999963
+      },
+      {
+        "timestamp": "2026-02-17T15:18:49Z",
+        "equity": 2179.4000000000055,
+        "drawdown": 2356.299999999996
+      },
+      {
+        "timestamp": "2026-02-18T19:30:19Z",
+        "equity": 2594.7000000000057,
+        "drawdown": 1940.999999999996
+      },
+      {
+        "timestamp": "2026-02-20T15:02:01Z",
+        "equity": 2193.500000000006,
+        "drawdown": 2342.1999999999957
+      },
+      {
+        "timestamp": "2026-02-20T17:20:33Z",
+        "equity": 1792.3000000000059,
+        "drawdown": 2743.399999999996
+      },
+      {
+        "timestamp": "2026-02-24T15:26:44Z",
+        "equity": 1391.1000000000058,
+        "drawdown": 3144.599999999996
+      },
+      {
+        "timestamp": "2026-02-25T23:41:59Z",
+        "equity": 1977.9000000000058,
+        "drawdown": 2557.7999999999956
+      },
+      {
+        "timestamp": "2026-02-27T14:49:13Z",
+        "equity": 2107.7000000000057,
+        "drawdown": 2427.999999999996
+      },
+      {
+        "timestamp": "2026-03-02T20:15:03Z",
+        "equity": 2283.500000000006,
+        "drawdown": 2252.1999999999957
+      },
+      {
+        "timestamp": "2026-03-06T15:00:21Z",
+        "equity": 2679.300000000006,
+        "drawdown": 1856.3999999999955
+      },
+      {
+        "timestamp": "2026-03-10T18:14:42Z",
+        "equity": 2830.1000000000063,
+        "drawdown": 1705.5999999999954
+      },
+      {
+        "timestamp": "2026-03-12T16:21:17Z",
+        "equity": 3102.9000000000065,
+        "drawdown": 1432.7999999999952
+      },
+      {
+        "timestamp": "2026-03-17T15:36:50Z",
+        "equity": 3203.2000000000066,
+        "drawdown": 1332.499999999995
+      },
+      {
+        "timestamp": "2026-03-19T01:43:13Z",
+        "equity": 3579.500000000007,
+        "drawdown": 956.1999999999948
+      },
+      {
+        "timestamp": "2026-03-20T10:01:57Z",
+        "equity": 3178.300000000007,
+        "drawdown": 1357.3999999999946
+      },
+      {
+        "timestamp": "2026-03-20T20:38:35Z",
+        "equity": 3818.1000000000067,
+        "drawdown": 717.5999999999949
+      },
+      {
+        "timestamp": "2026-03-24T13:40:51Z",
+        "equity": 3416.900000000007,
+        "drawdown": 1118.7999999999947
+      },
+      {
+        "timestamp": "2026-03-24T20:22:25Z",
+        "equity": 3015.700000000007,
+        "drawdown": 1519.9999999999945
+      },
+      {
+        "timestamp": "2026-04-01T08:54:16Z",
+        "equity": 3465.5000000000073,
+        "drawdown": 1070.1999999999944
+      },
+      {
+        "timestamp": "2026-04-02T14:30:00Z",
+        "equity": 3211.3000000000075,
+        "drawdown": 1324.3999999999942
+      },
+      {
+        "timestamp": "2026-04-02T14:50:00Z",
+        "equity": 3552.1000000000076,
+        "drawdown": 983.599999999994
+      },
+      {
+        "timestamp": "2026-04-07T19:45:51Z",
+        "equity": 3150.900000000008,
+        "drawdown": 1384.7999999999938
+      },
+      {
+        "timestamp": "2026-04-09T04:30:05Z",
+        "equity": 3013.700000000008,
+        "drawdown": 1521.9999999999936
+      },
+      {
+        "timestamp": "2026-04-09T16:01:21Z",
+        "equity": 2612.500000000008,
+        "drawdown": 1923.1999999999935
+      },
+      {
+        "timestamp": "2026-04-12T22:00:00Z",
+        "equity": 2211.3000000000084,
+        "drawdown": 2324.3999999999933
+      },
+      {
+        "timestamp": "2026-04-13T13:49:15Z",
+        "equity": 1810.1000000000083,
+        "drawdown": 2725.599999999993
+      },
+      {
+        "timestamp": "2026-04-19T22:00:00Z",
+        "equity": 4480.400000000009,
+        "drawdown": 55.299999999992906
+      },
+      {
+        "timestamp": "2026-04-22T14:15:15Z",
+        "equity": 4079.200000000009,
+        "drawdown": 456.4999999999927
+      },
+      {
+        "timestamp": "2026-04-23T17:40:15Z",
+        "equity": 3678.000000000009,
+        "drawdown": 857.6999999999925
+      },
+      {
+        "timestamp": "2026-04-24T00:29:45Z",
+        "equity": 3276.8000000000093,
+        "drawdown": 1258.8999999999924
+      },
+      {
+        "timestamp": "2026-04-26T22:04:19Z",
+        "equity": 3408.1000000000095,
+        "drawdown": 1127.5999999999922
+      },
+      {
+        "timestamp": "2026-04-28T13:38:31Z",
+        "equity": 3821.4000000000096,
+        "drawdown": 714.299999999992
+      },
+      {
+        "timestamp": "2026-04-29T20:14:20Z",
+        "equity": 3420.20000000001,
+        "drawdown": 1115.4999999999918
+      },
+      {
+        "timestamp": "2026-04-30T15:31:23Z",
+        "equity": 3019.00000000001,
+        "drawdown": 1516.6999999999916
+      },
+      {
+        "timestamp": "2026-05-04T10:08:13Z",
+        "equity": 2617.80000000001,
+        "drawdown": 1917.8999999999915
+      },
+      {
+        "timestamp": "2026-05-05T10:34:35Z",
+        "equity": 2216.6000000000104,
+        "drawdown": 2319.0999999999913
+      },
+      {
+        "timestamp": "2026-05-06T00:21:37Z",
+        "equity": 2531.4000000000106,
+        "drawdown": 2004.299999999991
+      },
+      {
+        "timestamp": "2026-05-08T09:05:15Z",
+        "equity": 2130.2000000000107,
+        "drawdown": 2405.499999999991
+      },
+      {
+        "timestamp": "2026-05-10T22:01:42Z",
+        "equity": 2316.000000000011,
+        "drawdown": 2219.6999999999907
+      },
+      {
+        "timestamp": "2026-05-12T19:30:42Z",
+        "equity": 1914.8000000000109,
+        "drawdown": 2620.8999999999905
+      },
+      {
+        "timestamp": "2026-05-14T17:16:44Z",
+        "equity": 2061.100000000011,
+        "drawdown": 2474.599999999991
+      },
+      {
+        "timestamp": "2026-05-18T08:25:02Z",
+        "equity": 1659.9000000000108,
+        "drawdown": 2875.799999999991
+      },
+      {
+        "timestamp": "2026-05-18T14:33:58Z",
+        "equity": 1258.7000000000107,
+        "drawdown": 3276.999999999991
+      },
+      {
+        "timestamp": "2026-05-18T22:20:47Z",
+        "equity": 857.5000000000107,
+        "drawdown": 3678.1999999999907
+      },
+      {
+        "timestamp": "2026-05-21T06:50:01Z",
+        "equity": 1014.8000000000106,
+        "drawdown": 3520.899999999991
+      },
+      {
+        "timestamp": "2026-05-26T14:00:00Z",
+        "equity": 627.1000000000106,
+        "drawdown": 3908.5999999999913
+      },
+      {
+        "timestamp": "2026-05-27T13:08:50Z",
+        "equity": 1069.9000000000106,
+        "drawdown": 3465.799999999991
+      },
+      {
+        "timestamp": "2026-05-27T20:39:10Z",
+        "equity": 668.7000000000105,
+        "drawdown": 3866.999999999991
+      },
+      {
+        "timestamp": "2026-05-29T14:25:00Z",
+        "equity": 825.5000000000105,
+        "drawdown": 3710.199999999991
+      },
+      {
+        "timestamp": "2026-06-01T15:30:26Z",
+        "equity": 424.30000000001047,
+        "drawdown": 4111.399999999991
+      },
+      {
+        "timestamp": "2026-06-02T23:21:36Z",
+        "equity": 619.6000000000105,
+        "drawdown": 3916.0999999999913
+      },
+      {
+        "timestamp": "2026-06-04T01:10:01Z",
+        "equity": 785.4000000000106,
+        "drawdown": 3750.299999999991
+      },
+      {
+        "timestamp": "2026-06-05T00:11:19Z",
+        "equity": 384.20000000001056,
+        "drawdown": 4151.499999999991
+      },
+      {
+        "timestamp": "2026-06-07T23:45:29Z",
+        "equity": 1869.5000000000105,
+        "drawdown": 2666.199999999991
+      },
+      {
+        "timestamp": "2026-06-09T13:57:14Z",
+        "equity": 2231.3000000000106,
+        "drawdown": 2304.399999999991
+      },
+      {
+        "timestamp": "2026-06-09T16:59:27Z",
+        "equity": 3754.6000000000104,
+        "drawdown": 781.0999999999913
+      },
+      {
+        "timestamp": "2026-06-12T07:17:41Z",
+        "equity": 3353.4000000000106,
+        "drawdown": 1182.299999999991
+      },
+      {
+        "timestamp": "2026-06-17T05:22:41Z",
+        "equity": 2952.2000000000107,
+        "drawdown": 1583.499999999991
+      },
+      {
+        "timestamp": "2026-06-18T13:35:52Z",
+        "equity": 3144.000000000011,
+        "drawdown": 1391.6999999999907
+      },
+      {
+        "timestamp": "2026-06-23T13:51:57Z",
+        "equity": 4586.300000000011,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2026-06-29T13:55:39Z",
+        "equity": 4845.100000000011,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2026-07-02T08:34:10Z",
+        "equity": 4993.4000000000115,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2026-07-06T02:19:44Z",
+        "equity": 4592.200000000012,
+        "drawdown": 401.1999999999998
+      },
+      {
+        "timestamp": "2026-07-06T13:50:32Z",
+        "equity": 4191.000000000012,
+        "drawdown": 802.3999999999996
+      },
+      {
+        "timestamp": "2026-07-06T23:45:42Z",
+        "equity": 3789.800000000012,
+        "drawdown": 1203.5999999999995
+      },
+      {
+        "timestamp": "2026-07-07T15:45:19Z",
+        "equity": 4006.600000000012,
+        "drawdown": 986.7999999999993
+      },
+      {
+        "timestamp": "2026-07-09T10:52:49Z",
+        "equity": 4325.900000000012,
+        "drawdown": 667.4999999999991
+      },
+      {
+        "timestamp": "2026-07-14T00:35:54Z",
+        "equity": 4593.200000000013,
+        "drawdown": 400.1999999999989
+      },
+      {
+        "timestamp": "2026-07-15T14:23:32Z",
+        "equity": 4192.000000000013,
+        "drawdown": 801.3999999999987
+      },
+      {
+        "timestamp": "2026-07-15T17:06:20Z",
+        "equity": 4358.300000000013,
+        "drawdown": 635.0999999999985
+      },
+      {
+        "timestamp": "2026-07-20T13:52:19Z",
+        "equity": 4701.100000000013,
+        "drawdown": 292.29999999999836
+      },
+      {
+        "timestamp": "2026-07-21T03:17:37Z",
+        "equity": 4299.900000000013,
+        "drawdown": 693.4999999999982
+      },
+      {
+        "timestamp": "2026-07-22T22:41:22Z",
+        "equity": 3898.7000000000135,
+        "drawdown": 1094.699999999998
+      },
+      {
+        "timestamp": "2026-07-24T14:57:02Z",
+        "equity": 4280.500000000014,
+        "drawdown": 712.8999999999978
+      },
+      {
+        "timestamp": "2026-07-31T02:16:08Z",
+        "equity": 4759.800000000014,
+        "drawdown": 233.59999999999764
+      },
+      {
+        "timestamp": "2026-08-02T22:00:00Z",
+        "equity": 4358.600000000014,
+        "drawdown": 634.7999999999975
+      },
+      {
+        "timestamp": "2026-08-05T14:52:27Z",
+        "equity": 6189.900000000014,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2026-08-06T11:41:46Z",
+        "equity": 6400.200000000014,
+        "drawdown": 0
+      },
+      {
+        "timestamp": "2026-08-07T13:16:28Z",
+        "equity": 6687.500000000015,
+        "drawdown": 0
+      }
+    ],
+    "evidenceComplete": 1
+  },
+  "dataset": {
+    "modelVersion": "1.0",
+    "strategies": [
+      {
+        "id": "first-triangle-adaptive",
+        "name": "First Triangle Adaptive",
+        "description": "Historical backtest of a systematic triangle-breakout model on Nasdaq-100 futures (AMP @ENQ). The model enters on the first alternating triangle signal, protects each position with a fixed 200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an opposite triangle signal. Results are reconstructed from the owner’s supplied trade history.",
+        "version": "1.00",
+        "status": "active",
+        "validationStatus": "owner_supplied_under_review",
+        "assetIds": [
+          "amp-enq"
+        ],
+        "backtestIds": [],
+        "createdAt": "2025-08-01T00:00:00Z",
+        "updatedAt": "2025-08-01T00:00:00Z",
+        "provenance": {
+          "dataStatus": "real",
+          "sourceName": "First Triangle for Quantora (owner delivery)",
+          "sourceType": "owner-delivery",
+          "receivedAt": "2025-08-01T00:00:00Z",
+          "sourceFile": "Descargar First Triangle para Quantora.zip",
+          "notes": "Source: data/quantora-real-backtests @ 2275c5d0e76d955c26df482be928ddd03bb9fc00. Source strategy name \"First Triangle Adaptive\". createdAt/updatedAt reflect the source run timestamp (2025-08-01) from source_run_id; no separate delivery timestamp was provided."
+        }
+      }
+    ],
+    "assets": [
+      {
+        "id": "amp-enq",
+        "symbol": "@ENQ",
+        "name": "Nasdaq-100",
+        "assetClass": "future",
+        "exchange": "AMP"
+      }
+    ],
+    "backtests": [],
+    "equityCurves": [],
+    "tradeLogs": []
+  }
+}

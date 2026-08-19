@@ -13,7 +13,8 @@
     "strategies:validate": "bun run scripts/strategy-intake.ts validate",
     "strategies:build": "bun run scripts/strategy-intake.ts build",
     "strategies:report": "bun run scripts/strategy-intake.ts report",
-    "strategies:intake": "bun run scripts/strategy-intake.ts intake"
+    "strategies:intake": "bun run scripts/strategy-intake.ts intake",
+    "strategies:ingest": "bun run scripts/intake/ingest-first-triangle.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

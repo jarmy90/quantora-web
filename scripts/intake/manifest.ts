@@ -10,7 +10,7 @@
  * either `error` (blocking) or `warning` (optional-field notice). It never
  * throws and never mutates its input.
  */
-import type { QuantoraDataset } from '../../src/domain/types.ts';
+import type { EquityPoint, QuantoraDataset } from '../../src/domain/types.ts';
 import { validateDataset, type ValidationIssue } from '../../src/domain/validation.ts';
 
 export const MANIFEST_VERSION = '1.0' as const;
@@ -24,7 +24,24 @@ export type ManifestEvidence = {
   kind: string;
   /** Whether this file may ever appear in the public bundle. */
   classification: EvidenceClassification;
+  /** Optional precomputed SHA-256 hex digest (provenance + integrity check). */
+  sha256?: string;
   note?: string;
+};
+
+/**
+ * Faithful results mapping for real owner deliveries whose source format does
+ * not carry the strict Phase 2A fields (`initialCapital`, `timeframe`,
+ * `TradeLog.quantity`, …). It reuses `EquityPoint` and stays numeric-only, so
+ * no absent field is ever fabricated. The strict `dataset` keeps identity and
+ * provenance; results live here when the source cannot be mapped 1:1.
+ */
+export type ManifestResults = {
+  period?: { start?: string; end?: string; timeframe?: string };
+  metrics?: Record<string, number>;
+  equity?: EquityPoint[];
+  /** 0..1 fraction of the expected evidence set that is present (used by the score). */
+  evidenceComplete?: number;
 };
 
 export type Manifest = {
@@ -32,12 +49,16 @@ export type Manifest = {
   strategyId: string;
   tagline?: string;
   type?: string;
+  market?: string;
+  instrument?: string;
   rules?: string[];
   limitations?: string[];
   costs?: Record<string, string>;
   variant?: string;
   configuration?: string;
   evidence?: ManifestEvidence[];
+  results?: ManifestResults;
+  disclaimer?: string;
   dataset: QuantoraDataset;
 };
 
@@ -142,6 +163,15 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   if (value.configuration !== undefined && !isText(value.configuration)) {
     issues.push(error('configuration', 'Must be a non-empty string.'));
   }
+  if (value.market !== undefined && !isText(value.market)) {
+    issues.push(error('market', 'Must be a non-empty string.'));
+  }
+  if (value.instrument !== undefined && !isText(value.instrument)) {
+    issues.push(error('instrument', 'Must be a non-empty string.'));
+  }
+  if (value.disclaimer !== undefined && !isText(value.disclaimer)) {
+    issues.push(error('disclaimer', 'Must be a non-empty string.'));
+  }
 
   if (value.evidence !== undefined) {
     if (!Array.isArray(value.evidence)) {
@@ -157,6 +187,11 @@ export function validateManifest(value: unknown): ManifestIssue[] {
         if (!isText(entry.kind)) issues.push(error(`${path}.kind`, 'Required non-empty kind.'));
         if (entry.classification !== 'public' && entry.classification !== 'private') {
           issues.push(error(`${path}.classification`, 'Must be "public" or "private".'));
+        }
+        if (entry.sha256 !== undefined) {
+          if (typeof entry.sha256 !== 'string' || !/^[a-fA-F0-9]{64}$/.test(entry.sha256)) {
+            issues.push(error(`${path}.sha256`, 'Must be a 64-character hex SHA-256 digest.'));
+          }
         }
         if (entry.note !== undefined && !isText(entry.note)) {
           issues.push(error(`${path}.note`, 'Must be a non-empty string.'));
@@ -194,7 +229,19 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   if (value.evidence === undefined || (Array.isArray(value.evidence) && value.evidence.length === 0)) {
     issues.push(warning('evidence', 'No evidence files declared (optional).'));
   }
+  if (value.results !== undefined) {
+    if (!isRecord(value.results)) {
+      issues.push(error('results', 'Must be an object.'));
+    } else {
+      validateResults(value.results, issues);
+    }
+  }
+
+  const hasResults =
+    isRecord(value.results) &&
+    (Array.isArray(value.results.equity) || isRecord(value.results.metrics));
   if (
+    !hasResults &&
     isRecord(value.dataset) &&
     Array.isArray(value.dataset.backtests) &&
     value.dataset.backtests.length === 0
@@ -203,4 +250,69 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   }
 
   return issues;
+}
+
+function validateResults(results: Record<string, unknown>, issues: ManifestIssue[]): void {
+  if (results.period !== undefined) {
+    if (!isRecord(results.period)) {
+      issues.push(error('results.period', 'Must be an object.'));
+    } else {
+      for (const key of ['start', 'end'] as const) {
+        if (results.period[key] !== undefined && !isIso(results.period[key])) {
+          issues.push(error(`results.period.${key}`, 'Must be an ISO 8601 timestamp with an explicit offset.'));
+        }
+      }
+      if (results.period.timeframe !== undefined && !isText(results.period.timeframe)) {
+        issues.push(error('results.period.timeframe', 'Must be a non-empty string.'));
+      }
+    }
+  }
+
+  if (results.metrics !== undefined) {
+    if (!isRecord(results.metrics)) {
+      issues.push(error('results.metrics', 'Must be an object of finite numbers.'));
+    } else {
+      for (const [key, metric] of Object.entries(results.metrics)) {
+        if (typeof metric !== 'number' || !Number.isFinite(metric)) {
+          issues.push(error(`results.metrics.${key}`, 'Must be a finite number.'));
+        }
+      }
+    }
+  }
+
+  if (results.equity !== undefined) {
+    if (!Array.isArray(results.equity)) {
+      issues.push(error('results.equity', 'Must be an array of equity points.'));
+    } else {
+      results.equity.forEach((point, index) => {
+        const path = `results.equity[${index}]`;
+        if (!isRecord(point)) {
+          issues.push(error(path, 'Expected an object.'));
+          return;
+        }
+        if (!isIso(point.timestamp)) issues.push(error(`${path}.timestamp`, 'Must be an ISO 8601 timestamp with an explicit offset.'));
+        if (typeof point.equity !== 'number' || !Number.isFinite(point.equity)) {
+          issues.push(error(`${path}.equity`, 'Must be a finite number.'));
+        }
+        if (point.drawdown !== undefined && (typeof point.drawdown !== 'number' || !Number.isFinite(point.drawdown))) {
+          issues.push(error(`${path}.drawdown`, 'Must be a finite number.'));
+        }
+      });
+    }
+  }
+
+  if (results.evidenceComplete !== undefined) {
+    if (
+      typeof results.evidenceComplete !== 'number' ||
+      !Number.isFinite(results.evidenceComplete) ||
+      results.evidenceComplete < 0 ||
+      results.evidenceComplete > 1
+    ) {
+      issues.push(error('results.evidenceComplete', 'Must be a finite number between 0 and 1.'));
+    }
+  }
+}
+
+function isIso(value: unknown): value is string {
+  return isText(value) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(Z|[+-]\d{2}:\d{2})$/.test(value);
 }

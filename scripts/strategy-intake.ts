@@ -13,6 +13,7 @@ import process from 'node:process';
 import { strategies as mockStrategies } from '../src/data.ts';
 import {
   buildCatalog,
+  buildPublicCatalog,
   exitCodeFor,
   mockStrategyToCatalogEntry,
   processDirectory,
@@ -59,9 +60,15 @@ function toSummary(result: ReturnType<typeof summarize>): IntakeSummary {
   };
 }
 
-function writeCatalog(catalog: CatalogEntry[]): void {
+function writeCatalog(entries: CatalogEntry[]): void {
+  // The public bundle never carries internal states (dataStatus, validationStatus,
+  // status) or evidence hashes — only the client-facing strategy shape.
+  const publicCatalog = {
+    generatedAt: new Date().toISOString(),
+    strategies: buildPublicCatalog(entries),
+  };
   mkdirSync(dirname(CATALOG_PATH), { recursive: true });
-  writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2) + '\n');
+  writeFileSync(CATALOG_PATH, JSON.stringify(publicCatalog, null, 2) + '\n');
 }
 
 function writeReports(summary: IntakeSummary): void {
@@ -99,7 +106,7 @@ switch (command) {
     const result = summarize(accepted.manifests);
     if (result.issues.length === 0) {
       writeCatalog(result.catalog);
-      console.log(`Catalog written to public-strategies/catalog.json (${result.catalog.length} strategies)`);
+      console.log(`Public catalog written to public-strategies/catalog.json (${buildPublicCatalog(result.catalog).length} published strategies)`);
     }
     printResult('build', result.issues, result.warnings);
     process.exit(exitCodeFor(result.issues));
@@ -121,7 +128,7 @@ switch (command) {
     const result = summarize(manifests);
     if (result.issues.length === 0) {
       writeCatalog(result.catalog);
-      console.log(`Catalog written to public-strategies/catalog.json (${result.catalog.length} strategies)`);
+      console.log(`Public catalog written to public-strategies/catalog.json (${buildPublicCatalog(result.catalog).length} published strategies)`);
     }
     writeReports(toSummary(result));
     console.log(`Intake processed: ${accepted.manifests.length} accepted + ${incoming.manifests.length} incoming`);

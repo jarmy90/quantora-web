@@ -77,11 +77,13 @@ bun run strategies:validate   # validate incoming + accepted manifests
 bun run strategies:build      # build public-strategies/catalog.json
 bun run strategies:report     # write strategy-intake/reports/*.md|json
 bun run strategies:intake     # full pipeline: validate -> hash -> catalog -> reports
+bun run strategies:ingest     # re-import the First Triangle source files into its manifest
 ```
 
 `strategies:intake` is the one to run after dropping a new manifest. The
-generated catalog is `public-strategies/catalog.json`; reports land in
-`strategy-intake/reports/`.
+generated public catalog is `public-strategies/catalog.json` (committed as the
+versioned dataset the app reads); the internal report (including statuses and
+evidence hashes) lands in `strategy-intake/reports/` and is gitignored.
 
 ## 6. How to interpret errors and warnings
 
@@ -116,3 +118,59 @@ not yet independently reproduced them. It is **not** promoted automatically.
 the strategy from its evidence, and only by an explicit editorial decision from
 Javier and M365 Copilot. It is never inferred, never defaulted, and never
 auto-assigned by the pipeline.
+
+## 10. Faithful `results` for real owner deliveries
+
+The Phase 2A domain dataset requires fields the owner's broker export does not
+carry verbatim (`backtests[].initialCapital`, `backtests[].timeframe`, and
+`tradeLogs[].quantity`). Writing absent values as zero would violate the
+"never fabricate" rule, so a real delivery keeps **identity + provenance** in
+the strict `dataset`, and its **period, metrics, equity points and evidence
+completeness** in an optional `results` block:
+
+```json
+"results": {
+  "period": { "start": "2025-08-14T01:30:00Z", "end": "2026-08-07T13:16:28Z" },
+  "metrics": { "profitFactor": 1.25593, "trades": 145, "winRate": 51.03, "netUsd": 6687.50 },
+  "equity": [ { "timestamp": "2025-08-14T01:30:00Z", "equity": 88.8, "drawdown": 0 } ],
+  "evidenceComplete": 1
+}
+```
+
+`results.metrics` and `results.equity` are extracted or calculated from the
+source files by an importer (e.g. `scripts/intake/ingest-first-triangle.ts`);
+they are never hand-typed into components. This is the documented QNT-0002F
+incompatibility: the strict domain contract is reused where the source maps 1:1,
+and the faithful `results` block covers the fields it cannot represent.
+
+## 11. Quantora Score
+
+Every strategy with results gets a common, data-driven 0-100 score computed by
+`scripts/intake/scoring.ts`. It is never tuned per strategy. Components and
+weights:
+
+| Component | Weight |
+| --- | --- |
+| Profit Factor | 25% |
+| Drawdown vs result | 25% |
+| Equity stability (R² of the equity curve) | 15% |
+| Trade count | 10% |
+| Temporal consistency (months covered) | 10% |
+| Frequency | 5% |
+| Costs | 5% |
+| Evidence completeness | 5% |
+
+The final score is a weighted average over the **available** components. A
+missing component is excluded (neutral) and reduces the reported `confidence`;
+it is never invented. Drawdown is measured relative to net result, so a large
+drawdown visibly lowers the score without acting as an automatic blocker.
+
+## 12. Publication filter and public catalog
+
+The reusable filter in `scripts/intake/filter.ts` gates the **public** catalog.
+A real strategy must have a name, a Profit Factor above **1.20**, at least one
+closed trade, and an equity curve with at least two points. Drawdown is **not**
+a blocking rule yet. `bun run strategies:intake` writes only the strategies that
+pass to `public-strategies/catalog.json`, and strips every internal state
+(`dataStatus`, `validationStatus`, `status`) plus evidence hashes before that
+file is written. "Owner Supplied" / "Under Review" therefore never reach the UI.

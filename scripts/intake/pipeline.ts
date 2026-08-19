@@ -9,8 +9,12 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
+import type { EquityPoint } from '../../src/domain/types.ts';
+import type { PublicStrategy, QuantoraScore } from '../../src/domain/publicStrategy.ts';
 import type { Manifest, ManifestEvidence, ManifestIssue } from './manifest.ts';
 import { validateManifest } from './manifest.ts';
+import { computeQuantoraScore } from './scoring.ts';
+import { evaluatePublishFilter } from './filter.ts';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -32,6 +36,8 @@ export type CatalogEntry = {
   description?: string;
   tagline?: string;
   type?: string;
+  market?: string;
+  instrument?: string;
   status?: string;
   validationStatus?: string;
   dataStatus?: string;
@@ -41,10 +47,16 @@ export type CatalogEntry = {
   costs?: Record<string, string>;
   variant?: string;
   configuration?: string;
+  disclaimer?: string;
   metrics?: Record<string, number>;
   period?: { start?: string; end?: string; timeframe?: string };
-  equity?: { pointCount: number; currency: string };
+  equity?: { currency?: string; points: EquityPoint[] };
+  /** Convenience accessor to `metrics.trades` (kept for report/test ergonomics). */
   trades?: number;
+  score?: QuantoraScore;
+  /** Publication filter outcome (internal — never part of the public catalog). */
+  published?: boolean;
+  filterReasons?: string[];
   evidencePublic?: { name: string; kind: string; hash: string }[];
   evidencePrivate?: { kind: string; hash: string }[];
   /** Mock presentation metadata, preserved verbatim (demo only). */
@@ -115,6 +127,16 @@ export function resolveEvidence(
   for (const [index, entry] of (manifest.evidence ?? []).entries()) {
     const filePath = resolve(baseDir, entry.file);
     if (!existsSync(filePath) || !statSync(filePath).isFile()) {
+      // Evidence kept out of git may still be represented by a stored digest.
+      if (entry.sha256) {
+        evidence.push({
+          name: basename(entry.file),
+          kind: entry.kind,
+          classification: entry.classification,
+          hash: entry.sha256.toLowerCase(),
+        });
+        continue;
+      }
       issues.push({
         level: 'error',
         path: `evidence[${index}].file`,
@@ -123,6 +145,13 @@ export function resolveEvidence(
       continue;
     }
     const hash = sha256File(filePath);
+    if (entry.sha256 && entry.sha256.toLowerCase() !== hash) {
+      issues.push({
+        level: 'error',
+        path: `evidence[${index}].sha256`,
+        message: `SHA-256 mismatch for ${entry.file}.`,
+      });
+    }
     evidence.push({ name: basename(entry.file), kind: entry.kind, classification: entry.classification, hash });
   }
 
@@ -161,7 +190,7 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
 
   const backtest = manifest.dataset.backtests.find((item) => item.strategyId === strategy.id);
   const equityCurve = manifest.dataset.equityCurves.find((item) => item.strategyId === strategy.id);
-  const trades = manifest.dataset.tradeLogs.filter((item) => item.strategyId === strategy.id);
+  const tradeLogCount = manifest.dataset.tradeLogs.filter((item) => item.strategyId === strategy.id).length;
 
   const entry: CatalogEntry = {
     id: strategy.id,
@@ -170,6 +199,8 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     description: strategy.description,
     tagline: manifest.tagline,
     type: manifest.type,
+    market: manifest.market,
+    instrument: manifest.instrument,
     status: strategy.status,
     validationStatus: strategy.validationStatus,
     dataStatus: strategy.provenance.dataStatus,
@@ -179,18 +210,41 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     costs: manifest.costs,
     variant: manifest.variant,
     configuration: manifest.configuration,
+    disclaimer: manifest.disclaimer,
   };
 
-  if (backtest) {
+  // Faithful `results` (real owner deliveries) take precedence over the strict
+  // domain dataset, which remains the fallback for fixtures that already carry
+  // backtests/equity curves.
+  const results = manifest.results;
+  if (results?.period) entry.period = results.period;
+  if (results?.metrics) entry.metrics = sortMetrics(results.metrics);
+  if (results?.equity) entry.equity = { points: results.equity };
+
+  if (!entry.period && backtest) {
     entry.period = { start: backtest.startedAt, end: backtest.endedAt, timeframe: backtest.timeframe };
+  }
+  if (!entry.metrics && backtest) {
     entry.metrics = metricsOf(backtest.metrics as unknown as Record<string, unknown>);
   }
-  if (equityCurve) {
-    entry.equity = { pointCount: equityCurve.points.length, currency: equityCurve.currency };
+  if (!entry.equity && equityCurve) {
+    entry.equity = { currency: equityCurve.currency, points: equityCurve.points };
   }
-  if (trades.length > 0) {
-    entry.trades = trades.length;
+  if (entry.metrics && entry.metrics.trades === undefined && tradeLogCount > 0) {
+    entry.metrics = { ...entry.metrics, trades: tradeLogCount };
   }
+  if (entry.metrics?.trades !== undefined) entry.trades = entry.metrics.trades;
+
+  entry.score = scoreEntry(entry, results?.evidenceComplete);
+  const filter = evaluatePublishFilter({
+    name: entry.name,
+    dataStatus: entry.dataStatus,
+    profitFactor: entry.metrics?.profitFactor,
+    trades: entry.metrics?.trades,
+    equityPointCount: entry.equity?.points.length,
+  });
+  entry.published = filter.publish;
+  entry.filterReasons = filter.reasons;
 
   const publicEvidence = evidence
     .filter((item) => item.classification === 'public')
@@ -203,6 +257,66 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
   if (privateEvidence.length) entry.evidencePrivate = privateEvidence;
 
   return entry;
+}
+
+function sortMetrics(value: Record<string, number>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const key of Object.keys(value).sort()) {
+    const item = value[key];
+    if (typeof item === 'number' && Number.isFinite(item)) out[key] = item;
+  }
+  return out;
+}
+
+function scoreEntry(entry: CatalogEntry, evidenceComplete?: number): QuantoraScore {
+  return computeQuantoraScore({
+    profitFactor: entry.metrics?.profitFactor,
+    netUsd: entry.metrics?.netUsd,
+    maxDrawdownUsd: entry.metrics?.maxDrawdownUsd,
+    equity: entry.equity?.points.map((point) => ({ timestamp: point.timestamp, equity: point.equity })),
+    trades: entry.metrics?.trades,
+    frequencyPerMonth: entry.metrics?.frequencyPerMonth,
+    costPerTradeUsd: entry.metrics?.costPerTradeUsd,
+    expectancyUsd: entry.metrics?.expectancyUsd,
+    evidenceComplete,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Public catalog (internal states never cross this boundary)
+// ---------------------------------------------------------------------------
+
+/** Strips internal states/provenance and keeps only the client-facing fields. */
+export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
+  return {
+    id: entry.id,
+    name: entry.name,
+    version: entry.version,
+    description: entry.description,
+    tagline: entry.tagline,
+    type: entry.type,
+    market: entry.market,
+    instrument: entry.instrument,
+    variant: entry.variant,
+    configuration: entry.configuration,
+    assets: entry.assets,
+    period: entry.period,
+    metrics: entry.metrics,
+    equity: entry.equity,
+    score: entry.score,
+    rules: entry.rules,
+    limitations: entry.limitations,
+    costs: entry.costs,
+    disclaimer: entry.disclaimer,
+  };
+}
+
+/** Only strategies that passed the publication filter reach the public catalog. */
+export function buildPublicCatalog(entries: CatalogEntry[]): PublicStrategy[] {
+  return entries
+    .filter((entry) => entry.published === true)
+    .map(toPublicStrategy)
+    .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 // ---------------------------------------------------------------------------

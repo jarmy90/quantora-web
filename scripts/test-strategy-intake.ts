@@ -12,9 +12,12 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import process from 'node:process';
 import { strategies as mockStrategies } from '../src/data.ts';
+import { evaluatePublishFilter } from './intake/filter.ts';
+import { buildFirstTriangleManifest, MANIFEST_PATH } from './intake/ingest-first-triangle.ts';
 import { validateManifest } from './intake/manifest.ts';
 import {
   buildCatalog,
+  buildPublicCatalog,
   discoverManifests,
   exitCodeFor,
   mockStrategyToCatalogEntry,
@@ -361,6 +364,63 @@ test('repository examples are valid', () => {
   const result = processDirectory(EXAMPLES_DIR);
   assert(result.issues.length === 0, `examples must be clean: ${JSON.stringify(result.issues)}`);
   assert(result.manifests.length === 3, `expected 3 examples: ${result.manifests.length}`);
+});
+
+// 19. First Triangle importer extracts the authorized metrics from the source files
+test('First Triangle importer extracts authorized metrics', () => {
+  const manifest = buildFirstTriangleManifest();
+  const m = manifest.results?.metrics;
+  assert(m, 'results.metrics must exist');
+  assert(m.profitFactor === 1.2559299201689968, `profitFactor: ${m.profitFactor}`);
+  assert(m.winRate === 51.03448275862069, `winRate: ${m.winRate}`);
+  assert(m.trades === 145, `trades: ${m.trades}`);
+  assert(Math.abs(m.netUsd! - 6687.5) < 0.01, `netUsd: ${m.netUsd}`);
+  assert(Math.abs(m.maxDrawdownUsd! - 4474.8) < 0.01, `maxDrawdownUsd: ${m.maxDrawdownUsd}`);
+  assert(Math.abs(m.costPerTradeUsd! - 1.2) < 1e-9, `costPerTradeUsd: ${m.costPerTradeUsd}`);
+  assert(manifest.results?.equity?.length === 145, `equity points: ${manifest.results?.equity?.length}`);
+  assert(manifest.results?.period?.start?.startsWith('2025-08-14T'), `period start: ${manifest.results?.period?.start}`);
+  assert(manifest.results?.period?.end?.startsWith('2026-08-07T'), `period end: ${manifest.results?.period?.end}`);
+  assert(manifest.dataset.strategies[0]?.validationStatus === 'owner_supplied_under_review', 'validationStatus');
+  assert(manifest.dataset.strategies[0]?.provenance.dataStatus === 'real', 'dataStatus');
+});
+
+// 20. First Triangle passes the publication filter with a drawdown-penalized score
+test('First Triangle passes filter with drawdown-penalized score', () => {
+  const result = processManifest(MANIFEST_PATH);
+  assert(result.issues.length === 0, `expected no issues: ${JSON.stringify(result.issues)}`);
+  assert(result.entry?.published === true, `expected published: ${JSON.stringify(result.entry?.filterReasons)}`);
+  assert(result.entry?.score !== undefined, 'expected score');
+  const score = result.entry!.score!;
+  assert(score.value >= 0 && score.value <= 100, `score range: ${score.value}`);
+  const dd = score.components.find((c) => c.key === 'drawdown');
+  assert(dd?.available === true, 'drawdown component must be available');
+  assert(dd!.points < 80, `drawdown must visibly penalize, got ${dd!.points}`);
+});
+
+// 21. Public catalog strips internal states but keeps the generated data
+test('public catalog strips internal states', () => {
+  const result = processManifest(MANIFEST_PATH);
+  const publicList = buildPublicCatalog([result.entry!]);
+  assert(publicList.length === 1, `expected 1 published, got ${publicList.length}`);
+  const publicEntry = publicList[0]!;
+  assert(!('validationStatus' in publicEntry), 'no validationStatus');
+  assert(!('dataStatus' in publicEntry), 'no dataStatus');
+  assert(!('status' in publicEntry), 'no status');
+  assert(publicEntry.metrics?.profitFactor === 1.2559299201689968, 'metrics preserved');
+  assert(publicEntry.equity?.points.length === 145, 'equity preserved');
+});
+
+// 22. A strategy below the minimum Profit Factor is excluded
+test('non-passing strategy is excluded from public catalog', () => {
+  const decision = evaluatePublishFilter({
+    name: 'Weak',
+    dataStatus: 'real',
+    profitFactor: 1.1,
+    trades: 100,
+    equityPointCount: 10,
+  });
+  assert(decision.publish === false, 'expected blocked');
+  assert(decision.reasons.some((r) => r.includes('1.20')), `expected PF reason: ${JSON.stringify(decision.reasons)}`);
 });
 
 // ---------------------------------------------------------------------------

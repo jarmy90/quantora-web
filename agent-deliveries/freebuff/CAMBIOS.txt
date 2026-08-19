@@ -1,0 +1,50 @@
+QUANTORA — QNT-0003 · Pipeline reutilizable de incorporación de estrategias
+Rama: feat/QNT-0003-strategy-intake-pipeline
+Entrega: First Triangle Adaptive — filtro, Quantora Score, catálogo y ficha
+
+RESUMEN DE CAMBIOS
+1. Quantora Score reutilizable (scripts/intake/scoring.ts)
+   - Puntuación común 0-100, basada solo en datos disponibles.
+   - Pesos: Profit Factor 25%, Drawdown vs resultado 25%, Estabilidad de la equity 15%,
+     Nº de operaciones 10%, Consistencia temporal 10%, Frecuencia 5%, Costes 5%,
+     Completitud de evidencia 5%.
+   - Un componente ausente se excluye (neutral) y reduce la confianza; nunca se inventa.
+   - Drawdown penaliza de forma visible: componente 55/100 para First Triangle.
+
+2. Filtro de publicación reutilizable (scripts/intake/filter.ts)
+   - Requisitos: identidad, Profit Factor > 1.20, al menos una operación cerrada y
+     equity curve con >= 2 puntos. Drawdown NO es bloqueo automático todavía.
+
+3. Bloque `results` fiel para entregas reales (scripts/intake/manifest.ts)
+   - El contrato estricto Phase 2A exige campos que el broker export no aporta
+     (initialCapital, timeframe, quantity). La identidad+procedencia vive en `dataset`;
+     period, metrics, equity y evidenceComplete viven en `results` (sin fabricar campos).
+   - Plantillas y ejemplos versionados en strategy-intake/templates y strategy-intake/examples
+     (mock mínimo, real Under Review mínimo y real Under Review con métricas sintéticas de fixture).
+
+4. Catálogo público sin estados internos (scripts/intake/pipeline.ts + strategy-intake.ts)
+   - public-strategies/catalog.json solo incluye lo que el cliente debe ver.
+   - dataStatus / validationStatus / status y hashes de evidencia NUNCA llegan a la UI.
+
+5. Importador reproducible (scripts/intake/ingest-first-triangle.ts)
+   - Lee los 5 archivos autorizados (manifest, summary, trades, equity, signals) y
+     genera el manifest versionado. Autocomprueba las cifras contra las autorizadas.
+
+6. Frontend dinámico
+   - src/catalog.ts consume el dataset generado.
+   - Tarjeta pública y ficha en /strategies y /strategies/:id generadas desde los datos.
+   - Fixtures Mock intactos y etiquetados como demo.
+
+CIFRAS AUTORIZADAS (extraídas de los archivos, no inventadas)
+- Profit Factor: 1.25593 · Win rate: 51.03% · Operaciones: 145 · ~12/mes
+- Drawdown máximo: -4,474.80 USD · Neto: +6,687.50 USD · Expectancy: 46.12 USD
+- Net R: 17.15 · Coste: 1.20 USD/operación · Periodo: 2025-08-14 a 2026-08-07
+
+VERIFICACIÓN
+- bun scripts/test-strategy-intake.ts -> 22/22 passed.
+- bun run build -> OK (client + server SSR).
+
+NOTA (errores preexistentes, fuera de alcance, no corregidos por instrucción)
+- serve.ts: tipos de Bun / import.meta.dir (falta @types/bun).
+- src/components/LegalShell.tsx: import de ReactNode sin usar.
+Estos errores ya existían y no se introducen nuevos errores en los archivos modificados.
