@@ -1,5 +1,8 @@
 QUANTORA — QNT-0003 · Pipeline reutilizable de incorporación de estrategias
 Rama: feat/QNT-0003-strategy-intake-pipeline
+PR: #4 (QNT-0003: reusable strategy intake pipeline)
+HEAD: d1c1194d103f63714f002c34d40a3a37c1c7552a
+Base: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
 Entrega final: First Triangle Adaptive + StochExtreme Adaptive — filtro común, Quantora Score, catálogo y fichas
 
 RESUMEN DE CAMBIOS

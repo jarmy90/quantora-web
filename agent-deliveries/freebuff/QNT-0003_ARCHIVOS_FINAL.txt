@@ -1,15 +1,8 @@
-QUANTORA — QNT-0003 · Archivos modificados/creados (diff completo vs origin/main @ c5fdb7d)
+QUANTORA — QNT-0003 · Archivos del diff final vs base c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
+HEAD: d1c1194d103f63714f002c34d40a3a37c1c7552a
+Total: 43 archivos de producto (36 añadidos + 7 modificados + 0 eliminados)
 
-Modificados:
-- .gitignore
-- docs/REAL_DATA_IMPORT.md
-- package.json
-- src/i18n/index.ts
-- src/routes/strategies.$id.tsx
-- src/routes/strategies.index.tsx
-- src/styles/app.css
-
-Nuevos:
+AÑADIDOS (36):
 - docs/STRATEGY_INTAKE.md
 - public-strategies/catalog.json
 - public-strategies/datasets/README.md
@@ -46,3 +39,19 @@ Nuevos:
 - strategy-intake/incoming/README.md
 - strategy-intake/reports/README.md
 - strategy-intake/templates/manifest.template.json
+
+MODIFICADOS (7):
+- .gitignore
+- docs/REAL_DATA_IMPORT.md
+- package.json
+- src/i18n/index.ts
+- src/routes/strategies.$id.tsx
+- src/routes/strategies.index.tsx
+- src/styles/app.css
+
+ELIMINADOS (0): ninguno.
+
+Nota: el diff bruto contra la base incluye además 4 archivos de entrega en
+agent-deliveries/freebuff/ (CAMBIOS.txt, ARCHIVOS_MODIFICADOS.txt,
+GIT_DIFF.patch, QNT-0003_Cambios.zip.txt) que son los artefactos de este
+paquete, no código de producto, y no se listan aquí.
