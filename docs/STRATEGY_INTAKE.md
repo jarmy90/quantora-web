@@ -150,11 +150,13 @@ The StochExtreme importer counts **only the 421 closed trades** in its trade
 log. Crosses, confirmations, cancelled signals and `SESSION_BLOCKED` events
 live in the events file and are never counted as trades.
 
-## 11. Quantora Score
+## 11. Quantora Score (beta-1)
 
 Every strategy with results gets a common, data-driven 0-100 score computed by
-`scripts/intake/scoring.ts`. It is never tuned per strategy. Components and
-weights:
+`scripts/intake/scoring.ts` (`scoreVersion: "beta-1"`). It is an experimental,
+comparative score based on available historical evidence — **it is not an
+independent validation** and never changes `validationStatus`. It is never tuned
+per strategy. Components and weights:
 
 | Component | Weight |
 | --- | --- |
@@ -177,14 +179,61 @@ missing component is excluded (neutral) and reduces the reported `confidence`;
 it is never invented. Drawdown is measured relative to net result, so a large
 drawdown visibly lowers the score without acting as an automatic blocker.
 
-## 12. Publication filter and public catalog
+When `costsApplied` is `false` the reported numbers exclude commissions/spread/
+slippage, so the costs component is **unavailable** (it never receives points)
+and the score's `confidence` is reduced. A `0.00 USD/trade` figure from an
+export is never interpreted as confirmed real costs.
 
-The reusable filter in `scripts/intake/filter.ts` gates the **public** catalog.
-A real strategy must have a name, a Profit Factor of at least **1.15**, at least
-one closed trade, and an equity curve with at least two points. A Profit Factor
-of **1.20 or higher is not mandatory** — it is simply treated as the more
-favorable tier by the Quantora Score. Drawdown is **not** a blocking rule yet.
+## 12. Publication filter (beta-1) and public catalog
+
+The reusable filter in `scripts/intake/filter.ts` (`filterVersion: "beta-1"`)
+gates the **public** catalog with two versioned modes (`publicationMode`):
+
+- **`documentary`**: identity + provenance are enough. Requirements: ID, name,
+  version, description or rules, an asset or market, valid provenance, a
+  `validationStatus` compatible with publication, limitations, and an
+  identifiable source or authorized evidence. No Profit Factor, trades or
+  equity are required; metrics and equity are never fabricated, and no score is
+  computed without sufficient results (missing fields render as "not
+  available" in the UI).
+- **`results`**: requires a valid identity, a finite Profit Factor of at least
+  **1.15** (a beta provisional threshold, not an independent validation), at
+  least one closed trade, an equity curve with at least two points, an analyzed
+  period, a maximum drawdown, and `costsApplied` explicitly defined. A Profit
+  Factor of **1.20 or higher is not mandatory** — it is the more favorable tier
+  in the Quantora Score. `costsApplied: false` does not block, but is shown,
+  reduces score confidence and marks the costs component unavailable.
+
 `bun run strategies:intake` writes only the strategies that pass to
 `public-strategies/catalog.json`, and strips every internal state
 (`dataStatus`, `validationStatus`, `status`) plus evidence hashes before that
-file is written. "Owner Supplied" / "Under Review" therefore never reach the UI.
+file is written. The public contract carries only commercially safe fields:
+`reviewLabel` (e.g. "Owner supplied"), `independentReproduction` (false until
+Quantora reproduces the strategy), `costsApplied`, `scoreVersion`, `filterVersion`
+and `publicationMode`. The internal statuses therefore never reach the UI.
+
+## 13. QNT-0003H manifest fields
+
+The optional top-level manifest fields added for public transparency and
+versioning are validated by `validateManifest`:
+
+```json
+{
+  "publicationMode": "results",
+  "filterVersion": "beta-1",
+  "scoreVersion": "beta-1",
+  "reviewLabel": "Owner supplied",
+  "independentReproduction": false,
+  "costsApplied": true
+}
+```
+
+- `publicationMode`: `"documentary"` or `"results"`.
+- `reviewLabel`: the public label shown to clients (never the internal
+  `validationStatus`).
+- `independentReproduction`: `false` until Quantora independently reproduces the
+  strategy; the pipeline never sets it to `true` automatically.
+- `costsApplied`: `true` when results already include costs; `false` when the
+  export did not apply them (surfaced as "Costs not applied" with the
+  commissions/spread/slippage warning).
+- `filterVersion` / `scoreVersion`: version stamps of the beta rules.

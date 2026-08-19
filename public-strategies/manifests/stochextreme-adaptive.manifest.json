@@ -5,6 +5,12 @@
   "type": "Historical backtest",
   "market": "Nasdaq-100",
   "instrument": "AMP @ENQ",
+  "publicationMode": "results",
+  "filterVersion": "beta-1",
+  "scoreVersion": "beta-1",
+  "reviewLabel": "Owner supplied",
+  "independentReproduction": false,
+  "costsApplied": false,
   "rules": [
     "Entry: stochastic-extreme arming (Q_PINE_INTRABAR_ORIGIN) on PERIOD_M30, confirmed on PERIOD_M3 (60s)",
     "Rearm: opposite_extreme_required",

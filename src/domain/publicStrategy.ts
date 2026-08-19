@@ -33,13 +33,11 @@ export type QuantoraScore = {
   components: QuantoraScoreComponent[];
   /** Short, human-readable summary of the formula and its weights. */
   formula: string;
+  /** Version of the score formula (e.g. "beta-1"). Experimental, not a validation. */
+  version: string;
 };
 
-export type PublicPeriod = {
-  start?: string;
-  end?: string;
-  timeframe?: string;
-};
+export type PublicationMode = 'documentary' | 'results';
 
 export type PublicStrategy = {
   id: string;
@@ -62,6 +60,25 @@ export type PublicStrategy = {
   limitations?: string[];
   costs?: Record<string, string>;
   disclaimer?: string;
+  // QNT-0003H public transparency (commercially safe; internal states stay private):
+  /** Public review label, e.g. "Owner supplied". Never the internal validationStatus. */
+  reviewLabel?: string;
+  /** False until Quantora independently reproduces the strategy. */
+  independentReproduction: boolean;
+  /** True when the reported results already include commissions/spread/slippage costs. */
+  costsApplied?: boolean;
+  /** Version of the score formula ("beta-1"). */
+  scoreVersion?: string;
+  /** Version of the publication filter ("beta-1"). */
+  filterVersion?: string;
+  /** "documentary" (no results required) or "results" (performance required). */
+  publicationMode?: PublicationMode;
+};
+
+export type PublicPeriod = {
+  start?: string;
+  end?: string;
+  timeframe?: string;
 };
 
 export type PublicCatalog = {

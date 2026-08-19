@@ -60,6 +60,19 @@ export type Manifest = {
   results?: ManifestResults;
   disclaimer?: string;
   dataset: QuantoraDataset;
+  // QNT-0003H public transparency + versioning (all optional, validated below):
+  /** "documentary" (identity + provenance only) or "results" (performance required). */
+  publicationMode?: 'documentary' | 'results';
+  /** Public review label, e.g. "Owner supplied". Never the internal validationStatus. */
+  reviewLabel?: string;
+  /** False until Quantora independently reproduces the strategy. */
+  independentReproduction?: boolean;
+  /** True when reported results already include commissions/spread/slippage. */
+  costsApplied?: boolean;
+  /** Version of the publication filter ("beta-1"). */
+  filterVersion?: string;
+  /** Version of the score formula ("beta-1"). */
+  scoreVersion?: string;
 };
 
 export type ManifestIssue = {
@@ -171,6 +184,30 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   }
   if (value.disclaimer !== undefined && !isText(value.disclaimer)) {
     issues.push(error('disclaimer', 'Must be a non-empty string.'));
+  }
+
+  // QNT-0003H fields.
+  if (
+    value.publicationMode !== undefined &&
+    value.publicationMode !== 'documentary' &&
+    value.publicationMode !== 'results'
+  ) {
+    issues.push(error('publicationMode', 'Must be "documentary" or "results".'));
+  }
+  if (value.reviewLabel !== undefined && !isText(value.reviewLabel)) {
+    issues.push(error('reviewLabel', 'Must be a non-empty string.'));
+  }
+  if (value.independentReproduction !== undefined && typeof value.independentReproduction !== 'boolean') {
+    issues.push(error('independentReproduction', 'Must be a boolean.'));
+  }
+  if (value.costsApplied !== undefined && typeof value.costsApplied !== 'boolean') {
+    issues.push(error('costsApplied', 'Must be a boolean.'));
+  }
+  if (value.filterVersion !== undefined && !isText(value.filterVersion)) {
+    issues.push(error('filterVersion', 'Must be a non-empty string.'));
+  }
+  if (value.scoreVersion !== undefined && !isText(value.scoreVersion)) {
+    issues.push(error('scoreVersion', 'Must be a non-empty string.'));
   }
 
   if (value.evidence !== undefined) {

@@ -200,6 +200,15 @@ export function buildStochExtremeManifest(evidenceDir: string = EVIDENCE_DIR): M
     type: 'Historical backtest',
     market: 'Nasdaq-100',
     instrument: 'AMP @ENQ',
+    // QNT-0003H: versioned publication contract (beta). Costs were NOT applied
+    // in this export (0.00 USD/trade is the recorded export value, not a
+    // confirmed real cost), so costsApplied is explicitly false.
+    publicationMode: 'results',
+    filterVersion: 'beta-1',
+    scoreVersion: 'beta-1',
+    reviewLabel: 'Owner supplied',
+    independentReproduction: false,
+    costsApplied: false,
     rules,
     limitations: [
       'Period analyzed: 2025-08-01 to 2026-08-07',

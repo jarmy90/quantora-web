@@ -161,6 +161,13 @@ export function buildFirstTriangleManifest(evidenceDir: string = EVIDENCE_DIR): 
     type: 'Historical backtest',
     market: 'Nasdaq-100',
     instrument: 'AMP @ENQ',
+    // QNT-0003H: versioned publication contract (beta).
+    publicationMode: 'results',
+    filterVersion: 'beta-1',
+    scoreVersion: 'beta-1',
+    reviewLabel: 'Owner supplied',
+    independentReproduction: false,
+    costsApplied: true,
     rules: [
       'Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)',
       'Stop: FIXED_200PTS (fixed 200-point stop)',

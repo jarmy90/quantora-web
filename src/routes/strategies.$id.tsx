@@ -97,7 +97,11 @@ function RealDetail({ s }: { s: PublicStrategy }) {
   const score = s.score;
 
   const cells: { label: string; value: string; accent?: string }[] = [
-    { label: t('detail.score'), value: score ? String(score.value) : '—', accent: LIME },
+    {
+      label: s.scoreVersion ? t('detail.scoreBeta') : t('detail.score'),
+      value: score ? String(score.value) : '—',
+      accent: LIME,
+    },
     {
       label: t('detail.profitFactor'),
       value: m.profitFactor !== undefined ? m.profitFactor.toFixed(2) : '—',
@@ -115,7 +119,12 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     },
     {
       label: t('detail.costs'),
-      value: m.costPerTradeUsd !== undefined ? `${fmtUsd(m.costPerTradeUsd)} / trade` : '—',
+      value:
+        s.costsApplied === false
+          ? t('detail.costsNotApplied')
+          : m.costPerTradeUsd !== undefined
+            ? `${fmtUsd(m.costPerTradeUsd)} / trade`
+            : '—',
     },
     {
       label: t('detail.netResult'),
@@ -139,6 +148,10 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.market && <span className="badge">{t('detail.market')}: {s.market}</span>}
             {s.instrument && <span className="badge">{t('detail.instrument')}: {s.instrument}</span>}
             {s.period && <span className="badge">{fmtPeriod(s.period.start, s.period.end)}</span>}
+            {s.reviewLabel && <span className="badge" style={{ color: 'var(--cyan)' }}>{s.reviewLabel}</span>}
+            {s.independentReproduction === false && (
+              <span className="badge">{t('detail.independentReproductionPending')}</span>
+            )}
           </div>
         </section>
 
@@ -169,12 +182,17 @@ function RealDetail({ s }: { s: PublicStrategy }) {
                 {s.instrument ? ` (${s.instrument})` : ''}
               </li>
             )}
+            {s.reviewLabel && <li>{t('detail.ownerSupplied')}: {s.reviewLabel}</li>}
+            {s.independentReproduction === false && (
+              <li>{t('detail.independentReproductionPending')}</li>
+            )}
             {(s.rules ?? []).map((rule) => (
               <li key={rule}>{rule}</li>
             ))}
             {s.variant && <li>Variant: {s.variant}</li>}
             {s.configuration && <li>Configuration: {s.configuration}</li>}
           </ul>
+          {s.scoreVersion && <p className="mono research-note">{t('detail.scoreBetaNote')}</p>}
           <p className="mono research-note">{t('detail.researchNote')}</p>
         </section>
 
@@ -186,6 +204,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {(s.limitations ?? []).map((limitation) => (
               <li key={limitation}>{limitation}</li>
             ))}
+            {s.costsApplied === false && <li>{t('detail.costsNotApplied')} — {t('detail.costsWarning')}</li>}
           </ul>
           {s.disclaimer && <p className="mono research-note">{s.disclaimer}</p>}
         </section>

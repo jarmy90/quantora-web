@@ -108,6 +108,13 @@ export const enUS = {
   'detail.notFoundBody':
     'The strategy you are looking for does not exist. Browse the catalog to explore available systems.',
   'detail.backCatalog': '← Back to catalog',
+  'detail.ownerSupplied': 'Owner supplied',
+  'detail.independentReproductionPending': 'Independent reproduction pending',
+  'detail.scoreBeta': 'Quantora Score · Beta',
+  'detail.scoreBetaNote':
+    'Experimental comparative score based on available historical evidence. It is not an independent validation.',
+  'detail.costsNotApplied': 'Costs not applied',
+  'detail.costsWarning': 'Reported performance may be reduced after commissions, spread and slippage.',
 
   'dashboard.eyebrow': 'Account dashboard / MOCK PREVIEW',
   'dashboard.title': 'Your workspace.',

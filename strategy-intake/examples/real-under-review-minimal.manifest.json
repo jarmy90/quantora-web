@@ -3,6 +3,10 @@
   "strategyId": "example-real-under-review",
   "tagline": "Documentary Under Review strategy (no results yet)",
   "type": "Explorer",
+  "publicationMode": "documentary",
+  "filterVersion": "beta-1",
+  "reviewLabel": "Owner supplied",
+  "independentReproduction": false,
   "rules": [
     "H4/H1 liquidity sweep",
     "M5 order block confirmation"

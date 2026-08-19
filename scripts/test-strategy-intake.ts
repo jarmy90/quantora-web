@@ -420,6 +420,10 @@ test('non-passing strategy is excluded from public catalog', () => {
     profitFactor: 1.14,
     trades: 100,
     equityPointCount: 10,
+    periodStart: '2025-01-01T00:00:00Z',
+    periodEnd: '2025-12-31T00:00:00Z',
+    maxDrawdownUsd: 100,
+    costsApplied: true,
   });
   assert(decision.publish === false, 'expected blocked');
   assert(
@@ -430,7 +434,16 @@ test('non-passing strategy is excluded from public catalog', () => {
 
 // 23. Publication filter boundary: PF 1.14 blocked, 1.15/1.19/1.20 pass
 test('publication filter Profit Factor boundary (1.14, 1.15, 1.19, 1.20)', () => {
-  const base = { name: 'Boundary', dataStatus: 'real', trades: 100, equityPointCount: 10 };
+  const base = {
+    name: 'Boundary',
+    dataStatus: 'real',
+    trades: 100,
+    equityPointCount: 10,
+    periodStart: '2025-01-01T00:00:00Z',
+    periodEnd: '2025-12-31T00:00:00Z',
+    maxDrawdownUsd: 100,
+    costsApplied: true,
+  };
   assert(evaluatePublishFilter({ ...base, profitFactor: 1.14 }).publish === false, 'PF 1.14 must be blocked');
   assert(evaluatePublishFilter({ ...base, profitFactor: 1.15 }).publish === true, 'PF 1.15 must pass');
   assert(evaluatePublishFilter({ ...base, profitFactor: 1.19 }).publish === true, 'PF 1.19 must pass');
@@ -494,6 +507,293 @@ test('StochExtreme public catalog strips internal states', () => {
   assert(!('dataStatus' in publicEntry), 'no dataStatus');
   assert(publicEntry.metrics?.profitFactor === 1.151392131381321, 'metrics preserved');
   assert(publicEntry.equity?.points.length === 354, 'equity preserved');
+});
+
+// ---------------------------------------------------------------------------
+// QNT-0003H: public transparency, costs handling, beta score/filter, modes
+// ---------------------------------------------------------------------------
+
+const RESULTS_BASE = {
+  name: 'Results',
+  dataStatus: 'real',
+  publicationMode: 'results' as const,
+  profitFactor: 1.15,
+  trades: 100,
+  equityPointCount: 10,
+  periodStart: '2025-01-01T00:00:00Z',
+  periodEnd: '2025-12-31T00:00:00Z',
+  maxDrawdownUsd: 500,
+  costsApplied: true,
+};
+
+function documentaryManifest(id: string): Record<string, unknown> {
+  return makeManifest(id, {
+    strategy: realStrategy(id, { version: '1.00', assetIds: ['asset-1'] }),
+    assets: [{ id: 'asset-1', symbol: 'TEST', name: 'Test asset', assetClass: 'other' }],
+    top: {
+      publicationMode: 'documentary',
+      filterVersion: 'beta-1',
+      reviewLabel: 'Owner supplied',
+      independentReproduction: false,
+      market: 'Test Market',
+      rules: ['Rule one'],
+      limitations: ['No results yet — documentary only.'],
+      evidence: [
+        { file: 'source.csv', kind: 'source', classification: 'private', sha256: 'a'.repeat(64) },
+      ],
+    },
+  });
+}
+
+// 28. reviewLabel reaches the public output
+test('reviewLabel reaches the public output', () => {
+  for (const manifestPath of [MANIFEST_PATH, STOCHEXTREME_MANIFEST_PATH]) {
+    const result = processManifest(manifestPath);
+    assert(result.issues.length === 0, `expected no issues: ${JSON.stringify(result.issues)}`);
+    const pub = buildPublicCatalog([result.entry!])[0]!;
+    assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
+  }
+});
+
+// 29. independentReproduction=false reaches the public output
+test('independentReproduction=false reaches the public output', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.independentReproduction === false, 'independentReproduction must be false');
+});
+
+// 30. validationStatus never reaches the public output
+test('validationStatus does not reach the public output', () => {
+  for (const manifestPath of [MANIFEST_PATH, STOCHEXTREME_MANIFEST_PATH]) {
+    const result = processManifest(manifestPath);
+    const pub = buildPublicCatalog([result.entry!])[0]!;
+    assert(!('validationStatus' in pub), 'no validationStatus in public output');
+    assert(!JSON.stringify(pub).includes('owner_supplied_under_review'), 'no internal status string in public output');
+  }
+});
+
+// 31. dataStatus never reaches the public output
+test('dataStatus does not reach the public output', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(!('dataStatus' in pub), 'no dataStatus in public output');
+});
+
+// 32. status never reaches the public output
+test('status does not reach the public output', () => {
+  const result = processManifest(MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(!('status' in pub), 'no status in public output');
+});
+
+// 33. First Triangle costsApplied=true
+test('First Triangle costsApplied=true', () => {
+  const manifest = buildFirstTriangleManifest();
+  assert(manifest.costsApplied === true, `costsApplied: ${manifest.costsApplied}`);
+  const result = processManifest(MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.costsApplied === true, 'public costsApplied must be true');
+});
+
+// 34. StochExtreme costsApplied=false
+test('StochExtreme costsApplied=false', () => {
+  const manifest = buildStochExtremeManifest();
+  assert(manifest.costsApplied === false, `costsApplied: ${manifest.costsApplied}`);
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.costsApplied === false, 'public costsApplied must be false');
+});
+
+// 35. StochExtreme gets no available points for costs
+test('StochExtreme has no available costs score component', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const costs = result.entry!.score!.components.find((c) => c.key === 'costs');
+  assert(costs !== undefined, 'costs component must exist');
+  assert(costs!.available === false, `costs must be unavailable, got ${JSON.stringify(costs)}`);
+  assert(costs!.points === 0, 'unavailable component must carry 0 points, not 100');
+});
+
+// 36. StochExtreme confidence reflects the absent costs component
+test('StochExtreme confidence reflects missing costs component', () => {
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  const score = result.entry!.score!;
+  assert(score.confidence < 1, `confidence must be reduced below 1: ${score.confidence}`);
+  assert(Math.abs(score.confidence - 0.95) < 1e-9, `expected 0.95 confidence, got ${score.confidence}`);
+});
+
+// 37. scoreVersion=beta-1 on manifest, entry and score
+test('scoreVersion=beta-1', () => {
+  const manifest = buildFirstTriangleManifest();
+  assert(manifest.scoreVersion === 'beta-1', `scoreVersion: ${manifest.scoreVersion}`);
+  const result = processManifest(MANIFEST_PATH);
+  assert(result.entry!.scoreVersion === 'beta-1', 'entry scoreVersion');
+  assert(result.entry!.score!.version === 'beta-1', 'score.version');
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.scoreVersion === 'beta-1', 'public scoreVersion');
+});
+
+// 38. filterVersion=beta-1
+test('filterVersion=beta-1', () => {
+  const manifest = buildStochExtremeManifest();
+  assert(manifest.filterVersion === 'beta-1', `filterVersion: ${manifest.filterVersion}`);
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.entry!.filterVersion === 'beta-1', 'entry filterVersion');
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.filterVersion === 'beta-1', 'public filterVersion');
+});
+
+// 39. First Triangle publicationMode=results
+test('First Triangle publicationMode=results', () => {
+  const manifest = buildFirstTriangleManifest();
+  assert(manifest.publicationMode === 'results', `publicationMode: ${manifest.publicationMode}`);
+  const pub = buildPublicCatalog([processManifest(MANIFEST_PATH).entry!])[0]!;
+  assert(pub.publicationMode === 'results', 'public publicationMode');
+});
+
+// 40. StochExtreme publicationMode=results
+test('StochExtreme publicationMode=results', () => {
+  const manifest = buildStochExtremeManifest();
+  assert(manifest.publicationMode === 'results', `publicationMode: ${manifest.publicationMode}`);
+  const pub = buildPublicCatalog([processManifest(STOCHEXTREME_MANIFEST_PATH).entry!])[0]!;
+  assert(pub.publicationMode === 'results', 'public publicationMode');
+});
+
+// 41. Documentary real strategy without PF publishes as documentary
+test('documentary real strategy without PF can be published', () => {
+  const dir = tempDir();
+  try {
+    const path = writeManifest(join(dir, 'doc.manifest.json'), documentaryManifest('strat-doc'));
+    const result = processManifest(path);
+    assert(result.issues.length === 0, `expected no issues: ${JSON.stringify(result.issues)}`);
+    assert(result.entry?.published === true, `expected published: ${JSON.stringify(result.entry?.filterReasons)}`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// 42. Documentary does not fabricate metrics
+test('documentary does not fabricate metrics', () => {
+  const dir = tempDir();
+  try {
+    const path = writeManifest(join(dir, 'doc.manifest.json'), documentaryManifest('strat-doc'));
+    const result = processManifest(path);
+    assert(result.entry?.metrics === undefined, 'documentary must have no metrics');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// 43. Documentary does not fabricate equity
+test('documentary does not fabricate equity', () => {
+  const dir = tempDir();
+  try {
+    const path = writeManifest(join(dir, 'doc.manifest.json'), documentaryManifest('strat-doc'));
+    const result = processManifest(path);
+    assert(result.entry?.equity === undefined, 'documentary must have no equity');
+    assert(result.entry?.trades === undefined, 'documentary must have no trades');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// 44. Documentary gets no score without sufficient results
+test('documentary gets no score without sufficient results', () => {
+  const dir = tempDir();
+  try {
+    const path = writeManifest(join(dir, 'doc.manifest.json'), documentaryManifest('strat-doc'));
+    const result = processManifest(path);
+    assert(result.entry?.score === undefined, 'documentary must not receive a score');
+    const pub = buildPublicCatalog([result.entry!])[0]!;
+    assert(pub.score === undefined, 'public documentary must not receive a score');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// 45. Results mode with PF 1.14 is blocked
+test('results mode with PF 1.14 is blocked', () => {
+  const decision = evaluatePublishFilter({ ...RESULTS_BASE, profitFactor: 1.14 });
+  assert(decision.publish === false, 'PF 1.14 must be blocked in results mode');
+});
+
+// 46. Results mode with PF 1.15 passes
+test('results mode with PF 1.15 passes', () => {
+  const decision = evaluatePublishFilter({ ...RESULTS_BASE, profitFactor: 1.15 });
+  assert(decision.publish === true, `PF 1.15 must pass: ${JSON.stringify(decision.reasons)}`);
+});
+
+// 47. Results mode without closed trades is blocked
+test('results mode without trades is blocked', () => {
+  const decision = evaluatePublishFilter({ ...RESULTS_BASE, trades: 0 });
+  assert(decision.publish === false, 'no-trades must be blocked');
+});
+
+// 48. Results mode without equity is blocked
+test('results mode without equity is blocked', () => {
+  const decision = evaluatePublishFilter({ ...RESULTS_BASE, equityPointCount: 1 });
+  assert(decision.publish === false, 'no-equity must be blocked');
+});
+
+// 49. Results mode without period is blocked
+test('results mode without period is blocked', () => {
+  const decision = evaluatePublishFilter({
+    ...RESULTS_BASE,
+    periodStart: undefined,
+    periodEnd: undefined,
+  });
+  assert(decision.publish === false, 'no-period must be blocked');
+});
+
+// 50. Results mode without drawdown is blocked
+test('results mode without drawdown is blocked', () => {
+  const decision = evaluatePublishFilter({ ...RESULTS_BASE, maxDrawdownUsd: undefined });
+  assert(decision.publish === false, 'no-drawdown must be blocked');
+});
+
+// 51. costsApplied=false does not change the source PF
+test('costsApplied=false does not change the source Profit Factor', () => {
+  const manifest = buildStochExtremeManifest();
+  const sourcePf = manifest.results?.metrics?.profitFactor;
+  assert(sourcePf === 1.151392131381321, `source PF: ${sourcePf}`);
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.entry?.published === true, 'must stay published');
+  assert(result.entry?.metrics?.profitFactor === sourcePf, 'entry PF must be unchanged');
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.metrics?.profitFactor === sourcePf, 'public PF must be unchanged');
+});
+
+// 52. Passing the filter does not change independentReproduction
+test('passing the filter does not change independentReproduction', () => {
+  const manifest = buildFirstTriangleManifest();
+  assert(manifest.independentReproduction === false, 'source independentReproduction');
+  const result = processManifest(MANIFEST_PATH);
+  assert(result.entry?.published === true, 'must be published');
+  assert(result.entry?.independentReproduction === false, 'entry independentReproduction unchanged');
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(pub.independentReproduction === false, 'public independentReproduction unchanged');
+});
+
+// 53. Passing the filter does not assign Quantora Validated
+test('passing the filter does not assign Quantora Validated', () => {
+  const manifest = buildStochExtremeManifest();
+  assert(manifest.dataset.strategies[0]?.validationStatus === 'owner_supplied_under_review', 'source validationStatus');
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.entry?.published === true, 'must be published');
+  assert(
+    result.entry?.validationStatus === 'owner_supplied_under_review',
+    `entry validationStatus: ${result.entry?.validationStatus}`,
+  );
+  assert(!JSON.stringify(buildPublicCatalog([result.entry!])).includes('quantora_validated'), 'no validated leak');
+});
+
+// 54. The beta score does not change validationStatus
+test('the beta score does not change validationStatus', () => {
+  const manifest = buildStochExtremeManifest();
+  const before = manifest.dataset.strategies[0]!.validationStatus;
+  const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.entry!.score!.version === 'beta-1', 'score version');
+  assert(result.entry!.score!.value > 0, `score value: ${result.entry!.score!.value}`);
+  assert(result.entry?.validationStatus === before, 'validationStatus must remain unchanged');
 });
 
 // ---------------------------------------------------------------------------

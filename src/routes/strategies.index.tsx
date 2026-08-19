@@ -53,10 +53,20 @@ function PublicCard({ s }: { s: PublicStrategy }) {
         </div>
         <span style={{ color: 'var(--cyan)', fontSize: 20 }}>↗</span>
       </div>
+      {(s.reviewLabel || s.independentReproduction === false) && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '12px 0 2px' }}>
+          {s.reviewLabel && (
+            <span className="badge" style={{ color: 'var(--cyan)' }}>{s.reviewLabel}</span>
+          )}
+          {s.independentReproduction === false && (
+            <span className="badge">{t('detail.independentReproductionPending')}</span>
+          )}
+        </div>
+      )}
       {curve.length > 1 && <EquitySpark points={curve} />}
       <div className="stats">
         <div>
-          <small>{t('detail.score')}</small>
+          <small>{s.scoreVersion ? t('detail.scoreBeta') : t('detail.score')}</small>
           <strong style={{ color: 'var(--lime)' }}>{score ?? '—'}</strong>
         </div>
         <div>

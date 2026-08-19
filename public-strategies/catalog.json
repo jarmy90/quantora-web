@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T18:39:34.714Z",
+  "generatedAt": "2026-08-19T20:33:19.968Z",
   "strategies": [
     {
       "id": "first-triangle-adaptive",
@@ -825,7 +825,8 @@
             "available": true
           }
         ],
-        "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence."
+        "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
+        "version": "beta-1"
       },
       "rules": [
         "Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)",
@@ -843,7 +844,13 @@
       "costs": {
         "commission": "1.20 USD per trade"
       },
-      "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results."
+      "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
+      "reviewLabel": "Owner supplied",
+      "independentReproduction": false,
+      "costsApplied": true,
+      "scoreVersion": "beta-1",
+      "filterVersion": "beta-1",
+      "publicationMode": "results"
     },
     {
       "id": "stochextreme-adaptive",
@@ -2655,8 +2662,8 @@
         ]
       },
       "score": {
-        "value": 72,
-        "confidence": 1,
+        "value": 71,
+        "confidence": 0.95,
         "components": [
           {
             "key": "profitFactor",
@@ -2704,8 +2711,8 @@
             "key": "costs",
             "label": "Costs",
             "weight": 0.05,
-            "points": 100,
-            "available": true
+            "points": 0,
+            "available": false
           },
           {
             "key": "evidence",
@@ -2715,7 +2722,8 @@
             "available": true
           }
         ],
-        "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence."
+        "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
+        "version": "beta-1"
       },
       "rules": [
         "Entry: stochastic-extreme arming (Q_PINE_INTRABAR_ORIGIN) on PERIOD_M30, confirmed on PERIOD_M3 (60s)",
@@ -2736,7 +2744,13 @@
         "commission": "0.00 USD per trade (not applied in this export)",
         "swap": "0.00 USD per trade (not applied in this export)"
       },
-      "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results."
+      "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
+      "reviewLabel": "Owner supplied",
+      "independentReproduction": false,
+      "costsApplied": false,
+      "scoreVersion": "beta-1",
+      "filterVersion": "beta-1",
+      "publicationMode": "results"
     }
   ]
 }

@@ -54,6 +54,13 @@ export type CatalogEntry = {
   /** Convenience accessor to `metrics.trades` (kept for report/test ergonomics). */
   trades?: number;
   score?: QuantoraScore;
+  /** QNT-0003H public transparency + versioning (safe to expose). */
+  reviewLabel?: string;
+  independentReproduction?: boolean;
+  costsApplied?: boolean;
+  scoreVersion?: string;
+  filterVersion?: string;
+  publicationMode?: 'documentary' | 'results';
   /** Publication filter outcome (internal — never part of the public catalog). */
   published?: boolean;
   filterReasons?: string[];
@@ -211,6 +218,13 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     variant: manifest.variant,
     configuration: manifest.configuration,
     disclaimer: manifest.disclaimer,
+    // QNT-0003H public transparency + versioning.
+    publicationMode: manifest.publicationMode,
+    reviewLabel: manifest.reviewLabel,
+    independentReproduction: manifest.independentReproduction,
+    costsApplied: manifest.costsApplied,
+    filterVersion: manifest.filterVersion,
+    scoreVersion: manifest.scoreVersion,
   };
 
   // Faithful `results` (real owner deliveries) take precedence over the strict
@@ -235,13 +249,34 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
   }
   if (entry.metrics?.trades !== undefined) entry.trades = entry.metrics.trades;
 
-  entry.score = scoreEntry(entry, results?.evidenceComplete);
+  // A documentary strategy with no results data receives no score (a missing
+  // value is never invented and is not presented as a zero).
+  const hasResultsData = Boolean(entry.metrics || entry.equity);
+  if (hasResultsData) {
+    entry.score = scoreEntry(entry, results?.evidenceComplete, entry.costsApplied);
+  }
+
   const filter = evaluatePublishFilter({
+    id: entry.id,
     name: entry.name,
+    version: entry.version,
+    descriptionOrRules: Boolean(entry.description || (entry.rules?.length ?? 0) > 0),
+    marketOrAssets: Boolean(entry.market || entry.instrument || entry.assets.length > 0),
+    limitations: Boolean(entry.limitations && entry.limitations.length > 0),
+    provenanceValid: entry.dataStatus === 'real' || entry.dataStatus === 'mock',
+    validationStatusCompatible: entry.validationStatus !== 'rejected',
+    evidenceAvailable:
+      Boolean(manifest.evidence && manifest.evidence.length > 0) ||
+      Boolean(strategy.provenance?.sourceName),
     dataStatus: entry.dataStatus,
+    publicationMode: entry.publicationMode,
     profitFactor: entry.metrics?.profitFactor,
     trades: entry.metrics?.trades,
     equityPointCount: entry.equity?.points.length,
+    periodStart: entry.period?.start,
+    periodEnd: entry.period?.end,
+    maxDrawdownUsd: entry.metrics?.maxDrawdownUsd,
+    costsApplied: entry.costsApplied,
   });
   entry.published = filter.publish;
   entry.filterReasons = filter.reasons;
@@ -268,7 +303,7 @@ function sortMetrics(value: Record<string, number>): Record<string, number> {
   return out;
 }
 
-function scoreEntry(entry: CatalogEntry, evidenceComplete?: number): QuantoraScore {
+function scoreEntry(entry: CatalogEntry, evidenceComplete?: number, costsApplied?: boolean): QuantoraScore {
   return computeQuantoraScore({
     profitFactor: entry.metrics?.profitFactor,
     netUsd: entry.metrics?.netUsd,
@@ -279,6 +314,7 @@ function scoreEntry(entry: CatalogEntry, evidenceComplete?: number): QuantoraSco
     costPerTradeUsd: entry.metrics?.costPerTradeUsd,
     expectancyUsd: entry.metrics?.expectancyUsd,
     evidenceComplete,
+    costsApplied,
   });
 }
 
@@ -308,6 +344,14 @@ export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
     limitations: entry.limitations,
     costs: entry.costs,
     disclaimer: entry.disclaimer,
+    // QNT-0003H public transparency: commercially safe labels. Internal states
+    // (status/validationStatus/dataStatus) and evidence hashes never cross here.
+    reviewLabel: entry.reviewLabel,
+    independentReproduction: entry.independentReproduction === true,
+    costsApplied: entry.costsApplied,
+    scoreVersion: entry.scoreVersion,
+    filterVersion: entry.filterVersion,
+    publicationMode: entry.publicationMode,
   };
 }
 

@@ -30,6 +30,7 @@ import type { QuantoraScore, QuantoraScoreComponent } from '../../src/domain/pub
 
 export const FAVORABLE_PROFIT_FACTOR = 1.2;
 export const FAVORABLE_PF_BONUS = 5;
+export const SCORE_VERSION = 'beta-1';
 
 export type ScoreInput = {
   profitFactor?: number;
@@ -43,6 +44,13 @@ export type ScoreInput = {
   expectancyUsd?: number;
   /** 0..1 fraction of the expected evidence set that is present. */
   evidenceComplete?: number;
+  /**
+   * True when reported results already include commissions/spread/slippage.
+   * When explicitly false, the costs component is unavailable (never credited
+   * with points) and the final confidence is reduced. When undefined the legacy
+   * behaviour applies (costs computed from the available numbers).
+   */
+  costsApplied?: boolean;
 };
 
 const WEIGHTS = {
@@ -159,13 +167,18 @@ export function computeQuantoraScore(input: ScoreInput): QuantoraScore {
       : null;
 
   // Costs: cost per trade relative to expectancy. 0 cost ratio → 100, ratio 0.5 → 0.
+  // When costsApplied === false the reported numbers exclude costs, so the
+  // component is NOT credited and stays unavailable (a zero cost figure in the
+  // export must never be read as confirmed real costs).
   const costPoints =
-    finite(input.costPerTradeUsd) &&
-    finite(input.expectancyUsd) &&
-    input.expectancyUsd! > 0 &&
-    input.costPerTradeUsd! >= 0
-      ? (1 - input.costPerTradeUsd! / input.expectancyUsd! / 0.5) * 100
-      : null;
+    input.costsApplied === false
+      ? null
+      : finite(input.costPerTradeUsd) &&
+          finite(input.expectancyUsd) &&
+          input.expectancyUsd! > 0 &&
+          input.costPerTradeUsd! >= 0
+        ? (1 - input.costPerTradeUsd! / input.expectancyUsd! / 0.5) * 100
+        : null;
 
   const evidencePoints =
     finite(input.evidenceComplete) && input.evidenceComplete! >= 0 && input.evidenceComplete! <= 1
@@ -194,5 +207,6 @@ export function computeQuantoraScore(input: ScoreInput): QuantoraScore {
     confidence: Math.round(clamp(weightSum, 0, 1) * 1000) / 1000,
     components,
     formula: SCORE_FORMULA,
+    version: SCORE_VERSION,
   };
 }
