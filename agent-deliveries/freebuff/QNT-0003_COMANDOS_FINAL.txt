@@ -1,66 +1,60 @@
-QUANTORA — QNT-0003 · COMANDOS Y RESULTADOS (paquete regenerado desde HEAD del PR #4)
-HEAD: d1c1194d103f63714f002c34d40a3a37c1c7552a
+QUANTORA — QNT-0003H · COMANDOS Y RESULTADOS
+Rama: feat/QNT-0003-strategy-intake-pipeline · Base: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
 
-1) SINCRONIZACIÓN CON LA RAMA REMOTA
-$ git fetch origin
-$ git checkout feat/QNT-0003-strategy-intake-pipeline
-  -> Already on 'feat/QNT-0003-strategy-intake-pipeline'
-$ git reset --hard origin/feat/QNT-0003-strategy-intake-pipeline
-  -> HEAD is now at d1c1194 feat(intake): QNT-0003 integrate StochExtreme Adaptive and align publication filter
+1) ESTADO
 $ git rev-parse HEAD
-  -> d1c1194d103f63714f002c34d40a3a37c1c7552a
-$ git ls-remote origin feat/QNT-0003-strategy-intake-pipeline
-  -> d1c1194d103f63714f002c34d40a3a37c1c7552a    refs/heads/feat/QNT-0003-strategy-intake-pipeline
-  (HEAD local == HEAD remoto == SHA del PR #4)
-$ git status --short
-  -> (vacío: working tree limpio)
+  -> c08df1eb20234d4b8bbacec5396b7bea23e4341e  (commit de producto QNT-0003H)
+$ git diff --name-status c5fdb7d..HEAD (excl. agent-deliveries)
+  -> 36 añadidos + 7 modificados + 0 eliminados = 43 archivos de producto
 
-2) DIFF CONTRA LA BASE OFICIAL c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-$ git diff --name-status --diff-filter=A c5fdb7d..HEAD (excl. agent-deliveries) -> 36 añadidos
-$ git diff --name-status --diff-filter=M c5fdb7d..HEAD (excl. agent-deliveries) -> 7 modificados
-$ git diff --name-status --diff-filter=D c5fdb7d..HEAD (excl. agent-deliveries) -> 0 eliminados
-  Total archivos de producto en el diff: 43
+2) PIPELINE
+$ bun run strategies:ingest
+  -> First Triangle Adaptive: 145 trades, PF 1.25593, net $6687.50
+  -> StochExtreme Adaptive: 421 trades, PF 1.15139, net $6582.00
+$ bun run strategies:validate
+  -> Manifests validated: 2 accepted + 0 incoming | blocking errors: 0 | warnings: 0
+$ bun run strategies:build
+  -> blocking errors: 0 | warnings: 0
+$ bun run strategies:report
+  -> blocking errors: 0 | warnings: 0
+$ bun run strategies:intake
+  -> Public catalog written to public-strategies/catalog.json (2 published strategies)
+  -> Intake processed: 2 accepted + 0 incoming | blocking errors: 0 | warnings: 0
 
-3) TESTS DE DOMINIO
+3) TESTS
 $ bun scripts/test-validation.ts
   -> Tests executed: 58 | passed: 58 | failed: 0
-
-4) TESTS DEL PIPELINE
 $ bun scripts/test-strategy-intake.ts
-  -> Tests executed: 27 | passed: 27 | failed: 0
+  -> Tests executed: 54 | passed: 54 | failed: 0
 $ grep -c "^[[:space:]]*test(" scripts/test-strategy-intake.ts
-  -> 27 (el archivo contiene realmente los 27 tests)
+  -> 54 (27 originales + 27 nuevos de QNT-0003H)
+
+4) TYPECHECK
+$ bun tsc -b --noEmit
+  -> Sin errores nuevos. Solo preexistentes documentados (fuera de alcance):
+     serve.ts (tipos de Bun / import.meta.dir) y
+     src/components/LegalShell.tsx (ReactNode sin usar).
 
 5) BUILD
 $ bun run build
-  -> ✓ built in 636ms (client + server SSR, sin errores)
+  -> ✓ built (client + server SSR, sin errores)
 
-6) PIPELINE DE INTAKE (catálogo público ya commiteado en HEAD)
-$ bun run strategies:intake
-  -> Public catalog written to public-strategies/catalog.json (2 published strategies)
-  -> Intake processed: 2 accepted + 0 incoming
-  -> [intake] blocking errors: 0
-  -> [intake] warnings: 0
+6) CALIDAD
+$ git diff --check
+  -> OK (sin errores de whitespace)
 
 7) PREVIEW TEMPORAL (no es producción)
 $ freebuff-preview start
-  -> Preview is ready (listening)
+  -> Preview is ready
   -> https://5173-124d91f4-172c-4dd5-bbb6-d6e7597a8990.daytonaproxy01.net/
-  Páginas verificadas (HTTP 200):
-  - /                                  (inicio)
-  - /strategies                        (catálogo: tarjetas First Triangle + StochExtreme)
-  - /strategies/first-triangle-adaptive (ficha First Triangle)
-  - /strategies/stochextreme-adaptive   (ficha StochExtreme)
-  Comprobado en las 4 páginas: sin "Owner Supplied" / "Under Review" /
-  validationStatus / dataStatus públicos; mock etiquetado como demo.
-
-8) REGENERACIÓN DEL PAQUETE
-- Carpeta de entrega vaciada previamente (se eliminaron los artefactos antiguos).
-- GIT_DIFF.patch regenerado: git diff c5fdb7d..HEAD (excl. agent-deliveries)
-  -> 43 diffs | 36 "new file mode" | 642,193 bytes
-- ZIP construido desde cero con estructura: CAMBIOS.txt, ARCHIVOS_MODIFICADOS.txt,
-  GIT_DIFF.patch, COMANDOS_Y_RESULTADOS.txt, PACKAGE_INTEGRITY.txt, archivos/.
-- Extracción verificada: unzip -t -> OK.
-- SHA-256 y tamaño calculados sobre el artefacto final.
+  Páginas verificadas (HTTP 200): /, /strategies,
+  /strategies/first-triangle-adaptive, /strategies/stochextreme-adaptive.
+  Comprobado por HTTP:
+  - "Owner supplied" presente (tarjeta + ficha de ambas estrategias).
+  - "Independent reproduction pending" presente.
+  - "Quantora Score · Beta" presente (tarjeta + ficha).
+  - "Costs not applied" + aviso de comisiones/spread/slippage en StochExtreme.
+  - Ausentes: owner_supplied_under_review, validationStatus, dataStatus,
+    accepted_for_publication.
 
 NO MERGE · NO DEPLOY · PR #4 MANTENIDO ABIERTO

@@ -1,11 +1,15 @@
-QUANTORA — QNT-0003 · PACKAGE INTEGRITY (paquete regenerado desde HEAD del PR #4)
-=================================================================================
+QUANTORA — QNT-0003H · PACKAGE INTEGRITY
+========================================
 
 NOMBRE DEL PR: #4 — QNT-0003: reusable strategy intake pipeline
 RAMA: feat/QNT-0003-strategy-intake-pipeline
 SHA BASE: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-SHA HEAD: d1c1194d103f63714f002c34d40a3a37c1c7552a
-   (verificado: git rev-parse HEAD == d1c1194... == SHA del head del PR #4)
+SHA HEAD: c08df1eb20234d4b8bbacec5396b7bea23e4341e
+   (commit de producto QNT-0003H; los artefactos de entrega se añaden después)
+TAMAÑO DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, con PACKAGE_INTEGRITY.txt): 349226 bytes
+SHA-256 DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, verificado con sha256sum):
+626b9de65f80ea16488f2433341e53367ee6ae72356434bf4643d338c98a6b4e
+
 
 CONTENIDO DEL PAQUETE
 - Archivos añadidos (vs base): 36
@@ -14,93 +18,85 @@ CONTENIDO DEL PAQUETE
 - Archivos completos bajo archivos/: 43
 - Entradas totales del ZIP: 68 (43 archivos + 4 documentos raíz + 20 directorios + PACKAGE_INTEGRITY.txt)
 
-TAMAÑO DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt): 335408 bytes
+TAMAÑO DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt): 347110 bytes
 SHA-256 DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt):
-89c68f7f014868d5d404a7766c3f70949f4ac463e1798677a00251114b103fbb
-
-TAMAÑO DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, con PACKAGE_INTEGRITY.txt): 337563 bytes
-SHA-256 DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, verificado con sha256sum):
-1eac4a10c74d8e0ad15647283ca03a808a59438d8d55045b31660e4ad65f3798
+0ac6f77c50ed2bf28e298641413630714c06e659a77f40a1f427a75cb73cd099
 
 FECHA DE GENERACIÓN: 2026-08-19 (UTC)
 COMPROBACIÓN DE EXTRACCIÓN: unzip -t -> OK, sin errores
 
 NOTA SOBRE LOS HASHES
-- El hash "SHA-256 DEL ZIP (contenido)" se calcula sobre el paquete sin el propio
-  PACKAGE_INTEGRITY.txt (es la única forma de que un hash registrado dentro del
+- El hash del contenido se calcula sobre el paquete sin el propio
+  PACKAGE_INTEGRITY.txt (única forma de que un hash registrado dentro del
   ZIP sea verificable de forma exacta).
-- El hash del archivo ZIP entregado completo (con PACKAGE_INTEGRITY.txt incluido)
-  es "SHA-256 DEL ARCHIVO ENTREGADO" y se verifica con sha256sum sobre el
-  artefacto final.
+- El hash del archivo ZIP entregado completo (con PACKAGE_INTEGRITY.txt) se
+  registra en QNT-0003_PACKAGE_INTEGRITY.txt junto al ZIP y se verifica con
+  sha256sum sobre el artefacto final.
 
 VERIFICACIONES AUTOMÁTICAS (todas ejecutadas)
 - Cada archivo del git diff está dentro del ZIP: OK (43/43)
 - Ningún archivo completo está vacío: OK (0 vacíos)
-- Ningún archivo pertenece a una versión anterior: OK (todo regenerado desde HEAD)
-- CAMBIOS.txt indica 27/27 tests de pipeline: OK
-- scripts/test-strategy-intake.ts contiene realmente 27 tests: OK
-- SHA HEAD del paquete coincide con el PR #4: OK
+- Sin secretos / node_modules / dist / rutas locales privadas: OK
+- scripts/test-strategy-intake.ts contiene 54 tests (27+27): OK
+- reviewLabel/independentReproduction/costsApplied/scoreVersion/
+  filterVersion/publicationMode presentes en catálogo y UI: OK
+- validationStatus/dataStatus/status ausentes del contrato público: OK
 - El ZIP puede extraerse: OK
-- Sin secretos (ghp_/sk-/AKIA/private keys/xoxb/AIza): OK
-- Sin node_modules: OK
-- Sin dist: OK
-- Sin rutas locales privadas (/home/, C:\, /Users/, .ssh): OK
 
-LISTA COMPLETA DE ENTRADAS DEL ZIP (contenido, 67 entradas; el ZIP final añade
-PACKAGE_INTEGRITY.txt como entrada 68):
+LISTA COMPLETA DE ENTRADAS DEL ZIP (contenido, 67 entradas):
 Archive:  QNT-0003_Cambios.zip.txt
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-     5950  2026-08-19 00:00   CAMBIOS.txt
-     2513  2026-08-19 00:00   ARCHIVOS_MODIFICADOS.txt
-   642193  2026-08-19 00:00   GIT_DIFF.patch
-     3086  2026-08-19 00:00   COMANDOS_Y_RESULTADOS.txt
-        0  2026-08-19 19:57   archivos/
+     6546  2026-08-19 00:00   CAMBIOS.txt
+     2824  2026-08-19 00:00   ARCHIVOS_MODIFICADOS.txt
+   670995  2026-08-19 00:00   GIT_DIFF.patch
+     2380  2026-08-19 00:00   COMANDOS_Y_RESULTADOS.txt
+        0  2026-08-19 20:34   archivos/
       836  2026-08-19 00:00   archivos/.gitignore
-        0  2026-08-19 19:57   archivos/docs/
+        0  2026-08-19 20:34   archivos/docs/
      4406  2026-08-19 00:00   archivos/docs/REAL_DATA_IMPORT.md
-     8380  2026-08-19 00:00   archivos/docs/STRATEGY_INTAKE.md
+    10785  2026-08-19 00:00   archivos/docs/STRATEGY_INTAKE.md
      1430  2026-08-19 00:00   archivos/package.json
-        0  2026-08-19 19:57   archivos/public-strategies/
-    78721  2026-08-19 00:00   archivos/public-strategies/catalog.json
-        0  2026-08-19 19:57   archivos/public-strategies/datasets/
+        0  2026-08-19 20:34   archivos/public-strategies/
+    79198  2026-08-19 00:00   archivos/public-strategies/catalog.json
+        0  2026-08-19 20:34   archivos/public-strategies/datasets/
       742  2026-08-19 00:00   archivos/public-strategies/datasets/README.md
-        0  2026-08-19 19:57   archivos/public-strategies/manifests/
+        0  2026-08-19 20:34   archivos/public-strategies/manifests/
       470  2026-08-19 00:00   archivos/public-strategies/manifests/README.md
-    24364  2026-08-19 00:00   archivos/public-strategies/manifests/first-triangle-adaptive.manifest.json
-    45850  2026-08-19 00:00   archivos/public-strategies/manifests/stochextreme-adaptive.manifest.json
-        0  2026-08-19 19:57   archivos/scripts/
-        0  2026-08-19 19:57   archivos/scripts/intake/
-     2502  2026-08-19 00:00   archivos/scripts/intake/filter.ts
-    12542  2026-08-19 00:00   archivos/scripts/intake/ingest-first-triangle.ts
-    14877  2026-08-19 00:00   archivos/scripts/intake/ingest-stochextreme.ts
-    11990  2026-08-19 00:00   archivos/scripts/intake/manifest.ts
-    17364  2026-08-19 00:00   archivos/scripts/intake/pipeline.ts
-     7384  2026-08-19 00:00   archivos/scripts/intake/scoring.ts
+    24548  2026-08-19 00:00   archivos/public-strategies/manifests/first-triangle-adaptive.manifest.json
+    46035  2026-08-19 00:00   archivos/public-strategies/manifests/stochextreme-adaptive.manifest.json
+        0  2026-08-19 20:34   archivos/scripts/
+        0  2026-08-19 20:34   archivos/scripts/intake/
+     5776  2026-08-19 00:00   archivos/scripts/intake/filter.ts
+    12783  2026-08-19 00:00   archivos/scripts/intake/ingest-first-triangle.ts
+    15282  2026-08-19 00:00   archivos/scripts/intake/ingest-stochextreme.ts
+    13722  2026-08-19 00:00   archivos/scripts/intake/manifest.ts
+    19464  2026-08-19 00:00   archivos/scripts/intake/pipeline.ts
+     8079  2026-08-19 00:00   archivos/scripts/intake/scoring.ts
      5613  2026-08-19 00:00   archivos/scripts/strategy-intake.ts
-    23291  2026-08-19 00:00   archivos/scripts/test-strategy-intake.ts
-        0  2026-08-19 19:57   archivos/src/
+    36604  2026-08-19 00:00   archivos/scripts/test-strategy-intake.ts
+        0  2026-08-19 20:34   archivos/src/
       862  2026-08-19 00:00   archivos/src/catalog.ts
-        0  2026-08-19 19:57   archivos/src/domain/
-     2121  2026-08-19 00:00   archivos/src/domain/publicStrategy.ts
+        0  2026-08-19 20:34   archivos/src/domain/
+     2982  2026-08-19 00:00   archivos/src/domain/publicStrategy.ts
      1086  2026-08-19 00:00   archivos/src/format.ts
-        0  2026-08-19 19:57   archivos/src/i18n/
-     7597  2026-08-19 00:00   archivos/src/i18n/index.ts
-        0  2026-08-19 19:57   archivos/src/routes/
-    17459  2026-08-19 00:00   archivos/src/routes/strategies.$id.tsx
-     7348  2026-08-19 00:00   archivos/src/routes/strategies.index.tsx
-        0  2026-08-19 19:57   archivos/src/styles/
+        0  2026-08-19 20:34   archivos/src/i18n/
+     8062  2026-08-19 00:00   archivos/src/i18n/index.ts
+        0  2026-08-19 20:34   archivos/src/routes/
+    18332  2026-08-19 00:00   archivos/src/routes/strategies.$id.tsx
+     7858  2026-08-19 00:00   archivos/src/routes/strategies.index.tsx
+        0  2026-08-19 20:34   archivos/src/styles/
      7770  2026-08-19 00:00   archivos/src/styles/app.css
-        0  2026-08-19 19:57   archivos/strategy-intake/
-        0  2026-08-19 19:57   archivos/strategy-intake/evidence/
-        0  2026-08-19 19:57   archivos/strategy-intake/evidence/first-triangle/
+        0  2026-08-19 20:34   archivos/strategy-intake/
+        0  2026-08-19 20:34   archivos/strategy-intake/evidence/
+        0  2026-08-19 20:34   archivos/strategy-intake/evidence/first-triangle/
      1203  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/README.md
     27181  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/first_triangle_web_equity.csv
      1037  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/first_triangle_web_manifest.json
     33815  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/first_triangle_web_signals.csv
       492  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/first_triangle_web_summary.csv
     63526  2026-08-19 00:00   archivos/strategy-intake/evidence/first-triangle/first_triangle_web_trades.csv
-        0  2026-08-19 19:57   archivos/strategy-intake/evidence/stochextreme/
+        0  2026-08-19 20:34   archivos/strategy-intake/evidence/stochextreme/
      2524  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/README.md
       223  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/stochextreme_coverage.csv
     12240  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/stochextreme_equity_daily.csv
@@ -108,15 +104,15 @@ Archive:  QNT-0003_Cambios.zip.txt
       654  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/stochextreme_strategy_config.csv
       438  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/stochextreme_symbol_specifications.csv
    181001  2026-08-19 00:00   archivos/strategy-intake/evidence/stochextreme/stochextreme_trades.csv
-        0  2026-08-19 19:57   archivos/strategy-intake/examples/
+        0  2026-08-19 20:34   archivos/strategy-intake/examples/
       880  2026-08-19 00:00   archivos/strategy-intake/examples/mock-minimal.manifest.json
-     1384  2026-08-19 00:00   archivos/strategy-intake/examples/real-under-review-minimal.manifest.json
+     1520  2026-08-19 00:00   archivos/strategy-intake/examples/real-under-review-minimal.manifest.json
      3108  2026-08-19 00:00   archivos/strategy-intake/examples/real-under-review-with-metrics.manifest.json
-        0  2026-08-19 19:57   archivos/strategy-intake/incoming/
+        0  2026-08-19 20:34   archivos/strategy-intake/incoming/
       715  2026-08-19 00:00   archivos/strategy-intake/incoming/README.md
-        0  2026-08-19 19:57   archivos/strategy-intake/reports/
+        0  2026-08-19 20:34   archivos/strategy-intake/reports/
       285  2026-08-19 00:00   archivos/strategy-intake/reports/README.md
-        0  2026-08-19 19:57   archivos/strategy-intake/templates/
+        0  2026-08-19 20:34   archivos/strategy-intake/templates/
       367  2026-08-19 00:00   archivos/strategy-intake/templates/manifest.template.json
 ---------                     -------
-  1290246                     67 files
+  1347105                     67 files

@@ -1,5 +1,4 @@
 QUANTORA — QNT-0003 · Archivos del diff final vs base c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-HEAD: d1c1194d103f63714f002c34d40a3a37c1c7552a
 Total: 43 archivos de producto (36 añadidos + 7 modificados + 0 eliminados)
 
 AÑADIDOS (36):
@@ -51,7 +50,13 @@ MODIFICADOS (7):
 
 ELIMINADOS (0): ninguno.
 
-Nota: el diff bruto contra la base incluye además 4 archivos de entrega en
-agent-deliveries/freebuff/ (CAMBIOS.txt, ARCHIVOS_MODIFICADOS.txt,
-GIT_DIFF.patch, QNT-0003_Cambios.zip.txt) que son los artefactos de este
-paquete, no código de producto, y no se listan aquí.
+QNT-0003H tocó (dentro de los 43 de arriba): scripts/intake/filter.ts,
+scoring.ts, pipeline.ts, manifest.ts, ingest-first-triangle.ts,
+ingest-stochextreme.ts, test-strategy-intake.ts, src/domain/publicStrategy.ts,
+src/i18n/index.ts, src/routes/strategies.index.tsx, src/routes/strategies.$id.tsx,
+public-strategies/catalog.json, los dos manifests de public-strategies/manifests/,
+strategy-intake/examples/real-under-review-minimal.manifest.json y
+docs/STRATEGY_INTAKE.md.
+
+Nota: el diff bruto contra la base incluye además los artefactos de entrega en
+agent-deliveries/freebuff/ (este paquete), que no son código de producto.
