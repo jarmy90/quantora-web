@@ -1,0 +1,112 @@
+{
+  "manifestVersion": "1.0",
+  "strategyId": "example-real-under-review-metrics",
+  "tagline": "Under Review example with synthetic metrics (test fixture)",
+  "type": "Explorer",
+  "rules": [
+    "H4/H1 liquidity sweep",
+    "M5 order block confirmation",
+    "1.5R take profit"
+  ],
+  "limitations": [
+    "Synthetic metrics for pipeline testing only — not real performance.",
+    "Not a public strategy."
+  ],
+  "costs": {
+    "spread": "Model-dependent (not provided)",
+    "commission": "Not provided"
+  },
+  "variant": "short (literal); the long model is its mirror",
+  "configuration": "Universe of 1,728 variants (fixture)",
+  "evidence": [],
+  "dataset": {
+    "modelVersion": "1.0",
+    "strategies": [
+      {
+        "id": "example-real-under-review-metrics",
+        "name": "Example Real Under Review (synthetic metrics)",
+        "version": "1.00",
+        "status": "draft",
+        "validationStatus": "owner_supplied_under_review",
+        "assetIds": [
+          "asset-ustec"
+        ],
+        "backtestIds": [
+          "bt-ustec"
+        ],
+        "createdAt": "2025-06-01T00:00:00Z",
+        "updatedAt": "2025-06-01T00:00:00Z",
+        "provenance": {
+          "dataStatus": "real",
+          "sourceName": "QNT-0003 synthetic fixture",
+          "sourceType": "owner-delivery",
+          "notes": "Synthetic fixture for pipeline testing. Metrics, equity and dates are invented test values, not real performance."
+        }
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-ustec",
+        "symbol": "USTEC",
+        "name": "US Tech 100 Index",
+        "assetClass": "other"
+      }
+    ],
+    "backtests": [
+      {
+        "id": "bt-ustec",
+        "strategyId": "example-real-under-review-metrics",
+        "assetIds": [
+          "asset-ustec"
+        ],
+        "startedAt": "2024-01-01T00:00:00Z",
+        "endedAt": "2024-12-31T23:59:59Z",
+        "timeframe": "H1",
+        "initialCapital": 10000,
+        "currency": "USD",
+        "metrics": {
+          "totalReturn": 12.5,
+          "maxDrawdown": -4.2,
+          "winRate": 0.55,
+          "tradeCount": 120,
+          "profitFactor": 1.8
+        },
+        "equityCurveId": "eq-ustec",
+        "tradeLogIds": [],
+        "provenance": {
+          "dataStatus": "real",
+          "sourceName": "QNT-0003 synthetic fixture",
+          "sourceType": "owner-delivery"
+        }
+      }
+    ],
+    "equityCurves": [
+      {
+        "id": "eq-ustec",
+        "strategyId": "example-real-under-review-metrics",
+        "backtestId": "bt-ustec",
+        "currency": "USD",
+        "points": [
+          {
+            "timestamp": "2024-01-01T00:00:00Z",
+            "equity": 10000
+          },
+          {
+            "timestamp": "2024-06-01T00:00:00Z",
+            "equity": 10600
+          },
+          {
+            "timestamp": "2024-12-31T00:00:00Z",
+            "equity": 11250
+          }
+        ],
+        "provenance": {
+          "dataStatus": "real",
+          "sourceName": "QNT-0003 synthetic fixture",
+          "sourceType": "owner-delivery"
+        }
+      }
+    ],
+    "tradeLogs": []
+  }
+}

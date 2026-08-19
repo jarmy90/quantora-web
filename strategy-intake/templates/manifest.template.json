@@ -1,0 +1,20 @@
+{
+  "manifestVersion": "1.0",
+  "strategyId": "REPLACE_WITH_STRATEGY_ID",
+  "tagline": "",
+  "type": "",
+  "rules": [],
+  "limitations": [],
+  "costs": {},
+  "variant": "",
+  "configuration": "",
+  "evidence": [],
+  "dataset": {
+    "modelVersion": "1.0",
+    "strategies": [],
+    "assets": [],
+    "backtests": [],
+    "equityCurves": [],
+    "tradeLogs": []
+  }
+}
