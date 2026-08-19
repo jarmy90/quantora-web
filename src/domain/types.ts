@@ -3,6 +3,13 @@ export const DATA_MODEL_VERSION = '1.0' as const;
 export type DataStatus = 'mock' | 'real';
 export type Currency = string;
 
+/** Quantora editorial review state. Independent from operational `status` and provenance `dataStatus`. */
+export type ValidationStatus =
+  | 'mock'
+  | 'owner_supplied_under_review'
+  | 'quantora_validated'
+  | 'rejected';
+
 export type Provenance = {
   dataStatus: DataStatus;
   sourceName: string;
@@ -27,6 +34,7 @@ export type Strategy = {
   description?: string;
   version: string;
   status: 'active' | 'archived' | 'draft';
+  validationStatus: ValidationStatus;
   assetIds: string[];
   provenance: Provenance;
   backtestIds: string[];

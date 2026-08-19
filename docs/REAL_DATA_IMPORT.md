@@ -7,6 +7,8 @@ This repository currently has a frontend-only catalog. Phase 2A adds versioned d
 - Existing UI records remain mock Phase 1 fixtures in `src/data.ts`.
 - Future owner deliveries belong outside mock fixtures (for example `data/real/`, which is gitignored in deployment workflows). Never copy owner data into mock files.
 - Every real record must carry `provenance.dataStatus: "real"`; mock fixtures must carry `"mock"`. The UI should show a clear status guardrail before presenting any imported record.
+- Every `Strategy` must also carry `validationStatus`, one of: `mock`, `owner_supplied_under_review`, `quantora_validated`, or `rejected`. It is independent from `provenance.dataStatus` and the operational `status` field.
+- Allowed combinations: `dataStatus: "mock"` pairs with `validationStatus: "mock"`; `dataStatus: "real"` pairs with `owner_supplied_under_review`, `quantora_validated`, or `rejected`. For example, a real owner delivery awaiting review uses `dataStatus: "real"` with `validationStatus: "owner_supplied_under_review"`.
 - `src/domain/catalog.ts` provides a selective ID-based overlay: only matching mock IDs are replaced, while all other mock records stay unchanged.
 
 ## JSON dataset format
@@ -23,6 +25,7 @@ Minimal illustrative fixture (not real performance data):
     "name": "Example owner strategy",
     "version": "1.0.0",
     "status": "active",
+    "validationStatus": "mock",
     "assetIds": ["asset-example"],
     "backtestIds": ["backtest-example"],
     "createdAt": "2025-01-01T00:00:00Z",
