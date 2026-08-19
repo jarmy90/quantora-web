@@ -1,0 +1,2 @@
+run_id,symbol,first_tick,last_tick,first_usable_signal_time,ticks_processed,work_bars_seen,warmup_complete
+SEA2575_AMP_@ENQ_1754006400,@ENQ,2025.08.01 00:00:00,2026.08.07 20:59:59,2025.08.01 09:00:00,509489041,12228,true
