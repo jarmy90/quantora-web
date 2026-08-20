@@ -1,104 +1,59 @@
 =====================================================================
-QNT-0007 · TM BANDAS S3 — INTAKE E INCORPORACIÓN AL CATÁLOGO
+QNT-0007C · CORRECCIÓN FINAL PRE-MERGE DEL PR #6
 =====================================================================
+Fecha: 2026-08-20
+Rama: feat/QNT-0007-bandas-strategy-intake
+PR: #6 (OPEN)
+Base: c8780fbe021096d97a9e3859d7c26dec73f42b42 (origin/main tras merge PR #5)
+Head: d2e6d74f315de64b5b1461927fc1ebebee891eb3
 
-ESTADO
-------
-- STATUS: COMPLETE (implementación entregada)
-- Rama: feat/QNT-0007-bandas-strategy-intake
-- PR: #6 (OPEN) — https://github.com/jarmy90/quantora-web/pull/6
-- Base: origin/main @ cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
-- HEAD: 69277706c763da4f437f5270d8828c610e3968bd
-- NO MERGE · NO DEPLOY
+1. CAMBIOS REALIZADOS
+---------------------
 
-FUENTE AUTORIZADA
+1.1 Merge de origin/main sobre la rama QNT-0007
+- PR #5 fusionado en main (SHA c8780fb)
+- Rama QNT-0007 actualizada sobre el nuevo main
+- Conflictos resueltos sin perder QNT-0005C ni QNT-0007 original
+
+1.2 Eliminación de costPerTradeUsd con costsApplied=false
+- StochExtreme: eliminado costPerTradeUsd del objeto metrics (era 0.0)
+- TM Bandas S3: eliminado costPerTradeUsd del objeto metrics (era 0.0)
+- First Triangle: conservado costPerTradeUsd=1.2 (costsApplied=true)
+- Gold: sin cambios (ya estaba correcto)
+
+1.3 closedTradeDrawdownDecimal para Bandas
+- Añadido: closedTradeDrawdownDecimal = maxDrawdown / initialCapital
+- Valor: 384 / 10000 = 0.0384 (3.84%)
+- Se calcula en el importador, no en React
+
+1.4 Frontend: renderizado del porcentaje de drawdown
+- Tarjeta: muestra "pts · 3.84%" cuando closedTradeDrawdownDecimal existe
+- Ficha: muestra "pts · 3.84%" en la fila de drawdown
+- Solo se muestra cuando el campo está disponible en el catálogo
+
+1.5 Tests añadidos
+- costPerTradeUsd no se emite cuando costsApplied=false (StochExtreme)
+- costPerTradeUsd no se emite cuando costsApplied=false (Bandas en test 89)
+- closedTradeDrawdownDecimal = 0.0384 para Bandas (test 90)
+- Total: 90 tests pipeline (9 nuevos sobre los 81 previos)
+- Dominio: 58/58 sin cambios
+
+2. VERIFICACIONES
 -----------------
-- Repositorio: jarmy90/quantora-web
-- Rama de datos: data/quantora-real-backtests
-- Ruta: data/imports/quantora-real-backtests/bandas.zip
-- Commit de la rama de datos: 24c161929325679bbf6f14a0a079b331a2cd7f5e
-- Tamaño: 25,696 bytes
-- SHA-256: 455294f995ede782880b847755828dc07e2b0ef4642040bca754c49f30b67f21
-- Extracción: OK (7 CSV internos; sin binarios, sin .set/.mq5/.ex5/logs MT5)
-- El ZIP no se copió a main ni al bundle público; solo se versionó su digest.
+- Pipeline completo: OK (4 estrategias, 0 errores, 0 warnings)
+- Tests dominio: 58/58
+- Tests pipeline: 90/90
+- Build client + SSR: OK
+- Typecheck: solo 7 errores preexistentes (serve.ts + LegalShell.tsx)
+- git diff --check: OK
+- Bundle: sin estados internos (validationStatus/dataStatus/modelId)
+- Working tree: limpio
 
-IDENTIDAD (desde la evidencia, no desde el nombre del ZIP)
----------------------------------------------------------
-- strategyId: tm-bandas-s3 (identidad de sistema del run_id; el source
-  strategy_id "tm-bandas-s3-keeper" es variant-qualified y "keeper" es la
-  variante, así que se conserva en `variant`)
-- strategyName: TM Bandas S3
-- strategyVersion: 1.00
-- modelId (interno, no expuesto): tm-bandas-s3
-- symbol: USTEC · mercado público: Nasdaq-100 · broker: IC Markets
-- timeframe: M1 · assetClass: other (index CFD)
-- initialCapital: 10,000.00 USD (verificado en manifest + summary)
-- money_per_index_point: 2.00 USD · lot: 0.10
-- variant: KEEPER_SL12_TP36 · short-only · entry: S3_ABOVE_TO_UPPER_RETURN
-- opens_real_orders: false (research explorer)
+3. CATÁLOGO FINAL
+------------------
+1. first-triangle-adaptive (USD, costsApplied=true, PF 1.26, score 68)
+2. first-triangle-gold-adaptive (pts, costsApplied=false, PF 1.90, score 98)
+3. stochextreme-adaptive (USD, costsApplied=false, PF 1.15, score 71)
+4. tm-bandas-s3 (USD, costsApplied=false, PF 1.74, score 97, DD 3.84%)
 
-VARIANTE
---------
-- Variante seleccionada declarada por la fuente: KEEPER_SL12_TP36 (única;
-  las 621 operaciones son de esa variante). No hay sweep de variantes ni
-  reutilización de OOS.
-
-OPERACIONES CERRADAS (reconciliadas desde bandas_trades.csv)
------------------------------------------------------------
-- closedTrades: 621
-- wins: 228 · losses: 393 · breakevens: 0  →  228 + 393 + 0 = 621 ✓
-- openPositionsAtEnd: 0 (no hay posición abierta que excluir)
-- winRate = 228 / 621 = 36.71497584 % (recalculado, no copiado)
-- expectancy = 6,984 / 621 = 11.24637681 USD/trade
-- grossProfit: 16,416.00 · grossLoss: 9,432.00 · net: 6,984.00 USD
-- Profit Factor: 1.74045802 (= 16,416 / 9,432)
-- maxDrawdownUsd: 384.00 (closed-trade, magnitud positiva)
-
-EQUITY
-------
-- No existe archivo de equity en el ZIP. La curva se reconstruyó acumulando
-  cronológicamente net_pnl desde el capital inicial 10,000.00.
-- 621 puntos (uno por operación cerrada, timestamp = exit_time).
-- Balance final: 16,984.00 ✓ · drawdown máximo: 384.00 ✓ (reconcilian con summary)
-
-COSTES
-------
-- costsApplied = false (costs_included=false en las 621 filas)
-- commission = 0.00 y fees = 0.00 del export NO son costes reales confirmados.
-- El componente de costes del Quantora Score queda available=false y la
-  confianza se reduce. La UI muestra "Costs not applied".
-
-TIMESTAMPS
-----------
-- La fuente declara +00:00 en cada timestamp (UTC declarado por el export).
-- Se conservan verbatim (YYYY-MM-DDTHH:mm:ss+00:00), sin re-normalización.
-
-PUBLICACIÓN
------------
-- publicationMode: results · filterVersion: beta-1 · scoreVersion: beta-1
-- reviewLabel: Owner supplied · independentReproduction: false
-- Filtro beta-1: PASA (identidad, PF finito ≥ 1.15, 621 trades, 621 puntos de
-  equity, periodo, drawdown, costsApplied definido)
-- Quantora Score: 97 (confianza 0.95; componente de costes no disponible)
-- Sin leaks internos: validationStatus/dataStatus/status no llegan al público.
-
-ARCHIVOS
---------
-- 5 modificados + 11 añadidos = 16 archivos (ver ARCHIVOS_MODIFICADOS.txt).
-
-VERIFICACIONES
---------------
-- bun run strategies:ingest      → 3 manifests generados, OK
-- bun run strategies:validate    → 3 accepted, 0 errores, 0 warnings
-- bun run strategies:build       → 3 publicadas, 0 errores
-- bun run strategies:report      → 0 errores
-- bun run strategies:intake      → 0 errores
-- bun scripts/test-validation.ts       → 58/58
-- bun scripts/test-strategy-intake.ts  → 67/67 (13 tests nuevos QNT-0007)
-- bun tsc -b --noEmit           → sin errores nuevos (solo los 7 preexistentes)
-- bun run build                 → OK (client + SSR)
-- git diff --check              → OK
-- HTTP 200 en /, /strategies, /strategies/tm-bandas-s3 (render verificado)
-
-NO MERGE · NO DEPLOY.
-=====================================================================
+4. NO MERGE · NO DEPLOY
