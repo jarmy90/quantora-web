@@ -21,26 +21,34 @@ export const enUS = {
   'home.heroTitle': 'Strategies you can',
   'home.heroAccent': 'understand.',
   'home.heroBody':
-    'Discover rules-based strategies, inspect their behavior, and make more informed allocation decisions — without the black box.',
+    'Cut through the noise of unverified bots and trading promises. Explore rules-based strategies evaluated through structured backtesting, with performance, risk and limitations shown clearly.',
   'home.browse': 'Browse strategies →',
   'home.seeHow': 'See how it works',
-  'home.mockNotice': '◉ ALL PERFORMANCE SHOWN IS MOCK / DEMO DATA',
+  'home.mockNotice': 'HISTORICAL RESULTS DO NOT GUARANTEE FUTURE PERFORMANCE',
   'home.curated': 'Curated systems',
   'home.signals': 'Signals worth a closer look.',
   'home.startingPoint': 'A starting point for your research, not a promise of returns.',
-  'home.workflow': 'A clearer workflow',
-  'home.workflowTitle': 'From curiosity to conviction.',
-  'home.stepExplore': 'Explore',
-  'home.stepExploreBody': 'Filter by asset, approach, return profile and risk.',
-  'home.stepInspect': 'Inspect',
-  'home.stepInspectBody': 'Open the curve, metrics and trade history behind each system.',
-  'home.stepDecide': 'Decide',
-  'home.stepDecideBody': 'Use the demo allocation panel to model your next step.',
+  'home.demoNote': 'Demo data — shown here for product demonstration only.',
+  'home.workflow': 'A seriouser way to evaluate strategies',
+  'home.workflowTitle': 'Less promise. More evidence.',
+  'home.workflowIntro':
+    'The internet and social media are full of strategies, signals and trading bots promoted through attractive screenshots, isolated results and claims that are difficult to verify. Quantora offers a more rigorous alternative: explainable strategies evaluated through a consistent backtesting methodology and presented with their complete historical results, including risk and limitations.',
+  'home.stepAnalyze': 'Analyze',
+  'home.stepAnalyzeBody':
+    'We process each strategy’s historical record through a structured methodology. We examine closed trades, the equity curve, Profit Factor, drawdown, frequency, stability and available costs.',
+  'home.stepFilter': 'Filter',
+  'home.stepFilterBody':
+    'Every strategy is assessed using the same publication criteria. If the evidence is insufficient or the strategy does not meet the minimum standard, it does not appear in the public catalog.',
+  'home.stepShow': 'Show the complete picture',
+  'home.stepShowBody':
+    'We present potential and risk together, without selecting only the best periods. Users can inspect the equity curve, metrics, Quantora Score and limitations before making their own decision.',
+  'home.workflowClose':
+    'We do not promise returns. We build a clearer and more rigorous way to evaluate strategies.',
 
-  'trust.eyebrow': 'Trust & transparency',
-  'trust.title': 'No hidden promises.',
+  'trust.eyebrow': 'Transparency by design',
+  'trust.title': 'The complete picture, not just the best trades.',
   'trust.body':
-    'Every figure on this page is clearly labeled mock data for product demonstration. Historical simulations do not predict future results. Quantora is not providing investment advice, execution, custody, or a guarantee of performance.',
+    'Quantora presents historical performance together with drawdown, trade count, costs, analyzed period and known limitations. Real strategies and demonstration data are clearly separated. Historical results are evidence for evaluation, not a promise of future returns.',
 
   'common.demoReturn': 'Demo return',
   'common.risk': 'Risk',
@@ -53,6 +61,8 @@ export const enUS = {
   'catalog.eyebrow': 'Strategy catalog',
   'catalog.published': 'Published strategies',
   'catalog.demoSection': 'Demo strategies · mock data',
+  'catalog.demoNote':
+    'Mock / demo data for product demonstration — kept separate from the published strategies above.',
   'catalog.sortReturn': 'Sort: demo return',
   'catalog.sortName': 'Sort: name',
 
@@ -108,8 +118,6 @@ export const enUS = {
   'detail.notFoundBody':
     'The strategy you are looking for does not exist. Browse the catalog to explore available systems.',
   'detail.backCatalog': '← Back to catalog',
-  'detail.ownerSupplied': 'Owner supplied',
-  'detail.independentReproductionPending': 'Independent reproduction pending',
   'detail.scoreBeta': 'Quantora Score · Beta',
   'detail.scoreBetaNote':
     'Experimental comparative score based on available historical evidence. It is not an independent validation.',
@@ -148,7 +156,7 @@ export const enUS = {
   'legal.placeholderSection':
     '(Placeholder section — content to be completed and reviewed by legal counsel.)',
 
-  'footer.demo': 'Demo product · Not financial advice',
+  'footer.demo': 'Historical results do not guarantee future performance · Not financial advice',
   'footer.mock': 'Figures are MOCK / DEMO only · Not investment advice',
   'footer.detail': 'MOCK / DEMO DATA · Historical simulation is not indicative of future results · Not financial advice',
   'footer.tagline': 'Algorithmic strategy discovery & evaluation · MetaTrader 5',

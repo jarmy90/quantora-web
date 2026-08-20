@@ -148,10 +148,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.market && <span className="badge">{t('detail.market')}: {s.market}</span>}
             {s.instrument && <span className="badge">{t('detail.instrument')}: {s.instrument}</span>}
             {s.period && <span className="badge">{fmtPeriod(s.period.start, s.period.end)}</span>}
-            {s.reviewLabel && <span className="badge" style={{ color: 'var(--cyan)' }}>{s.reviewLabel}</span>}
-            {s.independentReproduction === false && (
-              <span className="badge">{t('detail.independentReproductionPending')}</span>
-            )}
           </div>
         </section>
 
@@ -181,10 +177,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
                 {t('detail.market')}: {s.market}
                 {s.instrument ? ` (${s.instrument})` : ''}
               </li>
-            )}
-            {s.reviewLabel && <li>{t('detail.ownerSupplied')}: {s.reviewLabel}</li>}
-            {s.independentReproduction === false && (
-              <li>{t('detail.independentReproductionPending')}</li>
             )}
             {(s.rules ?? []).map((rule) => (
               <li key={rule}>{rule}</li>

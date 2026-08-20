@@ -53,16 +53,6 @@ function PublicCard({ s }: { s: PublicStrategy }) {
         </div>
         <span style={{ color: 'var(--cyan)', fontSize: 20 }}>↗</span>
       </div>
-      {(s.reviewLabel || s.independentReproduction === false) && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '12px 0 2px' }}>
-          {s.reviewLabel && (
-            <span className="badge" style={{ color: 'var(--cyan)' }}>{s.reviewLabel}</span>
-          )}
-          {s.independentReproduction === false && (
-            <span className="badge">{t('detail.independentReproductionPending')}</span>
-          )}
-        </div>
-      )}
       {curve.length > 1 && <EquitySpark points={curve} />}
       <div className="stats">
         <div>
@@ -130,11 +120,11 @@ function Catalog() {
         </section>
 
         {publicStrategies.length > 0 && (
-          <section style={{ paddingBottom: 20 }}>
+          <section className="real-section" style={{ marginBottom: 30 }}>
             <div className="eyebrow" style={{ marginBottom: 14 }}>
               {t('catalog.published')}
             </div>
-            <div className="grid" style={{ paddingBottom: 10 }}>
+            <div className="grid">
               {publicStrategies.map((s) => (
                 <PublicCard key={s.id} s={s} />
               ))}
@@ -142,9 +132,10 @@ function Catalog() {
           </section>
         )}
 
-        <section style={{ paddingBottom: 70 }}>
+        <section className="demo-section" style={{ paddingBottom: 70 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
             <div className="eyebrow">{t('catalog.demoSection')}</div>
+            <p className="mono demo-note">{t('catalog.demoNote')}</p>
             <div className="filters" style={{ margin: 0 }}>
               <select className="select" value={asset} onChange={(e) => setAsset(e.target.value)}>
                 <option>All</option>

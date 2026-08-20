@@ -20,7 +20,9 @@ export function Nav({ extra }: { extra?: ReactNode }) {
           {extra}
         </div>
         <div className="nav-actions">
-          <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
+          {!import.meta.env.PROD && (
+            <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
+          )}
           <Link className="btn primary" to="/strategies">
             {t('nav.explore')}
           </Link>
@@ -39,7 +41,9 @@ export function CatalogNav() {
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
         </div>
-        <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
+        {!import.meta.env.PROD && (
+          <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
+        )}
       </nav>
     </header>
   );
