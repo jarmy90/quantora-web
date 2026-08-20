@@ -1,0 +1,26 @@
+ENCARGO: QNT-WORKFLOW-LOCAL
+Generado (UTC): 2026-08-20T20:41:33Z
+Repositorio: jarmy90/quantora-web
+Rama: chore/QNT-local-workflow
+SHA base: 7e71e67506416e3a021984d70bdfca1073425b45 (7e71e67)
+SHA final: ba3b982575562a90dabd81364d4ca24aea18c03e (ba3b982)
+
+PAQUETE PRINCIPAL:
+  ruta: agent-deliveries/freebuff/QNT-WORKFLOW-LOCAL_Cambios.zip.txt
+  tamano_bytes: 8843
+  sha256: bd0caadb1913c3d2fb3660caa08398026eedb1b46d9233f2fcaf6877b7e3c612
+
+ARCHIVOS DENTRO DEL ZIP (sha256):
+  ARCHIVOS_MODIFICADOS.txt  aa5d1eb06ee8873662a0a82ae7c6ec764c44ab643867461efaaa1681a61ddff0
+  CAMBIOS.txt  c5d1582923ba84b79128ecdf2811c56b6bb148687b18cd21de08b9f3355e55d6
+  COMANDOS_Y_RESULTADOS.txt  e7f2b5e5472f733b2f4fe3aafdd8a6dc12432c5571cb1bf46c3ca21a57152f98
+  FREEBUFF_WORKFLOW.md  93e4eb60790d85c70d19f0bc92a9f3c944fe53a82b155d9a7038459c2323c8c9
+  GIT_DIFF.patch  55673122155512c8275cac9265045141fa987643ba61854cb70466efab650890
+  INVENTARIO_PAQUETE.txt  12789913a28837987f96a9bd5244cf17942cdf4292396224d17b9096d0d96304
+
+Estructura: ZIP deflate nivel 9; el archivo termina en .zip.txt pero
+es un archivo ZIP real (PK\x03\x04). Verificable con cualquier herramienta ZIP.
+
+Notas:
+  - Encargo solo documental; no se han generado capturas.
+  - Encargo solo documental; no se han adjuntado tests.
