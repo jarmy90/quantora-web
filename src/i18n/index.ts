@@ -29,7 +29,7 @@ export const enUS = {
   'home.signals': 'Signals worth a closer look.',
   'home.startingPoint': 'A starting point for your research, not a promise of returns.',
   'home.demoNote': 'Demo data — shown here for product demonstration only.',
-  'home.workflow': 'A seriouser way to evaluate strategies',
+  'home.workflow': 'A more rigorous way to evaluate strategies',
   'home.workflowTitle': 'Less promise. More evidence.',
   'home.workflowIntro':
     'The internet and social media are full of strategies, signals and trading bots promoted through attractive screenshots, isolated results and claims that are difficult to verify. Quantora offers a more rigorous alternative: explainable strategies evaluated through a consistent backtesting methodology and presented with their complete historical results, including risk and limitations.',
