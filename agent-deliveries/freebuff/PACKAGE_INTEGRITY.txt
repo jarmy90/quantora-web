@@ -6,16 +6,12 @@ RAMA: feat/QNT-0003-strategy-intake-pipeline
 SHA BASE: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
 SHA HEAD: 4865259da87eaf79190daf48f06d8ff709f17b8d
    (commit de producto QNT-0004; los artefactos de entrega se añaden después)
-TAMAÑO DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, con PACKAGE_INTEGRITY.txt): 357006 bytes
-SHA-256 DEL ARCHIVO ENTREGADO (QNT-0003_Cambios.zip.txt, verificado con sha256sum):
-5f754c49e4cea93862dcc73f97ea7dece60b50c3a5e9d9ed3e2b55cb66c59af0
-
 CONTENIDO DEL PAQUETE
 - Archivos añadidos (vs base): 36
 - Archivos modificados (vs base): 9
 - Archivos eliminados (vs base): 0
 - Archivos completos bajo archivos/: 45
-- Entradas totales del ZIP: 71 (45 archivos + 5 documentos raíz + 20 directorios + PACKAGE_INTEGRITY.txt)
+- Entradas totales del ZIP: 70 (45 archivos + 5 documentos raíz + 20 directorios + PACKAGE_INTEGRITY.txt)
 
 TAMAÑO DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt): 354645 bytes
 SHA-256 DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt):
@@ -29,8 +25,8 @@ NOTA SOBRE LOS HASHES
   PACKAGE_INTEGRITY.txt (única forma de que un hash registrado dentro del
   ZIP sea verificable de forma exacta).
 - El hash del archivo ZIP entregado completo (con PACKAGE_INTEGRITY.txt) se
-  registra en este QNT-0003_PACKAGE_INTEGRITY.txt junto al ZIP y se verifica
-  con sha256sum sobre el artefacto final (5f754c49... = sha256sum real).
+  registra en QNT-0003_PACKAGE_INTEGRITY.txt junto al ZIP y se verifica con
+  sha256sum sobre el artefacto final.
 
 VERIFICACIONES AUTOMÁTICAS (todas ejecutadas en HEAD 4865259)
 - Cada archivo del git diff está dentro del ZIP: OK (45/45)

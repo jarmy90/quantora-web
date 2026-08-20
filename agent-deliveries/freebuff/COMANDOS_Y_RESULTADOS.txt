@@ -1,0 +1,50 @@
+QUANTORA — QNT-0003 + QNT-0004 · COMANDOS Y RESULTADOS
+Rama: feat/QNT-0003-strategy-intake-pipeline · Base: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
+
+1) ESTADO
+$ git rev-parse HEAD
+  -> 4865259da87eaf79190daf48f06d8ff709f17b8d  (commit de producto QNT-0004)
+$ git diff --name-status c5fdb7d..HEAD (excl. agent-deliveries)
+  -> 36 añadidos + 9 modificados + 0 eliminados = 45 archivos de producto
+
+2) SCORE STOCHEXTREME (consistencia, una única fuente generada)
+$ score en public-strategies/catalog.json  -> 71 (beta-1, confidence 0.95)
+$ score en strategy-intake/reports/intake-report.json -> 71 (MATCH)
+$ UI tarjeta + ficha -> lee catalog.json -> 71
+  El manifest no guarda el score (lo calcula scoring.ts en el pipeline);
+  conserva scoreVersion beta-1 y las métricas fuente.
+
+3) TESTS
+$ bun scripts/test-validation.ts
+  -> Tests executed: 58 | passed: 58 | failed: 0
+$ bun scripts/test-strategy-intake.ts
+  -> Tests executed: 54 | passed: 54 | failed: 0
+
+4) TYPECHECK
+$ bun tsc -b --noEmit
+  -> Sin errores nuevos. Solo preexistentes documentados (fuera de alcance):
+     serve.ts (tipos de Bun / import.meta.dir) y
+     src/components/LegalShell.tsx (ReactNode sin usar).
+
+5) BUILD
+$ bun run build
+  -> ✓ built (client + server SSR, sin errores)
+
+6) CALIDAD
+$ git diff --check
+  -> OK (sin errores de whitespace)
+
+7) RESPONSIVE (comprobación estática de la estructura)
+  Contenedor compartido .wrap: 1200px, margin-inline auto,
+  padding-inline 32px (>1024) / 24px (<=1024) / 16px (<=760).
+  .hero/.section/footer usan padding-block (no borran el padding lateral).
+  Verificado para 1440 / 1280 / 1024 / 900 / 768 / 390 px: todas las
+  secciones comparten la misma alineación; nada pegado al borde.
+
+8) PREVIEW
+  Esta sesión no pudo levantar preview: el endpoint del turno anterior
+  devolvió 502 y el CLI freebuff-preview no está disponible en el entorno.
+  La verificación visual en vivo queda pendiente de la plataforma; el
+  código y el build quedan verificados (58/58, 54/54, build OK).
+
+NO MERGE · NO DEPLOY · PR #4 MANTENIDO ABIERTO
