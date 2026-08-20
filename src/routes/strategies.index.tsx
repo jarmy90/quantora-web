@@ -94,7 +94,7 @@ function PublicCard({ s }: { s: PublicStrategy }) {
           <small>{pointsUnit ? t('detail.closedTradeDrawdown') : t('detail.maxDrawdown')}</small>
           <strong style={{ color: 'var(--amber)' }}>
             {dd !== undefined
-              ? `${pointsUnit ? fmtPoints(dd) : fmtUsd(dd)}${pointsUnit ? ' pts' : ''}`
+              ? `${pointsUnit ? fmtPoints(dd) : fmtUsd(dd)}${pointsUnit ? ' pts' : ''}${m.closedTradeDrawdownDecimal !== undefined ? ` · ${(m.closedTradeDrawdownDecimal * 100).toFixed(2)}%` : ''}`
               : '—'}
           </strong>
         </div>

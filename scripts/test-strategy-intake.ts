@@ -490,7 +490,7 @@ test('StochExtreme importer extracts authorized metrics', () => {
   assert(Math.abs(m.winRate! - 45.13064133016627) < 1e-9, `winRate: ${m.winRate}`);
   assert(Math.abs(m.netUsd! - 6582.0) < 0.01, `netUsd: ${m.netUsd}`);
   assert(Math.abs(m.maxDrawdownUsd! - 4690.0) < 0.01, `maxDrawdownUsd: ${m.maxDrawdownUsd}`);
-  assert(Math.abs(m.costPerTradeUsd! - 0.0) < 1e-9, `costPerTradeUsd: ${m.costPerTradeUsd}`);
+  assert(m.costPerTradeUsd === undefined, 'costPerTradeUsd must not be emitted when costsApplied=false');
   assert(manifest.results?.equity?.length === 354, `equity points: ${manifest.results?.equity?.length}`);
   assert(manifest.dataset.strategies[0]?.validationStatus === 'owner_supplied_under_review', 'validationStatus');
   assert(manifest.dataset.strategies[0]?.provenance.dataStatus === 'real', 'dataStatus');
@@ -1212,6 +1212,15 @@ test('TM Bandas S3 performance is USD with costsApplied=false', () => {
   assert(metrics.initialCapital === 10000, `initialCapital: ${metrics.initialCapital}`);
   assert(metrics.netUsd === 6984, `netUsd: ${metrics.netUsd}`);
   assert(metrics.maxDrawdownUsd === 384, `maxDrawdownUsd: ${metrics.maxDrawdownUsd}`);
+  assert(metrics.costPerTradeUsd === undefined, "costPerTradeUsd must not be present when costsApplied=false");
+});
+
+// 90. closedTradeDrawdownDecimal is derived from maxDrawdown / initialCapital
+test("TM Bandas S3 closedTradeDrawdownDecimal = 384/10000 = 0.0384", () => {
+  const m = buildTmBandasS3Manifest().results!.metrics!;
+  assert(m.closedTradeDrawdownDecimal !== undefined, "closedTradeDrawdownDecimal must be present");
+  assert(Math.abs(m.closedTradeDrawdownDecimal! - 0.0384) < 1e-9, `closedTradeDrawdownDecimal: ${m.closedTradeDrawdownDecimal}`);
+});
 
 // ---------------------------------------------------------------------------
 // Run

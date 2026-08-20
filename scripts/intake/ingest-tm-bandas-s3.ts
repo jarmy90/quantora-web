@@ -269,7 +269,6 @@ export function buildTmBandasS3Manifest(evidenceDir: string = EVIDENCE_DIR): Man
   assertClose([...fees][0]!, 0.0, 'fees', 1e-9);
   assertClose(summaryCommissionTotal, 0.0, 'summary commission_total', 1e-9);
   assertClose(summaryFeesTotal, 0.0, 'summary fees_total', 1e-9);
-  const costPerTradeUsd = [...commissions][0]! + [...fees][0]!;
 
   // --- Equity: reconstruct closed-trade equity (no source equity file) ---
   const chronological = [...tradesCsv.rows].sort((a, b) => {
@@ -347,9 +346,9 @@ export function buildTmBandasS3Manifest(evidenceDir: string = EVIDENCE_DIR): Man
     expectancyUsd,
     grossProfit,
     grossLoss,
-    costPerTradeUsd,
     openPositionsAtEnd: summaryOpenAtEnd,
     initialCapital,
+    closedTradeDrawdownDecimal: maxDrawdown / initialCapital,
   };
 
   const params = Object.fromEntries(

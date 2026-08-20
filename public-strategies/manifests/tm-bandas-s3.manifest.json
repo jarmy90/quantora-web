@@ -96,7 +96,7 @@
     },
     "metrics": {
       "breakevens": 0,
-      "costPerTradeUsd": 0,
+      "closedTradeDrawdownDecimal": 0.0384,
       "expectancyUsd": 11.246376811594203,
       "frequencyPerMonth": 53.67457370425222,
       "grossLoss": 9432,

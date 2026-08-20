@@ -121,9 +121,9 @@ function RealDetail({ s }: { s: PublicStrategy }) {
       label: pointsUnit ? t('detail.closedTradeDrawdown') : t('detail.maxDrawdown'),
       value:
         m.maxDrawdownPoints !== undefined
-          ? fmtPoints(m.maxDrawdownPoints)
+          ? fmtPoints(m.maxDrawdownPoints) + (m.closedTradeDrawdownDecimal !== undefined ? ` · ${(m.closedTradeDrawdownDecimal * 100).toFixed(2)}%` : '')
           : m.maxDrawdownUsd !== undefined
-            ? fmtUsd(m.maxDrawdownUsd)
+            ? fmtUsd(m.maxDrawdownUsd) + (m.closedTradeDrawdownDecimal !== undefined ? ` · ${(m.closedTradeDrawdownDecimal * 100).toFixed(2)}%` : '')
             : '—',
       accent: AMBER,
       title: pointsUnit ? t('detail.drawdownNote') : undefined,

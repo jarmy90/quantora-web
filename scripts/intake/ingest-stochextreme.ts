@@ -176,7 +176,6 @@ export function buildStochExtremeManifest(evidenceDir: string = EVIDENCE_DIR): M
     expectancyUsd,
     grossProfit,
     grossLoss,
-    costPerTradeUsd,
   };
 
   const rules = [
