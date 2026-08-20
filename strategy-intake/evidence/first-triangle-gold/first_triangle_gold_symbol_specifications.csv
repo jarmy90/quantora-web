@@ -1,0 +1,2 @@
+broker,server,symbol,description,digits,point,tick_size,tick_value,contract_size,volume_min,volume_step,currency_base,currency_profit,currency_margin
+IC Markets,SET_EXACT_SERVER,XAUUSD,Gold vs US Dollar,2,0.01,0.01,1.0,100.0,0.01,0.01,XAU,USD,XAU

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { strategies } from '../data';
 import { publicStrategies } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
-import { fmtNum, fmtPct, fmtUsd } from '../format';
+import { fmtNum, fmtPct, fmtPoints, fmtUsd } from '../format';
 import { t } from '../i18n';
 import { CatalogNav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -39,6 +39,7 @@ function PublicCard({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const curve = s.equity?.points.map((p) => p.equity) ?? [];
   const score = s.score?.value;
+  const pointsUnit = s.performanceUnit === 'points';
   return (
     <Link to="/strategies/$id" params={{ id: s.id }} className="card" key={s.id}>
       <div className="strategy-top">
@@ -50,6 +51,12 @@ function PublicCard({ s }: { s: PublicStrategy }) {
           <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
           <div className="tag">{s.tagline}</div>
           {s.version && <div className="tag" style={{ marginTop: 4 }}>v{s.version}</div>}
+          {pointsUnit && s.reviewLabel && (
+            <div className="tag" style={{ marginTop: 4, color: 'var(--muted)' }}>
+              {s.costsApplied === false ? `${t('detail.costsNotApplied')} · ` : ''}
+              {s.reviewLabel} · {t('common.independentReproductionPending')}
+            </div>
+          )}
         </div>
         <span style={{ color: 'var(--cyan)', fontSize: 20 }}>↗</span>
       </div>
@@ -80,7 +87,11 @@ function PublicCard({ s }: { s: PublicStrategy }) {
         <div>
           <small>{t('detail.maxDrawdown')}</small>
           <strong style={{ color: 'var(--red)' }}>
-            {m.maxDrawdownUsd !== undefined ? `-${fmtUsd(m.maxDrawdownUsd)}` : '—'}
+            {m.maxDrawdownPoints !== undefined
+              ? `-${fmtPoints(m.maxDrawdownPoints)}`
+              : m.maxDrawdownUsd !== undefined
+                ? `-${fmtUsd(m.maxDrawdownUsd)}`
+                : '—'}
           </strong>
         </div>
       </div>

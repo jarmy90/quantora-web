@@ -54,6 +54,8 @@ export const enUS = {
   'common.risk': 'Risk',
   'common.maxDD': 'Max DD',
   'common.mockDemo': 'Strategy catalog / mock data',
+  'common.ownerSupplied': 'Owner supplied',
+  'common.independentReproductionPending': 'Independent reproduction pending',
 
   'catalog.title': 'Find your signal.',
   'catalog.body':
@@ -123,6 +125,10 @@ export const enUS = {
     'Experimental comparative score based on available historical evidence. It is not an independent validation.',
   'detail.costsNotApplied': 'Costs not applied',
   'detail.costsWarning': 'Reported performance may be reduced after commissions, spread and slippage.',
+  'detail.closedTradeEquity': 'Closed-trade equity · points',
+  'detail.openPositionsAtEnd': 'Open positions at end',
+  'detail.expectancy': 'Expectancy',
+  'detail.ptsPerTrade': 'pts/trade',
 
   'dashboard.eyebrow': 'Account dashboard / MOCK PREVIEW',
   'dashboard.title': 'Your workspace.',

@@ -237,3 +237,28 @@ versioning are validated by `validateManifest`:
   export did not apply them (surfaced as "Costs not applied" with the
   commissions/spread/slippage warning).
 - `filterVersion` / `scoreVersion`: version stamps of the beta rules.
+
+## 14. QNT-0005: point-based results and model identity
+
+Point-based strategies (e.g. First Triangle Gold Adaptive, whose source export
+carries results in points and no USD until broker costs are reconciled) add two
+optional top-level manifest fields:
+
+```json
+{
+  "modelId": "first-triangle-gold",
+  "performanceUnit": "points"
+}
+```
+
+- `modelId`: internal research model identity; never exposed in the public bundle.
+- `performanceUnit`: `"points"` or `"usd"` (default `"usd"`). The frontend
+  formats metrics and the equity tooltip accordingly (e.g. `+2,368.75 pts`,
+  `176.45 pts`, `11.61 pts/trade`), and the equity chart is labelled
+  "Closed-trade equity · points".
+
+For point-based strategies the pipeline feeds `netPoints` / `maxDrawdownPoints`
+into the same unit-agnostic filter and score inputs (the drawdown-vs-result
+ratio is unit-independent), so no USD value is ever fabricated. USD metric keys
+(`netUsd`, `maxDrawdownUsd`, `costPerTradeUsd`, …) must stay absent when the
+source export has no reconciled USD.

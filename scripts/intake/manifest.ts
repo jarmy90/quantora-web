@@ -47,6 +47,10 @@ export type ManifestResults = {
 export type Manifest = {
   manifestVersion: typeof MANIFEST_VERSION;
   strategyId: string;
+  /** Research model identity (internal; not exposed in the public bundle). */
+  modelId?: string;
+  /** Unit of all results metrics/equity: "points" or "usd" (default "usd"). */
+  performanceUnit?: 'points' | 'usd';
   tagline?: string;
   type?: string;
   market?: string;
@@ -193,6 +197,13 @@ export function validateManifest(value: unknown): ManifestIssue[] {
     value.publicationMode !== 'results'
   ) {
     issues.push(error('publicationMode', 'Must be "documentary" or "results".'));
+  }
+  // QNT-0005 fields.
+  if (value.modelId !== undefined && !isText(value.modelId)) {
+    issues.push(error('modelId', 'Must be a non-empty string.'));
+  }
+  if (value.performanceUnit !== undefined && value.performanceUnit !== 'points' && value.performanceUnit !== 'usd') {
+    issues.push(error('performanceUnit', 'Must be "points" or "usd".'));
   }
   if (value.reviewLabel !== undefined && !isText(value.reviewLabel)) {
     issues.push(error('reviewLabel', 'Must be a non-empty string.'));

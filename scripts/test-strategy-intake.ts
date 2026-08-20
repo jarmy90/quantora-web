@@ -15,6 +15,12 @@ import { strategies as mockStrategies } from '../src/data.ts';
 import { evaluatePublishFilter, MIN_PROFIT_FACTOR } from './intake/filter.ts';
 import { buildFirstTriangleManifest, MANIFEST_PATH } from './intake/ingest-first-triangle.ts';
 import { buildStochExtremeManifest, STOCHEXTREME_MANIFEST_PATH } from './intake/ingest-stochextreme.ts';
+import {
+  AUTHORIZED,
+  buildFirstTriangleGoldManifest,
+  FIRST_TRIANGLE_GOLD_MANIFEST_PATH,
+  SOURCE_ARCHIVE_SHA256,
+} from './intake/ingest-first-triangle-gold.ts';
 import { computeQuantoraScore, FAVORABLE_PROFIT_FACTOR } from './intake/scoring.ts';
 import { validateManifest } from './intake/manifest.ts';
 import {
@@ -794,6 +800,183 @@ test('the beta score does not change validationStatus', () => {
   assert(result.entry!.score!.version === 'beta-1', 'score version');
   assert(result.entry!.score!.value > 0, `score value: ${result.entry!.score!.value}`);
   assert(result.entry?.validationStatus === before, 'validationStatus must remain unchanged');
+});
+
+// ---------------------------------------------------------------------------
+// QNT-0005: First Triangle Gold Adaptive (OROM15.zip, points, variant 174/BASE)
+// ---------------------------------------------------------------------------
+
+const GOLD = (): ReturnType<typeof buildFirstTriangleGoldManifest> => buildFirstTriangleGoldManifest();
+const GOLD_ENTRY = (): NonNullable<ReturnType<typeof processManifest>['entry']> => {
+  const result = processManifest(FIRST_TRIANGLE_GOLD_MANIFEST_PATH);
+  assert(result.issues.length === 0, `gold manifest must be valid: ${JSON.stringify(result.issues)}`);
+  return result.entry!;
+};
+const GOLD_PUBLIC = (): ReturnType<typeof buildPublicCatalog>[number] =>
+  buildPublicCatalog([GOLD_ENTRY()])[0]!;
+
+// 55. Source archive hash of the authorized OROM15.zip is recorded and verified
+test('QNT-0005 source archive SHA-256 is the authorized value and importer verifies it', () => {
+  assert(
+    SOURCE_ARCHIVE_SHA256 === '816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476',
+    'SOURCE_ARCHIVE_SHA256 must match the authorized OROM15.zip hash',
+  );
+  // buildFirstTriangleGoldManifest() throws when the recorded source-archive.sha256
+  // content differs from SOURCE_ARCHIVE_SHA256 — succeeding here proves the check passed.
+  const manifest = GOLD();
+  const sourceHashEvidence = manifest.evidence?.find((e) => e.file.includes('source-archive.sha256'));
+  assert(sourceHashEvidence !== undefined, 'manifest must record the source archive hash entry');
+  assert(sourceHashEvidence!.kind === 'source', 'source-archive.sha256 evidence kind');
+  const provenanceNotes = manifest.dataset.strategies[0]?.provenance.notes ?? '';
+  assert(provenanceNotes.includes(SOURCE_ARCHIVE_SHA256), 'provenance notes must carry the archive hash');
+});
+
+// 56. Only variant 174 / BASE is selected: exactly 203 closed logical trades
+test('QNT-0005 selects only variant 174/BASE: 203 closed trades', () => {
+  const m = GOLD().results?.metrics;
+  assert(m, 'metrics must exist');
+  assert(m.trades === 203, `closedTrades: ${m.trades}`);
+  assert(m.openPositionsAtEnd === 1, `openPositionsAtEnd: ${m.openPositionsAtEnd}`);
+  assert(GOLD().results?.equity?.length === 203, 'equity must be exactly 203 points (open position excluded)');
+});
+
+// 57. 203 = 102 wins + 101 losses + 0 breakevens
+test('QNT-0005 wins/losses/breakevens reconcile to 203', () => {
+  const m = GOLD().results!.metrics!;
+  assert(m.wins === 102, `wins: ${m.wins}`);
+  assert(m.losses === 101, `losses: ${m.losses}`);
+  assert(m.breakevens === 0, `breakevens: ${m.breakevens}`);
+  assert(m.wins + m.losses + m.breakevens === 203, '203 = 102 + 101 + 0');
+});
+
+// 58. Profit Factor, gross profit/loss and net reconcile in points
+test('QNT-0005 Profit Factor and gross/net reconcile', () => {
+  const m = GOLD().results!.metrics!;
+  assert(m.profitFactor === AUTHORIZED.profitFactor, `profitFactor: ${m.profitFactor}`);
+  assert(Math.abs(m.grossProfitPoints - 5009.1) < 1e-6, `grossProfitPoints: ${m.grossProfitPoints}`);
+  assert(Math.abs(m.grossLossPoints - 2640.35) < 1e-6, `grossLossPoints: ${m.grossLossPoints}`);
+  assert(Math.abs(m.netPoints - 2368.75) < 1e-6, `netPoints: ${m.netPoints}`);
+  assert(
+    Math.abs(m.grossProfitPoints / m.grossLossPoints - m.profitFactor) < 1e-6,
+    'PF must equal gross/gross',
+  );
+});
+
+// 59. Drawdown and expectancy in points
+test('QNT-0005 max drawdown and expectancy are in points', () => {
+  const m = GOLD().results!.metrics!;
+  assert(Math.abs(m.maxDrawdownPoints - 176.45) < 1e-6, `maxDrawdownPoints: ${m.maxDrawdownPoints}`);
+  assert(Math.abs(m.expectancyPoints - 11.61151960784312) < 1e-9, `expectancyPoints: ${m.expectancyPoints}`);
+  assert(m.winRate === 50, `winRate: ${m.winRate}`);
+  assert(m.frequencyPerMonth > 14 && m.frequencyPerMonth < 16, `frequency: ${m.frequencyPerMonth}`);
+});
+
+// 60. No USD metric is emitted (absent data stays absent, never zero USD)
+test('QNT-0005 emits no USD metrics', () => {
+  const m = GOLD().results!.metrics!;
+  for (const key of Object.keys(m)) {
+    assert(!key.endsWith('Usd'), `USD metric must never be emitted: ${key}`);
+  }
+  const pub = GOLD_PUBLIC();
+  assert(pub.metrics!.netUsd === undefined, 'no netUsd in public output');
+  assert(pub.metrics!.maxDrawdownUsd === undefined, 'no maxDrawdownUsd in public output');
+  assert(pub.metrics!.costPerTradeUsd === undefined, 'no costPerTradeUsd in public output');
+});
+
+// 61. Period reconciliation: DEVELOPMENT + VALIDATION + LOCKED_OOS = 203
+test('QNT-0005 DEV+VAL+OOS reconciles to 203 closed trades', () => {
+  const manifest = GOLD();
+  assert(
+    manifest.results?.metrics?.trades === AUTHORIZED.development + AUTHORIZED.validation + AUTHORIZED.lockedOos,
+    'period reconciliation must equal closed trades',
+  );
+  assert(AUTHORIZED.development === 87 && AUTHORIZED.validation === 51 && AUTHORIZED.lockedOos === 65, 'authorized splits');
+});
+
+// 62. Monthly buckets: 10 of 12 positive months (reproducible from monthly.csv)
+test('QNT-0005 monthly buckets are 10 of 12 positive months', () => {
+  const manifest = GOLD();
+  const limitation = manifest.limitations?.find((l) => l.includes('Positive months'));
+  assert(limitation !== undefined, 'positive-months limitation must exist');
+  assert(limitation!.includes('10 of 12'), `limitation: ${limitation}`);
+  assert(AUTHORIZED.positiveMonths === 10 && AUTHORIZED.negativeMonths === 2, 'authorized monthly counts');
+});
+
+// 63. costsApplied=false and the costs score component is unavailable
+test('QNT-0005 costsApplied=false makes the costs score component unavailable', () => {
+  const manifest = GOLD();
+  assert(manifest.costsApplied === false, 'costsApplied must be false');
+  const entry = GOLD_ENTRY();
+  assert(entry.costsApplied === false, 'entry costsApplied');
+  const costs = entry.score!.components.find((c) => c.key === 'costs');
+  assert(costs !== undefined, 'costs component must exist');
+  assert(costs!.available === false, 'costs must be unavailable');
+  assert(costs!.points === 0, 'unavailable component carries 0 points');
+  assert(Math.abs(entry.score!.confidence - 0.95) < 1e-9, `confidence must drop to 0.95: ${entry.score!.confidence}`);
+});
+
+// 64. performanceUnit=points reaches the public output with point metrics
+test('QNT-0005 performanceUnit=points reaches the public output', () => {
+  const manifest = GOLD();
+  assert(manifest.performanceUnit === 'points', `manifest performanceUnit: ${manifest.performanceUnit}`);
+  assert(manifest.modelId === 'first-triangle-gold', `modelId: ${manifest.modelId}`);
+  const pub = GOLD_PUBLIC();
+  assert(pub.performanceUnit === 'points', 'public performanceUnit');
+  assert(pub.metrics?.netPoints !== undefined, 'public netPoints');
+  assert(pub.equity?.points.length === 203, 'public equity points');
+});
+
+// 65. Point metrics feed the unit-agnostic drawdown component of the beta score
+test('QNT-0005 point drawdown feeds the score drawdown component', () => {
+  const entry = GOLD_ENTRY();
+  assert(entry.score!.version === 'beta-1', 'score version');
+  const dd = entry.score!.components.find((c) => c.key === 'drawdown');
+  assert(dd !== undefined && dd.available === true, 'drawdown component must be available from points');
+  assert(dd!.points > 80, `drawdown vs result must score high: ${dd!.points}`);
+});
+
+// 66. Filter: results mode, PF 1.897 >= 1.15 → published
+test('QNT-0005 passes the beta-1 results filter and publishes', () => {
+  const entry = GOLD_ENTRY();
+  assert(entry.publicationMode === 'results', 'publicationMode');
+  assert(entry.filterVersion === 'beta-1', 'filterVersion');
+  assert(entry.published === true, `expected published: ${JSON.stringify(entry.filterReasons)}`);
+  const pub = GOLD_PUBLIC();
+  assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
+  assert(pub.independentReproduction === false, 'independentReproduction must be false');
+});
+
+// 67. Internal states never reach the public output for the gold strategy
+test('QNT-0005 public output strips internal states', () => {
+  const pub = GOLD_PUBLIC();
+  assert(!('validationStatus' in pub), 'no validationStatus');
+  assert(!('dataStatus' in pub), 'no dataStatus');
+  assert(!('status' in pub), 'no status');
+  assert(!JSON.stringify(pub).includes('owner_supplied_under_review'), 'no internal status string');
+  assert(JSON.stringify(pub).includes('modelId') === false, 'modelId is internal and must not leak');
+});
+
+// 68. Open position is a visible limitation and never counted as a closed trade
+test('QNT-0005 open position is excluded and documented', () => {
+  const manifest = GOLD();
+  assert(
+    manifest.limitations?.some((l) => l.includes('One position remained open at the end')),
+    'open-position limitation must exist',
+  );
+  assert(GOLD().results?.metrics?.trades === 203, 'closed trades must stay 203 (not 204)');
+  assert(GOLD().results?.equity?.length === 203, 'equity must not include the open position');
+});
+
+// 69. Identity fields are the authorized ones
+test('QNT-0005 identity matches the authorized contract', () => {
+  const manifest = GOLD();
+  assert(manifest.strategyId === 'first-triangle-gold-adaptive', 'strategyId');
+  assert(manifest.dataset.strategies[0]?.name === 'First Triangle Gold Adaptive', 'name');
+  assert(manifest.dataset.strategies[0]?.version === '3.00', 'version');
+  assert(manifest.publicationMode === 'results', 'publicationMode');
+  assert(manifest.scoreVersion === 'beta-1', 'scoreVersion');
+  assert(manifest.filterVersion === 'beta-1', 'filterVersion');
+  assert(manifest.dataset.strategies[0]?.assetIds.includes('xauusd'), 'asset xauusd');
 });
 
 // ---------------------------------------------------------------------------

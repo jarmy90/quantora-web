@@ -4,7 +4,7 @@ import { curveFor, findStrategy, type Asset, type Strategy } from '../data';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
 import type { EquityPoint } from '../domain/types';
-import { fmtDate, fmtNum, fmtPct, fmtPeriod, fmtSignedUsd, fmtUsd } from '../format';
+import { fmtDate, fmtNum, fmtNumDec, fmtPct, fmtPeriod, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
@@ -32,13 +32,15 @@ function Nav() {
 // ---------------------------------------------------------------------------
 
 /**
- * Equity-curve chart driven by the real equity points (timestamp + USD value).
- * Hovering reveals the closest point's date, equity and drawdown.
+ * Equity-curve chart driven by the real equity points (timestamp + value).
+ * Hovering reveals the closest point's date, equity and drawdown. Point-based
+ * strategies (performanceUnit = "points") render points, not USD.
  */
-function RealEquityChart({ points }: { points: EquityPoint[] }) {
+function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'points' | 'usd' }) {
   const [hover, setHover] = useState<number | null>(null);
   const total = points.length;
   if (total < 2) return <p className="muted">—</p>;
+  const fmtEquity = (value: number): string => (unit === 'points' ? fmtPoints(value) : fmtUsd(value));
 
   const values = points.map((p) => p.equity);
   const min = Math.min(...values);
@@ -84,8 +86,8 @@ function RealEquityChart({ points }: { points: EquityPoint[] }) {
       </svg>
       {hoverPoint && (
         <div className="mono" style={{ fontSize: 11, marginTop: 10, color: 'var(--muted)' }}>
-          {fmtDate(hoverPoint.timestamp)} · {fmtUsd(hoverPoint.equity)}
-          {hoverPoint.drawdown !== undefined && ` · ${t('detail.drawdownValue')} ${fmtUsd(hoverPoint.drawdown)}`}
+          {fmtDate(hoverPoint.timestamp)} · {fmtEquity(hoverPoint.equity)}
+          {hoverPoint.drawdown !== undefined && ` · ${t('detail.drawdownValue')} ${fmtEquity(hoverPoint.drawdown)}`}
         </div>
       )}
     </>
@@ -95,6 +97,7 @@ function RealEquityChart({ points }: { points: EquityPoint[] }) {
 function RealDetail({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const score = s.score;
+  const pointsUnit = s.performanceUnit === 'points';
 
   const cells: { label: string; value: string; accent?: string }[] = [
     {
@@ -114,7 +117,12 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     },
     {
       label: t('detail.maxDrawdown'),
-      value: m.maxDrawdownUsd !== undefined ? `-${fmtUsd(m.maxDrawdownUsd)}` : '—',
+      value:
+        m.maxDrawdownPoints !== undefined
+          ? `-${fmtPoints(m.maxDrawdownPoints)}`
+          : m.maxDrawdownUsd !== undefined
+            ? `-${fmtUsd(m.maxDrawdownUsd)}`
+            : '—',
       accent: RED,
     },
     {
@@ -128,10 +136,31 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     },
     {
       label: t('detail.netResult'),
-      value: m.netUsd !== undefined ? fmtSignedUsd(m.netUsd) : '—',
-      accent: (m.netUsd ?? 0) >= 0 ? LIME : RED,
+      value:
+        m.netPoints !== undefined
+          ? fmtSignedPoints(m.netPoints)
+          : m.netUsd !== undefined
+            ? fmtSignedUsd(m.netUsd)
+            : '—',
+      accent: (m.netPoints ?? m.netUsd ?? 0) >= 0 ? LIME : RED,
+    },
+    {
+      label: t('detail.expectancy'),
+      value:
+        m.expectancyPoints !== undefined
+          ? `${fmtNumDec(m.expectancyPoints)} ${t('detail.ptsPerTrade')}`
+          : m.expectancyUsd !== undefined
+            ? `${fmtUsd(m.expectancyUsd)} / trade`
+            : '—',
     },
   ];
+
+  if (m.openPositionsAtEnd !== undefined) {
+    cells.push({
+      label: t('detail.openPositionsAtEnd'),
+      value: String(fmtNum(m.openPositionsAtEnd)),
+    });
+  }
 
   return (
     <>
@@ -153,9 +182,9 @@ function RealDetail({ s }: { s: PublicStrategy }) {
 
         <section className="card chart-card">
           <div className="eyebrow" style={{ marginBottom: 12 }}>
-            {t('detail.equityCurve')}
+            {pointsUnit ? t('detail.closedTradeEquity') : t('detail.equityCurve')}
           </div>
-          <RealEquityChart points={s.equity?.points ?? []} />
+          <RealEquityChart points={s.equity?.points ?? []} unit={pointsUnit ? 'points' : 'usd'} />
         </section>
 
         <section className="metric-grid" style={{ marginTop: 15 }}>
@@ -185,6 +214,11 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.configuration && <li>Configuration: {s.configuration}</li>}
           </ul>
           {s.scoreVersion && <p className="mono research-note">{t('detail.scoreBetaNote')}</p>}
+          {pointsUnit && s.reviewLabel && (
+            <p className="mono research-note">
+              {s.reviewLabel} · {t('common.independentReproductionPending')}
+            </p>
+          )}
           <p className="mono research-note">{t('detail.researchNote')}</p>
         </section>
 
