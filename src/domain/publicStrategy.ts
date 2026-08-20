@@ -73,6 +73,8 @@ export type PublicStrategy = {
   filterVersion?: string;
   /** "documentary" (no results required) or "results" (performance required). */
   publicationMode?: PublicationMode;
+  /** Unit of results metrics/equity: "points" or "usd" (default "usd"). */
+  performanceUnit?: 'points' | 'usd';
 };
 
 export type PublicPeriod = {

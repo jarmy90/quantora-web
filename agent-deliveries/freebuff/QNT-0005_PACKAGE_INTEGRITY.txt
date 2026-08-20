@@ -1,0 +1,34 @@
+=====================================================================
+QNT-0005 / QNT-0005C · PACKAGE INTEGRITY (ENTREGADO)
+=====================================================================
+SHA BASE:   cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main tras merge PR #4)
+SHA HEAD:   be8935f3dce93e19acd87955e26c4d95e30809dc (producto QNT-0005C)
+PR:         #5 — feat/QNT-0005-first-triangle-gold (OPEN, sin merge, sin deploy)
+FECHA DE GENERACIÓN: 2026-08-20
+
+NOMBRE DEL PAQUETE: QNT-0005_Cambios.zip.txt
+TAMAÑO DEL ZIP:     6,025,894 bytes
+SHA-256 DEL ZIP:    4ac2dfda4b10f890fe1e5e8e60b0d8ee96a44523306b11fe994147ea9280253f
+
+RESUMEN DEL DIFF (base..HEAD):
+  Añadidos:    20
+  Modificados: 16
+  Eliminados:  0
+  Total:       36
+
+CONTENIDO DEL ZIP: 41 entradas
+  5 documentos en la raíz:
+    CAMBIOS.txt · ARCHIVOS_MODIFICADOS.txt · COMANDOS_Y_RESULTADOS.txt
+    · GIT_DIFF.patch · PACKAGE_INTEGRITY.txt (interno, sin hash)
+  34 archivos completos en archivos/ (todos los del diff excepto el ZIP
+    anterior y esta copia externa, que quedan fuera por diseño)
+  2 capturas en capturas-qnt-0005c/:
+    qnt5c-catalogo-1440.png · qnt5c-ficha-gold-1440.png
+
+COMPROBACIÓN DE EXTRACCIÓN: OK — "No errors detected in compressed data"
+COMPROBACIONES:
+  - 34/34 archivos del diff dentro del ZIP, ninguno vacío
+  - Sin node_modules · sin dist · sin secretos · sin rutas locales privadas
+  - 76 tests en scripts/test-strategy-intake.ts incluido (76/76 OK)
+  - SHA HEAD del paquete coincide con el PR #5 (be8935f)
+  - ZIP determinista (mismo contenido -> mismo hash)
