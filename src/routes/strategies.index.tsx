@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { strategies } from '../data';
 import { publicStrategies } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
-import { fmtNum, fmtPct, fmtPoints, fmtUsd } from '../format';
+import { fmtNum, fmtPoints, fmtUsd } from '../format';
 import { t } from '../i18n';
 import { CatalogNav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -20,7 +20,7 @@ const Spark = ({ points, color }: { points: number[]; color: string }) => (
   </svg>
 );
 
-/** Small equity sparkline generated from the real equity points (USD values). */
+/** Small equity sparkline generated from the real equity points. */
 function EquitySpark({ points }: { points: number[] }) {
   const min = Math.min(...points);
   const max = Math.max(...points);
@@ -40,6 +40,8 @@ function PublicCard({ s }: { s: PublicStrategy }) {
   const curve = s.equity?.points.map((p) => p.equity) ?? [];
   const score = s.score?.value;
   const pointsUnit = s.performanceUnit === 'points';
+  const net = pointsUnit ? m.netPoints : m.netUsd;
+  const dd = pointsUnit ? m.maxDrawdownPoints : m.maxDrawdownUsd;
   return (
     <Link to="/strategies/$id" params={{ id: s.id }} className="card" key={s.id}>
       <div className="strategy-top">
@@ -51,10 +53,10 @@ function PublicCard({ s }: { s: PublicStrategy }) {
           <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
           <div className="tag">{s.tagline}</div>
           {s.version && <div className="tag" style={{ marginTop: 4 }}>v{s.version}</div>}
-          {pointsUnit && s.reviewLabel && (
+          {pointsUnit && (
             <div className="tag" style={{ marginTop: 4, color: 'var(--muted)' }}>
-              {s.costsApplied === false ? `${t('detail.costsNotApplied')} · ` : ''}
-              {s.reviewLabel} · {t('common.independentReproductionPending')}
+              {t('detail.historicalBacktest')} · {t('detail.resultsInPoints')}
+              {s.costsApplied === false ? ` · ${t('detail.costsNotApplied')}` : ''}
             </div>
           )}
         </div>
@@ -63,16 +65,20 @@ function PublicCard({ s }: { s: PublicStrategy }) {
       {curve.length > 1 && <EquitySpark points={curve} />}
       <div className="stats">
         <div>
-          <small>{s.scoreVersion ? t('detail.scoreBeta') : t('detail.score')}</small>
-          <strong style={{ color: 'var(--lime)' }}>{score ?? '—'}</strong>
+          <small>{t('detail.netResult')}</small>
+          <strong style={{ color: net !== undefined && net > 0 ? 'var(--green)' : undefined }}>
+            {net !== undefined
+              ? `+${pointsUnit ? fmtPoints(net) : fmtUsd(net)}${pointsUnit ? ' pts' : ''}`
+              : '—'}
+          </strong>
         </div>
         <div>
           <small>{t('detail.profitFactor')}</small>
           <strong>{m.profitFactor !== undefined ? m.profitFactor.toFixed(2) : '—'}</strong>
         </div>
         <div>
-          <small>{t('detail.winRate')}</small>
-          <strong>{m.winRate !== undefined ? fmtPct(m.winRate) : '—'}</strong>
+          <small>{s.scoreVersion ? t('detail.scoreBeta') : t('detail.score')}</small>
+          <strong style={{ color: 'var(--lime)' }}>{score ?? '—'}</strong>
         </div>
       </div>
       <div className="stats" style={{ marginTop: 10 }}>
@@ -85,13 +91,11 @@ function PublicCard({ s }: { s: PublicStrategy }) {
           <strong>{m.frequencyPerMonth !== undefined ? `${fmtNum(m.frequencyPerMonth)} / mo` : '—'}</strong>
         </div>
         <div>
-          <small>{t('detail.maxDrawdown')}</small>
-          <strong style={{ color: 'var(--red)' }}>
-            {m.maxDrawdownPoints !== undefined
-              ? `-${fmtPoints(m.maxDrawdownPoints)}`
-              : m.maxDrawdownUsd !== undefined
-                ? `-${fmtUsd(m.maxDrawdownUsd)}`
-                : '—'}
+          <small>{pointsUnit ? t('detail.closedTradeDrawdown') : t('detail.maxDrawdown')}</small>
+          <strong style={{ color: 'var(--amber)' }}>
+            {dd !== undefined
+              ? `${pointsUnit ? fmtPoints(dd) : fmtUsd(dd)}${pointsUnit ? ' pts' : ''}`
+              : '—'}
           </strong>
         </div>
       </div>

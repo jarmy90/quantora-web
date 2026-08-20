@@ -49,7 +49,10 @@ export const FIRST_TRIANGLE_GOLD_ID = 'first-triangle-gold-adaptive';
 export const FIRST_TRIANGLE_GOLD_VARIANT = 174;
 export const FIRST_TRIANGLE_GOLD_COST_SCENARIO = 'BASE';
 
-// Authorized figures (variant 174, BASE, expressed in points).
+// Authorized figures (variant 174, BASE, expressed in points). Public metrics are
+// recomputed over the 203 CLOSED trades; the source aggregate values (which used
+// the exported count of 204, including the open position) are kept internally as
+// sourceWinRate / sourceExpectancy in provenance notes.
 export const AUTHORIZED = {
   closedTrades: 203,
   wins: 102,
@@ -60,8 +63,11 @@ export const AUTHORIZED = {
   netPoints: 2368.7499999999964,
   profitFactor: 1.8971348495464608,
   maxDrawdownPoints: 176.44999999999982,
-  expectancyPoints: 11.61151960784312, // source: net / exported count 204 (incl. open position)
-  winRate: 50.0, // source: wins / exported count 204 (incl. open position)
+  // Closed-trade metrics (QNT-0005C): recomputed from the 203 closed trades.
+  winRate: 50.24630541871921, // 102 / 203
+  expectancyPoints: 11.668719211822642, // 2368.75 / 203 (= periods ALL expectancy)
+  sourceWinRate: 50.0, // source aggregate: wins / 204
+  sourceExpectancy: 11.61151960784312, // source aggregate: net / 204
   equityPoints: 203,
   development: 87,
   validation: 51,
@@ -86,11 +92,16 @@ function parseCsv(text: string): Csv {
   return { headers, rows };
 }
 
-/** "2025.07.02 03:00:00" → "2025-07-02T03:00:00Z" (source times are UTC). */
-function toIso(dotDateTime: string): string {
+/**
+ * "2025.07.02 03:00:00" → "2025-07-02T03:00:00" (naive).
+ *
+ * The source timezone is unknown (QNT-0005C), so no Z is appended and the
+ * timestamps are NOT normalized: they keep the source's naive local format.
+ */
+function toNaive(dotDateTime: string): string {
   const [date, time] = dotDateTime.split(' ');
   if (!date || !time) throw new Error(`Unexpected source timestamp: ${dotDateTime}`);
-  return `${date.replace(/\./g, '-')}T${time}Z`;
+  return `${date.replace(/\./g, '-')}T${time}`;
 }
 
 function colValue(csv: Csv, row: string[], name: string): string {
@@ -210,13 +221,18 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
   assertClose(profitFactor, AUTHORIZED.profitFactor, 'profitFactor', 1e-12);
   assertClose(profitFactor, grossProfit / grossLoss, 'profitFactor (gross ratio)', 1e-6);
 
-  // Win rate + expectancy: extracted verbatim from the source summary (the source
-  // divides by the exported count 204, which includes the open position; the
-  // closed-trade count is 203). Stored as authorized, documented in limitations.
-  const winRate = numCol(summary, summaryRow, 'win_rate');
-  const expectancy = numCol(summary, summaryRow, 'expectancy');
-  assertClose(winRate, AUTHORIZED.winRate, 'winRate', 1e-9);
-  assertClose(expectancy, AUTHORIZED.expectancyPoints, 'expectancyPoints', 1e-9);
+  // QNT-0005C: public metrics are recomputed over the 203 CLOSED trades. The
+  // source aggregate values (win_rate 50.0, expectancy 11.6115) divided by the
+  // exported count of 204 (including the open position) and are kept only in
+  // provenance notes, never as the main public metrics.
+  const sourceWinRate = numCol(summary, summaryRow, 'win_rate');
+  const sourceExpectancy = numCol(summary, summaryRow, 'expectancy');
+  assertClose(sourceWinRate, AUTHORIZED.sourceWinRate, 'sourceWinRate', 1e-9);
+  assertClose(sourceExpectancy, AUTHORIZED.sourceExpectancy, 'sourceExpectancy', 1e-9);
+  const closedWinRate = (wins / AUTHORIZED.closedTrades) * 100;
+  const closedExpectancy = netSum / AUTHORIZED.closedTrades;
+  assertClose(closedWinRate, AUTHORIZED.winRate, 'winRate (102/203)', 1e-9);
+  assertClose(closedExpectancy, AUTHORIZED.expectancyPoints, 'expectancyPoints (net/203)', 1e-9);
 
   // Open position: declared separately, never counted as a closed trade.
   const openAtEndSummary = colValue(summary, summaryRow, 'open_at_end');
@@ -227,7 +243,7 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
 
   // 9. Equity: exactly the 203 closed-trade equity points (points; USD = NA).
   const points: EquityPoint[] = equity.rows.map((row) => ({
-    timestamp: toIso(colValue(equity, row, 'timestamp')),
+    timestamp: toNaive(colValue(equity, row, 'timestamp')),
     equity: numCol(equity, row, 'equity_points'),
     drawdown: numCol(equity, row, 'drawdown_points'),
   }));
@@ -246,12 +262,13 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
   const periodRows = periods.rows.filter(
     (row) => Number(colValue(periods, row, 'variant_id')) === FIRST_TRIANGLE_GOLD_VARIANT,
   );
-  const byPeriod = new Map<string, { trades: number; net: number; pf: number }>();
+  const byPeriod = new Map<string, { trades: number; net: number; pf: number; expectancy: number }>();
   for (const row of periodRows) {
     byPeriod.set(colValue(periods, row, 'period'), {
       trades: numCol(periods, row, 'trades'),
       net: numCol(periods, row, 'net_points'),
       pf: numCol(periods, row, 'profit_factor'),
+      expectancy: numCol(periods, row, 'expectancy'),
     });
   }
   const dev = byPeriod.get('DEVELOPMENT');
@@ -268,6 +285,12 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
   assertCount(all.trades, AUTHORIZED.closedTrades, 'ALL trades');
   assertClose(all.net, summaryNet, 'ALL net', 1e-6);
   assertClose(all.pf, profitFactor, 'ALL profitFactor', 1e-9);
+  // Cross-check: the source's own ALL period row reports net/203 expectancy, which
+  // must equal the closed-trade expectancy used as the public metric.
+  const allExpectancy = all.expectancy;
+  if (Math.abs(allExpectancy - closedExpectancy) > 1e-9) {
+    throw new Error(`Closed expectancy must match the ALL period expectancy: ${allExpectancy}`);
+  }
 
   // Monthly: 12 buckets with closed trades; 10 positive, 2 negative (reproducible from monthly.csv).
   const monthRows = monthly.rows.filter(
@@ -282,8 +305,8 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
   // Frequency: ~15 closed trades per month over the analyzed period.
   const runStart = colValue(coverage, coverageRow, 'start_time');
   const runEnd = colValue(coverage, coverageRow, 'end_time');
-  const startMs = Date.parse(toIso(runStart));
-  const endMs = Date.parse(toIso(runEnd));
+  const startMs = Date.parse(toNaive(runStart));
+  const endMs = Date.parse(toNaive(runEnd));
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) throw new Error('Invalid coverage period.');
   const days = (endMs - startMs) / 86_400_000;
   const frequencyPerMonth = AUTHORIZED.closedTrades / (days / 30.4375);
@@ -292,9 +315,11 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
   }
 
   // 17. No USD metric may be emitted (costs are not applied and USD is unavailable).
+  // Public metrics are the CLOSED-trade values; source-aggregate values (which
+  // counted 204, including the open position) never become public metrics.
   const metrics: Record<string, number> = {
     profitFactor,
-    winRate,
+    winRate: closedWinRate,
     trades: AUTHORIZED.closedTrades,
     wins,
     losses,
@@ -303,12 +328,13 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
     grossLossPoints: grossLoss,
     netPoints: summaryNet,
     maxDrawdownPoints: summaryDrawdown,
-    expectancyPoints: expectancy,
+    expectancyPoints: closedExpectancy,
     frequencyPerMonth,
     openPositionsAtEnd: AUTHORIZED.openPositionsAtEnd,
   };
   for (const key of Object.keys(metrics)) {
     if (key.endsWith('Usd')) throw new Error(`USD metric must never be emitted: ${key}`);
+    if (key.startsWith('source')) throw new Error(`Source-only values must not be public metrics: ${key}`);
   }
   for (const value of Object.values(metrics)) {
     if (!Number.isFinite(value)) throw new Error(`Non-finite metric value: ${value}`);
@@ -350,22 +376,16 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
     reviewLabel: 'Owner supplied',
     independentReproduction: false,
     costsApplied: false,
+    sourceTimezone: null,
+    timestampNormalization: 'not_normalized',
     rules,
     limitations: [
       'Historical backtest on XAUUSD (Gold vs US Dollar), M15, every tick based on real ticks.',
       'Results are expressed in points, not USD.',
-      'Costs were not applied to this export (commission/slippage recorded as 0.0 are not confirmed real costs).',
-      'One position remained open at the end of the test and is excluded from closed-trade metrics.',
-      'Equity is sampled after each closed trade, not intraday.',
-      'Initial capital is unavailable.',
-      'Timezone is unavailable.',
-      'Broker server is unavailable.',
-      '203 closed trades (variant 174 of 378, SL 55 / activation 60 / distance 25, BASE).',
+      'Initial capital, timezone and broker server are unavailable.',
+      '203 closed trades (variant 174 of 378, SL 55 / activation 60 / distance 25, BASE); 1 open position at end excluded from closed-trade metrics.',
       'Positive months in the supplied backtest: 10 of 12 months with closed trades (2 negative months).',
-      'Source win rate and expectancy divide by the exported count (204, including the open position); the closed-trade count is 203.',
-      'Owner-supplied evidence.',
-      'Independent reproduction is pending.',
-      'Past performance does not guarantee future results.',
+      'Source aggregate metrics used the exported count of 204 (including one open position); public closed-trade metrics were recomputed from the 203 closed trades.',
     ],
     costs: {
       status:
@@ -455,7 +475,7 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
       },
     ],
     results: {
-      period: { start: toIso(runStart), end: toIso(runEnd), timeframe: 'M15' },
+      period: { start: toNaive(runStart), end: toNaive(runEnd), timeframe: 'M15' },
       metrics,
       equity: points,
       evidenceComplete: 1,
@@ -484,8 +504,12 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
               'Source: data/quantora-real-backtests @ 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf, ' +
               'data/imports/quantora-real-backtests/OROM15.zip, SHA-256 ' +
               '816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476. ' +
-              'Run id FIRST_TRIANGLE_GOLD_EVIDENCE_XAUUSD_1751328000 (source run timestamp 2025-07-01). ' +
+              'Run id FIRST_TRIANGLE_GOLD_EVIDENCE_XAUUSD_1751328000 (source run timestamp 2025-07-01; ' +
+              'sourceTimezone unknown, timestamps kept naive and not normalized). ' +
               'Model id first-triangle-gold. Selected variant 174 of 378 (SL55_ACT60_DIST25_BASE). ' +
+              'Source aggregate used exported count 204, including one open position (source win rate 50.0%, ' +
+              'source expectancy 11.6115 pts/trade). Public closed-trade metrics were recomputed from the 203 ' +
+              'closed trades (win rate 50.2463%, expectancy 11.6687 pts/trade). ' +
               'createdAt/updatedAt reflect the source run timestamp; no separate delivery timestamp was provided.',
           },
         },

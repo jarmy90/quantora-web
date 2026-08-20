@@ -13,6 +13,8 @@ import '../styles/app.css';
 const CYAN = '#72d9ff';
 const LIME = '#c9ff5a';
 const RED = '#ff7185';
+const GREEN = '#4ade80';
+const AMBER = '#e0a860';
 
 function Nav() {
   return (
@@ -99,7 +101,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
   const score = s.score;
   const pointsUnit = s.performanceUnit === 'points';
 
-  const cells: { label: string; value: string; accent?: string }[] = [
+  const cells: { label: string; value: string; accent?: string; title?: string }[] = [
     {
       label: s.scoreVersion ? t('detail.scoreBeta') : t('detail.score'),
       value: score ? String(score.value) : '—',
@@ -116,14 +118,15 @@ function RealDetail({ s }: { s: PublicStrategy }) {
       value: m.frequencyPerMonth !== undefined ? `${fmtNum(m.frequencyPerMonth)} ${t('detail.freqPerMonth')}` : '—',
     },
     {
-      label: t('detail.maxDrawdown'),
+      label: pointsUnit ? t('detail.closedTradeDrawdown') : t('detail.maxDrawdown'),
       value:
         m.maxDrawdownPoints !== undefined
-          ? `-${fmtPoints(m.maxDrawdownPoints)}`
+          ? fmtPoints(m.maxDrawdownPoints)
           : m.maxDrawdownUsd !== undefined
-            ? `-${fmtUsd(m.maxDrawdownUsd)}`
+            ? fmtUsd(m.maxDrawdownUsd)
             : '—',
-      accent: RED,
+      accent: AMBER,
+      title: pointsUnit ? t('detail.drawdownNote') : undefined,
     },
     {
       label: t('detail.costs'),
@@ -142,7 +145,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           : m.netUsd !== undefined
             ? fmtSignedUsd(m.netUsd)
             : '—',
-      accent: (m.netPoints ?? m.netUsd ?? 0) >= 0 ? LIME : RED,
+      accent: (m.netPoints ?? m.netUsd ?? 0) >= 0 ? GREEN : RED,
     },
     {
       label: t('detail.expectancy'),
@@ -191,7 +194,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           {cells.map((cell) => (
             <div className="metric-cell" key={cell.label}>
               <small>{cell.label}</small>
-              <strong style={cell.accent ? { color: cell.accent } : undefined}>{cell.value}</strong>
+              <strong title={cell.title} style={cell.accent ? { color: cell.accent } : undefined}>{cell.value}</strong>
             </div>
           ))}
         </section>
@@ -214,13 +217,19 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.configuration && <li>Configuration: {s.configuration}</li>}
           </ul>
           {s.scoreVersion && <p className="mono research-note">{t('detail.scoreBetaNote')}</p>}
-          {pointsUnit && s.reviewLabel && (
-            <p className="mono research-note">
-              {s.reviewLabel} · {t('common.independentReproductionPending')}
-            </p>
-          )}
           <p className="mono research-note">{t('detail.researchNote')}</p>
         </section>
+
+        {pointsUnit && (
+          <section className="card" style={{ marginTop: 15 }}>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>
+              {t('detail.evidence')}
+            </div>
+            <p className="muted" style={{ fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+              {t('detail.evidenceClosedTrade')}
+            </p>
+          </section>
+        )}
 
         <section className="card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 12 }}>

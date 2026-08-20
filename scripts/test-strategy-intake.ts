@@ -862,12 +862,13 @@ test('QNT-0005 Profit Factor and gross/net reconcile', () => {
   );
 });
 
-// 59. Drawdown and expectancy in points
-test('QNT-0005 max drawdown and expectancy are in points', () => {
+// 59. Drawdown and expectancy are in points; win rate/expectancy are CLOSED-trade
+// (QNT-0005C: recomputed from the 203 closed trades, not the source 204 count).
+test('QNT-0005 max drawdown in points and closed-trade win rate/expectancy', () => {
   const m = GOLD().results!.metrics!;
   assert(Math.abs(m.maxDrawdownPoints - 176.45) < 1e-6, `maxDrawdownPoints: ${m.maxDrawdownPoints}`);
-  assert(Math.abs(m.expectancyPoints - 11.61151960784312) < 1e-9, `expectancyPoints: ${m.expectancyPoints}`);
-  assert(m.winRate === 50, `winRate: ${m.winRate}`);
+  assert(Math.abs(m.expectancyPoints - 2368.75 / 203) < 1e-9, `expectancyPoints: ${m.expectancyPoints}`);
+  assert(Math.abs(m.winRate - (102 / 203) * 100) < 1e-9, `winRate: ${m.winRate}`);
   assert(m.frequencyPerMonth > 14 && m.frequencyPerMonth < 16, `frequency: ${m.frequencyPerMonth}`);
 });
 
@@ -960,8 +961,8 @@ test('QNT-0005 public output strips internal states', () => {
 test('QNT-0005 open position is excluded and documented', () => {
   const manifest = GOLD();
   assert(
-    manifest.limitations?.some((l) => l.includes('One position remained open at the end')),
-    'open-position limitation must exist',
+    manifest.limitations?.some((l) => l.includes('1 open position at end excluded from closed-trade metrics')),
+    `open-position limitation must exist: ${JSON.stringify(manifest.limitations)}`,
   );
   assert(GOLD().results?.metrics?.trades === 203, 'closed trades must stay 203 (not 204)');
   assert(GOLD().results?.equity?.length === 203, 'equity must not include the open position');
@@ -977,6 +978,89 @@ test('QNT-0005 identity matches the authorized contract', () => {
   assert(manifest.scoreVersion === 'beta-1', 'scoreVersion');
   assert(manifest.filterVersion === 'beta-1', 'filterVersion');
   assert(manifest.dataset.strategies[0]?.assetIds.includes('xauusd'), 'asset xauusd');
+});
+
+// ---------------------------------------------------------------------------
+// QNT-0005C: honest closed-trade publication (win rate, expectancy, timestamps,
+// drawdown magnitude, grouped transparency)
+// ---------------------------------------------------------------------------
+
+// 70. Closed-trade win rate is exactly 102 / 203 and expectancy is 2368.75 / 203
+test('QNT-0005C winRate = 102/203 and expectancyPoints = 2368.75/203', () => {
+  const m = GOLD().results!.metrics!;
+  assert(Math.abs(m.winRate - (102 / 203) * 100) < 1e-12, `winRate must equal 102/203: ${m.winRate}`);
+  assert(Math.abs(m.expectancyPoints - 2368.75 / 203) < 1e-12, `expectancyPoints must equal net/203: ${m.expectancyPoints}`);
+});
+
+// 71. Source aggregate values (204 count) never become public metrics
+test('QNT-0005C source aggregate values stay internal', () => {
+  const m = GOLD().results!.metrics!;
+  for (const key of Object.keys(m)) {
+    assert(!key.startsWith('source'), `source-only key must not be public: ${key}`);
+  }
+  const pub = GOLD_PUBLIC();
+  assert(pub.metrics!.sourceWinRate === undefined, 'no sourceWinRate in public output');
+  assert(pub.metrics!.sourceExpectancy === undefined, 'no sourceExpectancy in public output');
+  const notes = GOLD().dataset.strategies[0]!.provenance.notes ?? '';
+  assert(notes.includes('exported count 204'), 'provenance must document the 204 source count');
+  assert(notes.includes('recomputed from the 203'), 'provenance must document the 203 recomputation');
+});
+
+// 72. The open position is excluded from PF, win rate, expectancy, net and equity
+test('QNT-0005C open position excluded from every closed metric', () => {
+  const m = GOLD().results!.metrics!;
+  assert(m.trades === 203, 'closed trades 203');
+  assert(m.wins === 102 && m.losses === 101 && m.breakevens === 0, '102/101/0');
+  assert(m.openPositionsAtEnd === 1, 'open at end 1');
+  assert(Math.abs(m.profitFactor - 5009.1 / 2640.35) < 1e-6, 'PF from closed gross P&L only');
+  assert(Math.abs(m.netPoints - 2368.75) < 1e-6, 'net from 203 closed trades only');
+  assert(Math.abs(m.winRate - (102 / 203) * 100) < 1e-9, 'win rate over 203 only');
+  assert(Math.abs(m.expectancyPoints - 2368.75 / 203) < 1e-9, 'expectancy over 203 only');
+  assert(GOLD().results!.equity!.length === 203, 'equity has no open position point');
+});
+
+// 73. Drawdown is stored and published as a positive magnitude
+test('QNT-0005C drawdown is a positive magnitude', () => {
+  const m = GOLD().results!.metrics!;
+  assert(m.maxDrawdownPoints > 0, 'drawdown must be positive');
+  assert(Math.abs(m.maxDrawdownPoints - 176.45) < 1e-6, 'drawdown 176.45');
+  const pub = GOLD_PUBLIC();
+  assert(pub.metrics!.maxDrawdownPoints > 0, 'public drawdown positive');
+});
+
+// 74. Unknown source timezone: timestamps are naive and never normalized to Z
+test('QNT-0005C timestamps are naive when the source timezone is unknown', () => {
+  const manifest = GOLD();
+  assert(manifest.sourceTimezone === null, `sourceTimezone: ${manifest.sourceTimezone}`);
+  assert(manifest.timestampNormalization === 'not_normalized', `normalization: ${manifest.timestampNormalization}`);
+  const period = manifest.results!.period!;
+  assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(period.start!), `naive start: ${period.start}`);
+  assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(period.end!), `naive end: ${period.end}`);
+  assert(!period.start!.includes('Z') && !period.end!.includes('Z'), 'no Z on period');
+  for (const point of manifest.results!.equity!) {
+    assert(!point.timestamp.includes('Z'), `equity timestamps must be naive: ${point.timestamp}`);
+  }
+  const pub = GOLD_PUBLIC();
+  assert(!pub.period!.start!.includes('Z'), 'public period naive');
+  assert(!pub.equity!.points[0]!.timestamp.includes('Z'), 'public equity naive');
+});
+
+// 75. sourceTimezone/timestampNormalization are internal and never exposed
+test('QNT-0005C timezone metadata does not reach the public output', () => {
+  const pub = GOLD_PUBLIC();
+  assert(!('sourceTimezone' in pub), 'no sourceTimezone in public output');
+  assert(!('timestampNormalization' in pub), 'no timestampNormalization in public output');
+  assert(!JSON.stringify(pub).includes('not_normalized'), 'no normalization string leak');
+});
+
+// 76. The 204-count source convention is documented in the limitations
+test('QNT-0005C limitations document the 204 vs 203 convention', () => {
+  const manifest = GOLD();
+  assert(
+    manifest.limitations?.some((l) => l.includes('exported count of 204')) &&
+      manifest.limitations!.some((l) => l.includes('recomputed from the 203 closed trades')),
+    `limitations must document the source convention: ${JSON.stringify(manifest.limitations)}`,
+  );
 });
 
 // ---------------------------------------------------------------------------

@@ -247,18 +247,48 @@ optional top-level manifest fields:
 ```json
 {
   "modelId": "first-triangle-gold",
-  "performanceUnit": "points"
+  "performanceUnit": "points",
+  "sourceTimezone": null,
+  "timestampNormalization": "not_normalized"
 }
 ```
 
 - `modelId`: internal research model identity; never exposed in the public bundle.
 - `performanceUnit`: `"points"` or `"usd"` (default `"usd"`). The frontend
   formats metrics and the equity tooltip accordingly (e.g. `+2,368.75 pts`,
-  `176.45 pts`, `11.61 pts/trade`), and the equity chart is labelled
+  `176.45 pts`, `11.67 pts/trade`), and the equity chart is labelled
   "Closed-trade equity · points".
+- `sourceTimezone` / `timestampNormalization`: when the source timezone is
+  unknown, `sourceTimezone` is `null` and `timestampNormalization` is
+  `"not_normalized"` — public timestamps keep the source's naive
+  `YYYY-MM-DDTHH:mm:ss` format (no `Z` appended, no UTC claim). The manifest
+  validator accepts offset-less timestamps only under that flag. Both fields are
+  internal and never reach the public catalog.
 
 For point-based strategies the pipeline feeds `netPoints` / `maxDrawdownPoints`
 into the same unit-agnostic filter and score inputs (the drawdown-vs-result
 ratio is unit-independent), so no USD value is ever fabricated. USD metric keys
 (`netUsd`, `maxDrawdownUsd`, `costPerTradeUsd`, …) must stay absent when the
 source export has no reconciled USD.
+
+## 15. QNT-0005C: closed-trade metrics and honest publication
+
+Public metrics are always recomputed over the **closed trades only**: if the
+source aggregate divided by an exported count that includes an open position
+(e.g. 204 = 203 closed + 1 open), the source values are documented in
+`provenance.notes` (never as public metrics) and the manifest publishes
+`winRate = wins / closedTrades` and `expectancyPoints = netPoints / closedTrades`.
+The frontend renders the drawdown as a positive magnitude (peak-to-trough from
+closed-trade equity) and groups transparency copy into Evidence / Costs /
+Limitations blocks without repetition.
+
+### Pending (future task, NOT implemented in QNT-0005)
+
+`QNT-SCORE-BETA2` — review of the beta-1 score to consider:
+- penalization when `costsApplied = false`;
+- closed-trade drawdown only (no intraday/account-equity drawdown);
+- initial capital unavailable;
+- open position at end;
+- independent reproduction pending.
+
+The current `beta-1` formula and weights are unchanged in QNT-0005C.

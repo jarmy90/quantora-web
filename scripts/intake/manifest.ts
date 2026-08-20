@@ -51,6 +51,10 @@ export type Manifest = {
   modelId?: string;
   /** Unit of all results metrics/equity: "points" or "usd" (default "usd"). */
   performanceUnit?: 'points' | 'usd';
+  /** Source timezone of the backtest export (null/absent = unknown). Internal. */
+  sourceTimezone?: string | null;
+  /** "not_normalized" when timestamps keep the source's naive local format. Internal. */
+  timestampNormalization?: string;
   tagline?: string;
   type?: string;
   market?: string;
@@ -205,6 +209,13 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   if (value.performanceUnit !== undefined && value.performanceUnit !== 'points' && value.performanceUnit !== 'usd') {
     issues.push(error('performanceUnit', 'Must be "points" or "usd".'));
   }
+  // QNT-0005C fields.
+  if (value.sourceTimezone !== undefined && value.sourceTimezone !== null && !isText(value.sourceTimezone)) {
+    issues.push(error('sourceTimezone', 'Must be a non-empty string or null.'));
+  }
+  if (value.timestampNormalization !== undefined && !isText(value.timestampNormalization)) {
+    issues.push(error('timestampNormalization', 'Must be a non-empty string.'));
+  }
   if (value.reviewLabel !== undefined && !isText(value.reviewLabel)) {
     issues.push(error('reviewLabel', 'Must be a non-empty string.'));
   }
@@ -277,11 +288,15 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   if (value.evidence === undefined || (Array.isArray(value.evidence) && value.evidence.length === 0)) {
     issues.push(warning('evidence', 'No evidence files declared (optional).'));
   }
+  // Naive (offset-less) timestamps are allowed only when the source timezone is
+  // unknown and the manifest declares timestampNormalization = "not_normalized".
+  const allowNaiveTimestamps = value.timestampNormalization === 'not_normalized';
+
   if (value.results !== undefined) {
     if (!isRecord(value.results)) {
       issues.push(error('results', 'Must be an object.'));
     } else {
-      validateResults(value.results, issues);
+      validateResults(value.results, issues, allowNaiveTimestamps);
     }
   }
 
@@ -300,14 +315,25 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   return issues;
 }
 
-function validateResults(results: Record<string, unknown>, issues: ManifestIssue[]): void {
+function validateResults(
+  results: Record<string, unknown>,
+  issues: ManifestIssue[],
+  allowNaiveTimestamps = false,
+): void {
   if (results.period !== undefined) {
     if (!isRecord(results.period)) {
       issues.push(error('results.period', 'Must be an object.'));
     } else {
       for (const key of ['start', 'end'] as const) {
-        if (results.period[key] !== undefined && !isIso(results.period[key])) {
-          issues.push(error(`results.period.${key}`, 'Must be an ISO 8601 timestamp with an explicit offset.'));
+        if (results.period[key] !== undefined && !isIso(results.period[key], allowNaiveTimestamps)) {
+          issues.push(
+            error(
+              `results.period.${key}`,
+              allowNaiveTimestamps
+                ? 'Must be an ISO 8601 timestamp (naive allowed: source timezone unknown).'
+                : 'Must be an ISO 8601 timestamp with an explicit offset.',
+            ),
+          );
         }
       }
       if (results.period.timeframe !== undefined && !isText(results.period.timeframe)) {
@@ -338,7 +364,16 @@ function validateResults(results: Record<string, unknown>, issues: ManifestIssue
           issues.push(error(path, 'Expected an object.'));
           return;
         }
-        if (!isIso(point.timestamp)) issues.push(error(`${path}.timestamp`, 'Must be an ISO 8601 timestamp with an explicit offset.'));
+        if (!isIso(point.timestamp, allowNaiveTimestamps)) {
+          issues.push(
+            error(
+              `${path}.timestamp`,
+              allowNaiveTimestamps
+                ? 'Must be an ISO 8601 timestamp (naive allowed: source timezone unknown).'
+                : 'Must be an ISO 8601 timestamp with an explicit offset.',
+            ),
+          );
+        }
         if (typeof point.equity !== 'number' || !Number.isFinite(point.equity)) {
           issues.push(error(`${path}.equity`, 'Must be a finite number.'));
         }
@@ -361,6 +396,9 @@ function validateResults(results: Record<string, unknown>, issues: ManifestIssue
   }
 }
 
-function isIso(value: unknown): value is string {
-  return isText(value) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(Z|[+-]\d{2}:\d{2})$/.test(value);
+function isIso(value: unknown, allowNaive = false): value is string {
+  if (!isText(value)) return false;
+  const withOffset = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(Z|[+-]\d{2}:\d{2})$/.test(value);
+  if (withOffset) return true;
+  return allowNaive && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?$/.test(value);
 }
