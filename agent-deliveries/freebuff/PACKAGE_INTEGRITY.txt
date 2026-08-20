@@ -1,21 +1,23 @@
-QUANTORA — QNT-0003 + QNT-0004 · PACKAGE INTEGRITY
-==================================================
+QUANTORA — QNT-0003 + QNT-0004 + QNT-0004B · PACKAGE INTEGRITY
+===============================================================
 
 NOMBRE DEL PR: #4 — QNT-0003: reusable strategy intake pipeline
 RAMA: feat/QNT-0003-strategy-intake-pipeline
 SHA BASE: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-SHA HEAD: 4865259da87eaf79190daf48f06d8ff709f17b8d
-   (commit de producto QNT-0004; los artefactos de entrega se añaden después)
+SHA HEAD: c8c770b2b50d37be1c23878107b508106e357468
+   (commit de producto QNT-0004B: errata de copia + capturas)
+
 CONTENIDO DEL PAQUETE
 - Archivos añadidos (vs base): 36
 - Archivos modificados (vs base): 9
 - Archivos eliminados (vs base): 0
 - Archivos completos bajo archivos/: 45
-- Entradas totales del ZIP: 70 (45 archivos + 5 documentos raíz + 20 directorios + PACKAGE_INTEGRITY.txt)
+- Capturas de revisión visual bajo capturas-qnt-0004b/: 10 PNG
+- Entradas del ZIP (contenido, sin PACKAGE_INTEGRITY.txt): 81
 
-TAMAÑO DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt): 354645 bytes
+TAMAÑO DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt): 7441622 bytes
 SHA-256 DEL ZIP (contenido del paquete, sin PACKAGE_INTEGRITY.txt):
-c6334b65313f553d120b2fe12009698169684b0318a043eee0f407972a6574ef
+f60bbc01c8aab0c8d3cd8dec3496e8803044aa6b70da3ffa77ee51cf846a43f8
 
 FECHA DE GENERACIÓN: 2026-08-20 (UTC)
 COMPROBACIÓN DE EXTRACCIÓN: unzip -t -> OK, sin errores
@@ -28,7 +30,7 @@ NOTA SOBRE LOS HASHES
   registra en QNT-0003_PACKAGE_INTEGRITY.txt junto al ZIP y se verifica con
   sha256sum sobre el artefacto final.
 
-VERIFICACIONES AUTOMÁTICAS (todas ejecutadas en HEAD 4865259)
+VERIFICACIONES AUTOMÁTICAS (todas ejecutadas en HEAD c8c770b)
 - Cada archivo del git diff está dentro del ZIP: OK (45/45)
 - Ningún archivo completo está vacío: OK (0 vacíos)
 - Sin secretos / node_modules / dist / rutas locales privadas: OK
@@ -37,23 +39,35 @@ VERIFICACIONES AUTOMÁTICAS (todas ejecutadas en HEAD 4865259)
 - bun scripts/test-strategy-intake.ts: 54/54 passed
 - bun run build: OK (client + server SSR)
 - git diff --check: OK (sin errores de whitespace)
-- bun tsc -b --noEmit: sin errores nuevos (solo preexistentes documentados:
-  serve.ts tipos Bun y LegalShell ReactNode)
-- Score StochExtreme 71/100 idéntico en catalog.json, intake-report.json y
-  UI (única fuente generada; el manifest no guarda el score)
-- "Owner supplied" / "Independent reproduction pending" retirados de la UI
-  (se conservan internamente en el dataset)
-- validationStatus/dataStatus/status ausentes del contrato público: OK
+- bun tsc -b --noEmit: sin errores nuevos (solo preexistentes documentados)
+- Errata QNT-0004B: "A more rigorous way to evaluate strategies" presente
+  en i18n y en la portada renderizada; "seriouser" ausente (0 ocurrencias)
+- Layout verificado por navegador headless en 1440/1280/1024/900/768/390:
+  0 issues (paddings 32/24/16, sin overflow, sin contenido pegado a bordes)
+- "Owner supplied" / "Independent reproduction pending" ausentes de la UI;
+  validationStatus/dataStatus ausentes del contrato público: OK
+- Score StochExtreme 71/100 idéntico en catalog.json, informe y UI: OK
 - El ZIP puede extraerse: OK
 
-LISTA COMPLETA DE ENTRADAS DEL ZIP (contenido, 70 entradas):
+LISTA COMPLETA DE ENTRADAS DEL ZIP (contenido, 81 entradas):
 Archive:  QNT-0003_Cambios.zip.txt
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-     9063  2026-08-19 00:00   CAMBIOS.txt
+    10440  2026-08-19 00:00   CAMBIOS.txt
      3039  2026-08-19 00:00   ARCHIVOS_MODIFICADOS.txt
-   680294  2026-08-19 00:00   GIT_DIFF.patch
-     2063  2026-08-19 00:00   COMANDOS_Y_RESULTADOS.txt
+   680298  2026-08-19 00:00   GIT_DIFF.patch
+     3027  2026-08-19 00:00   COMANDOS_Y_RESULTADOS.txt
+        0  2026-08-19 00:00   capturas-qnt-0004b/
+   542647  2026-08-19 00:00   capturas-qnt-0004b/catalogo-1024.png
+   674813  2026-08-19 00:00   capturas-qnt-0004b/catalogo-1440.png
+   766345  2026-08-19 00:00   capturas-qnt-0004b/ficha-first-triangle.png
+   829091  2026-08-19 00:00   capturas-qnt-0004b/ficha-stochextreme.png
+   735452  2026-08-19 00:00   capturas-qnt-0004b/portada-1024.png
+   833006  2026-08-19 00:00   capturas-qnt-0004b/portada-1280.png
+   880271  2026-08-19 00:00   capturas-qnt-0004b/portada-1440.png
+   585224  2026-08-19 00:00   capturas-qnt-0004b/portada-390.png
+   651675  2026-08-19 00:00   capturas-qnt-0004b/portada-768.png
+   701067  2026-08-19 00:00   capturas-qnt-0004b/portada-900.png
         0  2026-08-19 00:00   archivos/
       836  2026-08-19 00:00   archivos/.gitignore
         0  2026-08-19 00:00   archivos/docs/
@@ -86,7 +100,7 @@ Archive:  QNT-0003_Cambios.zip.txt
      2982  2026-08-19 00:00   archivos/src/domain/publicStrategy.ts
      1086  2026-08-19 00:00   archivos/src/format.ts
         0  2026-08-19 00:00   archivos/src/i18n/
-     9311  2026-08-19 00:00   archivos/src/i18n/index.ts
+     9315  2026-08-19 00:00   archivos/src/i18n/index.ts
         0  2026-08-19 00:00   archivos/src/routes/
      4550  2026-08-19 00:00   archivos/src/routes/index.tsx
     17840  2026-08-19 00:00   archivos/src/routes/strategies.$id.tsx
@@ -121,4 +135,4 @@ Archive:  QNT-0003_Cambios.zip.txt
         0  2026-08-19 00:00   archivos/strategy-intake/templates/
       367  2026-08-19 00:00   archivos/strategy-intake/templates/manifest.template.json
 ---------                     -------
-  1366148                     70 files
+  8568088                     81 files
