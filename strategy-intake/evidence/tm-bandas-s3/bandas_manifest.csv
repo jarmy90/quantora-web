@@ -1,0 +1,2 @@
+schema_version,strategy_id,strategy_version,run_id,symbol,timeframe,lot_size,tick_size,money_per_index_point,initial_capital,entry_logic,variant,opens_real_orders,start_utc,end_utc,notes
+1.1,tm-bandas-s3-keeper,1.00,"tm-bandas-s3_1.00_USTEC_1751328000_KEEPER_SL12_TP36","USTEC",M1,0.10,0.10,2.00,10000.00,S3_ABOVE_TO_UPPER_RETURN,"KEEPER_SL12_TP36",false,"2024-01-02T01:00:00+00:00","2026-08-19T23:59:44+00:00","IC Markets virtual explorer; original SMA7 M3 S3 entry; ATR 15-21; rail gap >=16; no ladder"

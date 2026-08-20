@@ -1,48 +1,26 @@
-QNT-0005 / QNT-0005C · FIRST TRIANGLE GOLD ADAPTIVE
-Diff contra la base cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main tras PR #4)
-Total: 36 archivos (20 añadidos + 16 modificados)
+QNT-0007 · ARCHIVOS MODIFICADOS (diff contra origin/main cf80b1c3)
+==================================================================
 
-AÑADIDOS (20)
-  agent-deliveries/freebuff/QNT-0005_Cambios.zip.txt        (paquete QNT-0005 anterior, sustituido por este)
-  agent-deliveries/freebuff/QNT-0005_PACKAGE_INTEGRITY.txt   (integridad externa)
-  agent-deliveries/freebuff/capturas-qnt-0005/catalogo-qnt5-1440.png
-  agent-deliveries/freebuff/capturas-qnt-0005/ficha-first-triangle-gold-1440.png
-  agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-catalogo-1440.png
-  agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-ficha-gold-1440.png
-  public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
-  scripts/intake/ingest-first-triangle-gold.ts
-  strategy-intake/evidence/first-triangle-gold/README.md
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv
-  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv
-  strategy-intake/evidence/first-triangle-gold/source-archive.sha256
+Total: 16 archivos (5 modificados + 11 añadidos).
 
-MODIFICADOS (16)
-  agent-deliveries/freebuff/ARCHIVOS_MODIFICADOS.txt
-  agent-deliveries/freebuff/CAMBIOS.txt
-  agent-deliveries/freebuff/COMANDOS_Y_RESULTADOS.txt
-  agent-deliveries/freebuff/PACKAGE_INTEGRITY.txt
-  docs/STRATEGY_INTAKE.md
-  package.json
-  public-strategies/catalog.json
-  scripts/intake/manifest.ts
-  scripts/intake/pipeline.ts
-  scripts/test-strategy-intake.ts
-  src/domain/publicStrategy.ts
-  src/format.ts
-  src/i18n/index.ts
-  src/routes/strategies.$id.tsx
-  src/routes/strategies.index.tsx
-  src/styles/app.css
+MODIFICADOS (5)
+---------------
+1. package.json
+2. public-strategies/catalog.json
+3. scripts/test-strategy-intake.ts
+4. src/routes/strategies.$id.tsx
+5. src/routes/strategies.index.tsx
 
-El ZIP nuevo contiene 41 entradas: 5 documentos (CAMBIOS, ARCHIVOS,
-COMANDOS, GIT_DIFF.patch, PACKAGE_INTEGRITY) + 34 archivos en archivos/
-(36 del diff menos el ZIP anterior y menos la copia externa de
-QNT-0005_PACKAGE_INTEGRITY.txt) + 2 capturas en capturas-qnt-0005c/.
+AÑADIDOS (11)
+-------------
+6.  public-strategies/manifests/tm-bandas-s3.manifest.json
+7.  scripts/intake/ingest-tm-bandas-s3.ts
+8.  strategy-intake/evidence/tm-bandas-s3/README.md
+9.  strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv
+10. strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv
+11. strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv
+12. strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv
+13. strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv
+14. strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv
+15. strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv
+16. strategy-intake/evidence/tm-bandas-s3/source-archive.sha256

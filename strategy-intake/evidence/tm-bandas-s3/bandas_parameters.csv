@@ -1,0 +1,11 @@
+parameter,value
+VirtualLots,0.10
+TickSize,0.10
+MoneyPerIndexPoint,2.00
+RailPeriod,7
+RailShift,1
+ATRPeriod,14
+ATRMin,15.00
+ATRMax,21.00
+MinRailGap,16.00
+Variant,"KEEPER_SL12_TP36"

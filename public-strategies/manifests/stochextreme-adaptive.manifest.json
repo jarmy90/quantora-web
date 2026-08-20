@@ -83,7 +83,6 @@
       "end": "2026-08-07T20:59:59Z"
     },
     "metrics": {
-      "costPerTradeUsd": 0,
       "expectancyUsd": 15.634204275534442,
       "frequencyPerMonth": 34.45832040019671,
       "grossLoss": 43476.5,

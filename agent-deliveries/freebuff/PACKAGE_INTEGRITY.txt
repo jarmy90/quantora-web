@@ -1,67 +1,37 @@
-=====================================================================
-QNT-0005 / QNT-0005C · PACKAGE INTEGRITY (contenido)
-=====================================================================
-SHA BASE:   cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main tras merge PR #4)
-SHA HEAD:   be8935f3dce93e19acd87955e26c4d95e30809dc (producto QNT-0005C)
-PR:         #5 — feat/QNT-0005-first-triangle-gold (OPEN, sin merge, sin deploy)
-FECHA:      2026-08-20
-AÑADIDOS:   20
-MODIFICADOS: 16
-ELIMINADOS: 0
-ARCHIVOS COMPLETOS EN archivos/: 34
-ENTRADAS DEL ZIP: 41 (5 documentos + GIT_DIFF.patch + 34 en archivos/ + 2 capturas en capturas-qnt-0005c/)
+QNT-0007 · PACKAGE INTEGRITY
+============================
 
-NOTA: el hash y tamaño del ZIP entregado constan únicamente en la copia
-legible externa QNT-0005_PACKAGE_INTEGRITY.txt (fuera del ZIP), para que
-el contenido del ZIP no dependa de su propio hash.
+SHA BASE:  cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
+SHA HEAD:  69277706c763da4f437f5270d8828c610e3968bd
+PR:        #6 — https://github.com/jarmy90/quantora-web/pull/6
+FECHA:     2026-08-20
 
-COMPROBACIONES REALIZADAS:
-- Cada archivo del diff (34 incluidos en archivos/) está dentro del ZIP,
-  sin vacíos (el ZIP anterior y la copia externa de
-  QNT-0005_PACKAGE_INTEGRITY.txt quedan fuera por diseño).
-- Sin node_modules, sin dist, sin rutas locales privadas, sin secretos.
-- ZIP con extracción verificada: "No errors detected in compressed data".
-- El ZIP se genera de forma determinista (mismo contenido -> mismo hash).
+ARCHIVOS AÑADIDOS:    11
+ARCHIVOS MODIFICADOS:  5
+TOTAL DIFF FILES:     16
+ARCHIVOS COMPLETOS BAJO archivos/: 16
 
-LISTA COMPLETA DE ENTRADAS (41):
-ARCHIVOS_MODIFICADOS.txt
-CAMBIOS.txt
-COMANDOS_Y_RESULTADOS.txt
-GIT_DIFF.patch
-PACKAGE_INTEGRITY.txt
-archivos/agent-deliveries/freebuff/ARCHIVOS_MODIFICADOS.txt
-archivos/agent-deliveries/freebuff/CAMBIOS.txt
-archivos/agent-deliveries/freebuff/COMANDOS_Y_RESULTADOS.txt
-archivos/agent-deliveries/freebuff/PACKAGE_INTEGRITY.txt
-archivos/agent-deliveries/freebuff/capturas-qnt-0005/catalogo-qnt5-1440.png
-archivos/agent-deliveries/freebuff/capturas-qnt-0005/ficha-first-triangle-gold-1440.png
-archivos/agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-catalogo-1440.png
-archivos/agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-ficha-gold-1440.png
-archivos/docs/STRATEGY_INTAKE.md
-archivos/package.json
-archivos/public-strategies/catalog.json
-archivos/public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
-archivos/scripts/intake/ingest-first-triangle-gold.ts
-archivos/scripts/intake/manifest.ts
-archivos/scripts/intake/pipeline.ts
-archivos/scripts/test-strategy-intake.ts
-archivos/src/domain/publicStrategy.ts
-archivos/src/format.ts
-archivos/src/i18n/index.ts
-archivos/src/routes/strategies.$id.tsx
-archivos/src/routes/strategies.index.tsx
-archivos/src/styles/app.css
-archivos/strategy-intake/evidence/first-triangle-gold/README.md
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv
-archivos/strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv
-archivos/strategy-intake/evidence/first-triangle-gold/source-archive.sha256
-capturas-qnt-0005c/qnt5c-catalogo-1440.png
-capturas-qnt-0005c/qnt5c-ficha-gold-1440.png
+ZIP SHA-256 / ZIP SIZE:
+  Registrados en el archivo externo QNT-0007_PACKAGE_INTEGRITY.txt
+  (junto a este paquete en agent-deliveries/freebuff/), calculados tras
+  empaquetar este mismo ZIP (el hash no puede autorreferenciarse dentro del ZIP).
+
+EXTRACTION CHECK: OK (zip -t sin errores)
+
+ENTRIES (archivos/):
+  package.json
+  public-strategies/catalog.json
+  public-strategies/manifests/tm-bandas-s3.manifest.json
+  scripts/intake/ingest-tm-bandas-s3.ts
+  scripts/test-strategy-intake.ts
+  src/routes/strategies.$id.tsx
+  src/routes/strategies.index.tsx
+  strategy-intake/evidence/tm-bandas-s3/README.md
+  strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv
+  strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv
+  strategy-intake/evidence/tm-bandas-s3/source-archive.sha256

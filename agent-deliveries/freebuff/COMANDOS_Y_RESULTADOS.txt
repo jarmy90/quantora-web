@@ -1,54 +1,53 @@
-QNT-0005 / QNT-0005C · COMANDOS Y RESULTADOS
-Rama: feat/QNT-0005-first-triangle-gold · Base: cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
+QNT-0007 · COMANDOS Y RESULTADOS
+================================
 
-1. FUENTE Y VERIFICACIÓN
-   git fetch origin data/quantora-real-backtests
-   git show origin/data/quantora-real-backtests:data/imports/quantora-real-backtests/OROM15.zip > /tmp/OROM15.zip
-   sha256sum /tmp/OROM15.zip
-     -> 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476  OK (coincide con autorización)
-   unzip -t /tmp/OROM15.zip -> No errors detected in compressed data (10 entradas)
-   Commit fuente: 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf
+Fuente
+------
+git fetch origin +refs/heads/data/quantora-real-backtests:refs/remotes/origin/data/quantora-real-backtests
+  → tip 24c161929325679bbf6f14a0a079b331a2cd7f5e
+git ls-tree -r origin/data/quantora-real-backtests | grep -i bandas
+  → data/imports/quantora-real-backtests/bandas.zip
 
-2. INGEST / PIPELINE
-   bun run strategies:ingest     -> importador Gold: todas las reconciliaciones OK (203 = 102+101+0)
-   bun run strategies:validate   -> OK
-   bun run strategies:build      -> OK
-   bun run strategies:report     -> OK
-   bun run strategies:intake     -> Intake processed: 3 accepted + 0 incoming · blocking errors: 0 · warnings: 0
+Integridad
+----------
+sha256sum bandas.zip
+  → 455294f995ede782880b847755828dc07e2b0ef4642040bca754c49f30b67f21 (25,696 bytes)
+unzip -t bandas.zip
+  → "No errors detected in compressed data" · 7 entries
 
-3. TESTS
-   bun scripts/test-validation.ts      -> Tests executed: 58 | passed: 58 | failed: 0
-   bun scripts/test-strategy-intake.ts -> Tests executed: 76 | passed: 76 | failed: 0
-     (69 de QNT-0005 + 7 nuevos de QNT-0005C:
-      winRate = 102/203, expectancyPoints = 2368.75/203,
-      drawdown positivo, timestamps naive sin Z, sourceTimezone interno
-      no expuesto, open position excluida, sin leaks de estados internos)
+Reconciliación de trades (bun, sobre los 621 cerrados)
+-----------------------------------------------------
+sides: sell (621) · exit_reasons: SL 393 / TP 228 · status: closed (621)
+costs_included: false (621) · variants: KEEPER_SL12_TP36 (621)
+winners 228 + losers 393 + breakevens 0 = 621
+grossProfit 16,416.00 · grossLoss -9,432.00 · net 6,984.00
+PF 1.74045802 · winRate 36.71497584% · expectancy 11.2464 USD
+final equity 16,984.00 · max closed-trade drawdown 384.00 · NaN: 0
 
-4. TYPECHECK
-   bun tsc -b --noEmit -> solo los 7 errores preexistentes (serve.ts x6, LegalShell.tsx x1); sin errores nuevos
+Pipeline
+--------
+bun run strategies:ingest:tm-bandas-s3
+  → Manifest written · 621 trades, PF 1.74046, net $6984.00
+bun run strategies:ingest   → 3 manifests, OK
+bun run strategies:validate → 3 accepted, 0 errores, 0 warnings
+bun run strategies:build    → catalog.json (3 publicadas), 0 errores
+bun run strategies:report   → 0 errores
+bun run strategies:intake   → 0 errores
 
-5. BUILD
-   bun run build -> ✓ built (client + server SSR)
+Tests
+-----
+bun scripts/test-validation.ts        → 58/58
+bun scripts/test-strategy-intake.ts   → 67/67 (13 nuevos QNT-0007)
 
-6. DIFF / INTEGRIDAD
-   git diff --check -> OK
-   git diff --name-status cf80b1c..HEAD -> 36 archivos (20 A + 16 M)
+Build / typecheck
+-----------------
+bun tsc -b --noEmit  → solo los 7 errores preexistentes (serve.ts, LegalShell.tsx)
+bun run build        → OK (client + SSR, 776ms)
+git diff --check     → OK
 
-7. VERIFICACIÓN HTTP / VISUAL (dev server + Playwright/Chromium)
-   GET /                                     -> 200
-   GET /strategies                           -> 200 · tarjetas: Gold primero, jerarquía Net/PF/Score · Trades/Freq/DD
-   GET /strategies/first-triangle-gold-adaptive -> 200
-     Renderizado: "50.2%" · "11.67 pts/trade" · "176.45 pts" ·
-     "Closed-trade drawdown" · "CLOSED-TRADE EQUITY · POINTS" ·
-     "EVIDENCE" (texto agrupado) · "Costs not applied" ·
-     "Independent reproduction pending" (dentro de Evidence)
-   Sin leaks: owner_supplied_under_review, validationStatus, dataStatus
-   Sin "seriouser"
-   Capturas: agent-deliveries/freebuff/capturas-qnt-0005c/
-     qnt5c-catalogo-1440.png · qnt5c-ficha-gold-1440.png
-
-8. GIT
-   git status --short -> limpio tras el commit
-   git log: be8935f (producto QNT-0005C) sobre 634fd7b (entrega QNT-0005) sobre 78efa79 (producto QNT-0005)
-   git push origin feat/QNT-0005-first-triangle-gold -> OK
-   gh pr view 5 -> OPEN, sin merge, sin deploy
+HTTP (verificación de render)
+-----------------------------
+GET /                          → 200
+GET /strategies                → 200
+GET /strategies/tm-bandas-s3   → 200 (TM Bandas S3, 1.74, 36.7%, 621,
+                                     Costs not applied, Nasdaq-100; sin leaks)
