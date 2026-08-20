@@ -1,0 +1,10 @@
+{
+  "strategy": "First Triangle Gold Adaptive",
+  "explorer_version": "3.00",
+  "run_id": "FIRST_TRIANGLE_GOLD_EVIDENCE_XAUUSD_1751328000",
+  "selected_variant_id": 174,
+  "selected_configuration": {"sl":55,"activation":60,"distance":25,"cost_scenario":"BASE"},
+  "total_variants": 378,
+  "drawdown_definition": "closed-trade",
+  "warnings": ["USD fields unavailable until broker costs are reconciled","file hashes must be generated after export","development and validation cutoffs are user inputs"]
+}

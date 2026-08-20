@@ -1,181 +1,139 @@
-QUANTORA — QNT-0003 + QNT-0004 · Pipeline de estrategias + corrección responsive y posicionamiento de marca
-Rama: feat/QNT-0003-strategy-intake-pipeline
-PR: #4 (QNT-0003: reusable strategy intake pipeline) — OPEN, sin merge
-HEAD de producto: 4865259da87eaf79190daf48f06d8ff709f17b8d (QNT-0004)
-Base oficial: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-
 =====================================================================
-QNT-0004 · CORRECCIÓN RESPONSIVE Y POSICIONAMIENTO DE MARCA
+QUANTORA · QNT-0005 / QNT-0005C · FIRST TRIANGLE GOLD ADAPTIVE
 =====================================================================
-1. MARGEN LATERAL CORREGIDO (estructura, no títulos sueltos)
-   - Contenedor compartido .wrap: max-width 1200px, margin-inline auto,
-     padding lateral 32px (escritorio) / 24px (tablet <=1024) / 16px
-     (móvil <=760).
-   - .hero y .section usan padding-block (antes su shorthand padding
-     borraba el padding horizontal de .wrap y dejaba secciones pegadas al
-     borde). Footer (footer-grid/footer-bar) idéntico tratamiento.
-   - Se quitó max-width:850px del hero: ahora todas las secciones
-     (CURATED SYSTEMS, Signals worth a closer look, How it works, tarjetas
-     de estrategias y proceso, bloque verde Trust & Transparency, nav y
-     footer) comparten la misma alineación horizontal en 1440/1280/1024/
-     900/768/390 px. Sin contenido pegado a los bordes.
+Paquete de revisión regenerado desde el HEAD exacto del PR #5.
 
-2. PORTADA
-   - Titular principal mantenido: "Strategies you can understand."
-   - Nuevo subtítulo: "Cut through the noise of unverified bots and
-     trading promises. Explore rules-based strategies evaluated through
-     structured backtesting, with performance, risk and limitations shown
-     clearly."
+SHA BASE:   cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main, merge PR #4)
+SHA HEAD:   be8935f (producto QNT-0005C) · PR head: be8935f
+PR:         #5 — feat/QNT-0005-first-triangle-gold (OPEN, sin merge)
+FUENTE:     OROM15.zip · rama data/quantora-real-backtests
+            commit 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf
+            SHA-256 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476
+            (verificado byte a byte por el importador antes de leer)
 
-3. HOW IT WORKS (sección central de marca)
-   - EYEBROW: "A SERIOUSER WAY TO EVALUATE STRATEGIES"
-   - TÍTULO: "Less promise. More evidence."
-   - INTRO: internet y redes llenos de estrategias/señales/bots con
-     capturas atractivas y afirmaciones difíciles de verificar; Quantora
-     ofrece una alternativa rigurosa: estrategias explicables evaluadas
-     con metodología de backtesting consistente y resultados completos
-     incluyendo riesgo y limitaciones.
-   - PASO 01 Analyze: procesamos el registro histórico con metodología
-     estructurada; trades cerrados, equity, Profit Factor, drawdown,
-     frecuencia, estabilidad y costes disponibles.
-   - PASO 02 Filter: criterios de publicación comunes; evidencia
-     insuficiente o mínimo no alcanzado => no aparece en el catálogo.
-   - PASO 03 Show the complete picture: potencial y riesgo juntos, sin
-     seleccionar los mejores periodos; el usuario inspecciona equity,
-     métricas, Quantora Score y limitaciones.
-   - CIERRE: "We do not promise returns. We build a clearer and more
-     rigorous way to evaluate strategies."
+---------------------------------------------------------------------
+1. QUÉ SE ENTREGÓ EN QNT-0005 (aceptado)
+---------------------------------------------------------------------
+- Pipeline reutilizable de intake con manifest versionado, evidencia
+  privada versionada (strategy-intake/evidence/first-triangle-gold/),
+  importador reproducible y catálogo generado.
+- Importador scripts/intake/ingest-first-triangle-gold.ts:
+  * verifica el SHA-256 del ZIP fuente;
+  * filtra variant_id=174 y cost_scenario=BASE (76,356 filas -> 203);
+  * reconcilia wins/losses/breakevens, PF, gross/net, drawdown,
+    expectancy, equity (203 pts), DEV+VAL+OOS=203 y monthly;
+  * falla ante NaN/Infinity, otra variante, recuento != 203 o si la
+    posición abierta se tratara como cerrada;
+  * costsApplied=false; sin campos USD; performanceUnit="points".
+- Manifest público public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
+  con identidad, variante 174/378, configuración SL55/ACT60/DIST25,
+  limitaciones y procedencia pública segura.
+- Frontend dinámico: tarjeta en /strategies y ficha
+  /strategies/first-triangle-gold-adaptive con gráfica de equity en
+  puntos, métricas, costes no aplicados y posición abierta al final.
+- 15 tests nuevos (total pipeline 69/69 en QNT-0005).
 
-4. TRUST & TRANSPARENCY
-   - EYEBROW: "TRANSPARENCY BY DESIGN"
-   - TÍTULO: "The complete picture, not just the best trades."
-   - TEXTO: rendimiento histórico junto con drawdown, número de
-     operaciones, costes, periodo analizado y limitaciones conocidas;
-     estrategias reales y datos demo claramente separados; resultados
-     históricos son evidencia para evaluar, no promesa de futuro.
+---------------------------------------------------------------------
+2. QUÉ CORRIGE QNT-0005C (este commit)
+---------------------------------------------------------------------
+A. MÉTRICAS PÚBLICAS SOBRE OPERACIONES CERRADAS
+   - closedWinRate = 102 / 203 = 50.2463054187%  -> UI "50.2%"
+   - closedExpectancyPoints = 2368.75 / 203 = 11.6687192118 -> UI "11.67 pts/trade"
+   - El valor fuente (winRate=50.0, expectancy=11.6115) se conserva
+     internamente en provenance; no se publica como métrica principal.
+   - Documentado: "Source aggregate used exported count 204, including
+     one open position. Public closed-trade metrics were recomputed
+     from 203 closed trades."
+   - 203 cerradas = 102W + 101L + 0B; 1 posición abierta excluida de
+     PF, win rate, expectancy, neto y equity.
 
-5. MENSAJES MOCK ACTUALIZADOS
-   - "ALL PERFORMANCE SHOWN IS MOCK / DEMO DATA" sustituido por
-     "HISTORICAL RESULTS DO NOT GUARANTEE FUTURE PERFORMANCE".
-   - MOCK ENVIRONMENT permanece solo en preview técnico (no se renderiza
-     en builds de producción: gate por import.meta.env.PROD).
-   - Los datos demo quedan identificados únicamente dentro de su propia
-     sección (nota demo en portada + sección demo del catálogo).
+B. TIMESTAMPS
+   - sourceTimezone = null; timestampNormalization = "not_normalized".
+   - Sin sufijo Z; sin declarar UTC; formato YYYY-MM-DDTHH:mm:ss.
 
-6. JERARQUÍA DEL CATÁLOGO
-   - First Triangle Adaptive y StochExtreme Adaptive aparecen primero, en
-     una sección destacada (real-section con borde/glow discreto).
-   - La sección "Demo strategies · mock data" queda visualmente rebajada
-     (colores atenuados) y sus filtros siguen siendo solo de demo.
-   - Métricas intactas; nada recalculado.
+C. DRAWDOWN
+   - Valor fuente 176.45 puntos, magnitud positiva en UI ("176.45 pts").
+   - Definición: "Closed-trade drawdown" con tooltip
+     "Peak-to-trough drawdown calculated from closed-trade equity."
+   - Sin porcentaje, sin USD, sin denominarlo intraday/account-equity.
 
-7. ETIQUETAS PÚBLICAS
-   - "Owner supplied" e "Independent reproduction pending" retiradas de
-     tarjetas y fichas. Los campos se conservan internamente en el dataset
-     generado (trazabilidad), no dominan la experiencia pública.
-   - Se mantienen: Quantora Score · Beta (discreto), "Costs not applied"
-     + aviso de comisiones/spread/slippage en StochExtreme, y el
-     disclaimer histórico.
+D. JERARQUÍA VISUAL DE TARJETAS (todas las estrategias públicas)
+   - Fila 1: Net result (verde si positivo) · Profit Factor · Score (verde lima)
+   - Fila 2: Total trades · Frequency · drawdown (ámbar apagado, positivo)
+   - Rojo intenso reservado para errores/bloqueos/riesgo crítico.
+   - Gold: +2,368.75 pts · 1.90 · 98 · 203 · 15 / mo · 176.45 pts.
 
-8. CONSISTENCIA DEL SCORE
-   - StochExtreme: 71/100 (beta-1, confidence 0.95, costs unavailable)
-     en catalog.json, informe de intake y UI (tarjeta + ficha), todo
-     generado por el pipeline (única fuente). El manifest no guarda el
-     score: lo calcula scoring.ts. No se escribe el valor a mano.
+E. TEXTO DE TRANSPARENCIA (ficha Gold)
+   - Evidence: "Historical backtest on XAUUSD M15. Results are
+     expressed in points and include 203 closed trades. One position
+     remained open at the end of the test and is excluded from the
+     closed-trade metrics. The equity curve and drawdown are calculated
+     at closed-trade level, not from intratrade account equity.
+     Owner-supplied evidence. Independent reproduction pending."
+   - Costs: "Costs not applied" + "Reported performance may be reduced
+     after commission, spread, slippage and swap."
+   - Limitations: lista deduplicada del manifest (sin repeticiones).
+   - Tarjeta Gold: "Historical backtest · Results in points · Costs not applied"
 
-=====================================================================
-QNT-0003 · PIPELINE REUTILIZABLE (base de esta rama)
-=====================================================================
-1. Pipeline de intake reutilizable (scripts/intake/* + scripts/strategy-intake.ts)
-   - Manifests versionados en public-strategies/manifests/; plantillas y
-     ejemplos en strategy-intake/templates y strategy-intake/examples.
-   - Comandos: strategies:validate, strategies:build, strategies:report,
-     strategies:intake, strategies:ingest (y variantes por estrategia).
-   - Intake: valida estructura y referencias, calcula hashes de evidencia,
-     impide exponer archivos privados, construye el catálogo normalizado y
-     genera informes humano y máquina; exit code != 0 ante errores bloqueantes.
+F. COSTES
+   - costsApplied=false mantenido; commission=0.0/slippage=0.0 del
+     export no se interpretan como costes reales confirmados.
 
-2. Importador reproducible First Triangle (ingest-first-triangle.ts)
-   - Lee los 5 archivos autorizados (manifest, summary, trades, equity,
-     signals) y genera el manifest versionado. Autocomprueba las cifras.
+G. QUANTORA SCORE
+   - Sin cambios en scoring.ts; scoreVersion=beta-1; score 98
+     (confidence 0.95, componente costes unavailable).
+   - Registrada para tarea futura (sin implementar): QNT-SCORE-BETA2
+     (penalización costsApplied=false, closed-trade drawdown only,
+     initial capital unavailable, open position at end, independent
+     reproduction pending).
 
-3. Importador reproducible StochExtreme (ingest-stochextreme.ts)
-   - Lee los derivados web autorizados en strategy-intake/evidence/
-     stochextreme/ (procedentes de STOCHEXTREME.rar en data/quantora-real-
-     backtests; SHA-256 del RAR 09cc6fd3... verificado).
-   - Cuenta SOLO los 421 trades cerrados. Cruces, confirmaciones
-     canceladas y SESSION_BLOCKED NO se cuentan como operaciones.
-   - Equity reconstruida (354 puntos diarios, incluye el punto de máximo
-     drawdown). Autocomprueba PF, neto, drawdown, wins/losses y counts.
+---------------------------------------------------------------------
+3. CIFRAS AUTORIZADAS (variante 174/378, BASE)
+---------------------------------------------------------------------
+- Profit Factor:       1.8971348495 (filtro beta-1: PF >= 1.15 OK)
+- Win rate (cerradas): 50.2%  (102 / 203)
+- Trades cerradas:     203    (wins 102 · losses 101 · breakevens 0)
+- Posición abierta:    1      (excluida de métricas cerradas)
+- Gross profit:        +5,009.10 pts
+- Gross loss:          -2,640.35 pts
+- Net result:          +2,368.75 pts
+- Max drawdown:        176.45 pts (closed-trade)
+- Expectancy:          11.67 pts/trade
+- Frecuencia:          ~15 operaciones cerradas/mes
+- Periodo:             2025-07-01 01:00:00 -> 2026-08-14 23:56:59
+- Equity:              203 puntos closed-trade
+- DEV 87 + VAL 51 + LOCKED_OOS 65 = 203
+- Monthly: 10 de 12 meses con trades cerrados positivos (calculado
+  desde monthly.csv; no se afirma 12/12)
+- Costes:              costsApplied=false (0.0 del export no es coste real)
+- Unidades:            performanceUnit="points"; sin campos USD
+- Score:               98 (beta-1, confidence 0.95, costs unavailable)
 
-4. Filtro de publicación común versionado (filter.ts)
-   - filterVersion = "beta-1" · publicationMode = "documentary" | "results".
-   - RESULTS exige: identidad, Profit Factor finito >= 1.15 (umbral beta
-     provisional, no validación independiente), >= 1 operación cerrada,
-     equity con >= 2 puntos, periodo, drawdown y costsApplied definido.
-   - PF >= 1.20 NO es obligatorio: es el tramo favorable en el score (+5
-     en el componente Profit Factor, topado a 100).
-   - costsApplied=false no bloquea; se muestra, reduce confianza y deja el
-     componente de costes no disponible.
-   - DOCUMENTARY: identidad + procedencia suficientes; nunca fabrica
-     métricas/equity/score.
+---------------------------------------------------------------------
+4. TESTS Y VERIFICACIONES
+---------------------------------------------------------------------
+- Dominio:  bun scripts/test-validation.ts        -> 58/58
+- Pipeline: bun scripts/test-strategy-intake.ts   -> 76/76
+  (7 tests QNT-0005C: winRate 102/203, expectancy 2368.75/203,
+   drawdown positivo, timestamps naive, sourceTimezone interno,
+   open position excluida de PF/winRate/neto/equity, sin leaks)
+- build:    bun run build                          -> OK (client + SSR)
+- typecheck: bun tsc -b --noEmit                   -> sin errores nuevos
+  (solo los 7 errores preexistentes: serve.ts x6 + LegalShell.tsx x1)
+- git diff --check                                -> OK
+- HTTP: 200 en /, /strategies y /strategies/first-triangle-gold-adaptive
+- Renderizado verificado por navegador (Playwright): "50.2%",
+  "11.67 pts/trade", "176.45 pts", "Closed-trade drawdown",
+  "EVIDENCE", "Costs not applied"; sin leaks de
+  owner_supplied_under_review / validationStatus / dataStatus;
+  sin "seriouser".
 
-5. Quantora Score reutilizable (scoring.ts, scoreVersion = "beta-1")
-   - 0-100 ponderado sobre componentes disponibles: Profit Factor 25%,
-     Drawdown vs resultado 25%, Estabilidad de equity 15%, Operaciones 10%,
-     Consistencia temporal 10%, Frecuencia 5%, Costes 5%, Evidencia 5%.
-   - Componentes ausentes se excluyen y reducen confidence; nunca se
-     inventan. El drawdown penaliza visiblemente sin bloquear.
-
-6. Transparencia pública (QNT-0003H)
-   - Contrato público con reviewLabel, independentReproduction,
-     costsApplied, scoreVersion, filterVersion, publicationMode.
-   - dataStatus / validationStatus / status NUNCA cruzan al bundle.
-   - First Triangle: costsApplied=true · StochExtreme: costsApplied=false.
-
-CIFRAS AUTORIZADAS (sin recálculo en QNT-0004)
-- First Triangle Adaptive: PF 1.25593 · 145 trades · win 51.03% · neto
-  +6,687.50 USD · drawdown 4,474.80 USD · score 68/100 · costsApplied=true
-  · periodo 2025-08-14 a 2026-08-07.
-- StochExtreme Adaptive: PF 1.151392131381321 (>= 1.15 publicable, sin
-  bonus 1.20) · 421 trades cerrados (190 wins / 231 losses) · win rate
-  45.13% · neto +6,582.00 USD (bruto 50,058.50 / bruto pérdida 43,476.50)
-  · drawdown 4,690.00 USD (26.53%) · score 71/100 (beta-1, confidence 0.95,
-  costs unavailable) · costsApplied=false · frecuencia ~34/mes · periodo
-  2025-08-01 a 2026-08-07 · equity 354 puntos.
-
-VERIFICACIONES EJECUTADAS (HEAD 4865259)
-- bun scripts/test-validation.ts          -> 58/58 passed
-- bun scripts/test-strategy-intake.ts     -> 54/54 passed (27 + 27 QNT-0003H)
-- bun tsc -b --noEmit                     -> sin errores nuevos (solo los
-  preexistentes documentados: serve.ts tipos Bun y LegalShell ReactNode)
-- bun run build                           -> OK (client + server SSR)
-- git diff --check                        -> OK (sin errores de whitespace)
-- Score StochExtreme 71/100 idéntico en catalog.json, intake-report y UI.
-
-=====================================================================
-QNT-0004B · ERRATA DE COPIA + PREVIEW FINAL (commit c8c770b)
-=====================================================================
-1. Errata corregida en i18n: "A seriouser way to evaluate strategies"
-   -> "A more rigorous way to evaluate strategies". La UI muestra
-   "A MORE RIGOROUS WAY TO EVALUATE STRATEGIES". Sin "seriouser".
-2. Preview funcional levantado y verificado por navegador headless
-   (Playwright + Chromium). Comprobación de layout en 1440 / 1280 / 1024 /
-   900 / 768 / 390 px: 0 issues (padding 32/24/16 correcto en .wrap, sin
-   overflow horizontal, sin contenido pegado a bordes) en portada,
-   catálogo y fichas. CSS sin selectores concatenados ni bloques sin cerrar
-   (build + parse de las media queries OK).
-3. Capturas (10 PNG) en agent-deliveries/freebuff/capturas-qnt-0004b/:
-   portada 1440/1280/1024/900/768/390, catálogo 1440/1024, fichas
-   First Triangle y StochExtreme.
-4. Contenido comprobado por HTTP: errata corregida, "Less promise.",
-   "Cut through the noise", disclaimer histórico, sin "Owner supplied" /
-   "Independent reproduction pending" en tarjeta/ficha, sin
-   validationStatus/dataStatus en el bundle.
-5. Verificaciones re-ejecutadas: 58/58 dominio + 54/54 pipeline,
-   bun tsc -b --noEmit sin errores nuevos, bun run build OK,
-   git diff --check OK.
-6. Sin merge, sin deploy. PR #4 abierto (head c8c770b).
-
-NO MERGE · NO DEPLOY · SIN PAGOS · SIN AUTENTICACIÓN
-PR #4 MANTENIDO ABIERTO · Preview: https://3000-124d91f4-172c-4dd5-bbb6-d6e7597a8990.daytonaproxy01.net/
+---------------------------------------------------------------------
+5. RESTRICCIONES RESPETADAS
+---------------------------------------------------------------------
+- NO merge · NO deploy · PR #5 abierto
+- No se modificaron: CSV fuente, métricas autorizadas (solo su
+  presentación pública sobre 203 cerradas), scoring.ts, manifiestos
+  de First Triangle / StochExtreme, datos Mock.
+- ZIP y CSV brutos no están en el bundle público (solo derivados
+  versionados bajo strategy-intake/evidence/).

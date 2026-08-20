@@ -4,7 +4,7 @@ import { curveFor, findStrategy, type Asset, type Strategy } from '../data';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
 import type { EquityPoint } from '../domain/types';
-import { fmtDate, fmtNum, fmtPct, fmtPeriod, fmtSignedUsd, fmtUsd } from '../format';
+import { fmtDate, fmtNum, fmtNumDec, fmtPct, fmtPeriod, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
@@ -13,6 +13,8 @@ import '../styles/app.css';
 const CYAN = '#72d9ff';
 const LIME = '#c9ff5a';
 const RED = '#ff7185';
+const GREEN = '#4ade80';
+const AMBER = '#e0a860';
 
 function Nav() {
   return (
@@ -32,13 +34,15 @@ function Nav() {
 // ---------------------------------------------------------------------------
 
 /**
- * Equity-curve chart driven by the real equity points (timestamp + USD value).
- * Hovering reveals the closest point's date, equity and drawdown.
+ * Equity-curve chart driven by the real equity points (timestamp + value).
+ * Hovering reveals the closest point's date, equity and drawdown. Point-based
+ * strategies (performanceUnit = "points") render points, not USD.
  */
-function RealEquityChart({ points }: { points: EquityPoint[] }) {
+function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'points' | 'usd' }) {
   const [hover, setHover] = useState<number | null>(null);
   const total = points.length;
   if (total < 2) return <p className="muted">—</p>;
+  const fmtEquity = (value: number): string => (unit === 'points' ? fmtPoints(value) : fmtUsd(value));
 
   const values = points.map((p) => p.equity);
   const min = Math.min(...values);
@@ -84,8 +88,8 @@ function RealEquityChart({ points }: { points: EquityPoint[] }) {
       </svg>
       {hoverPoint && (
         <div className="mono" style={{ fontSize: 11, marginTop: 10, color: 'var(--muted)' }}>
-          {fmtDate(hoverPoint.timestamp)} · {fmtUsd(hoverPoint.equity)}
-          {hoverPoint.drawdown !== undefined && ` · ${t('detail.drawdownValue')} ${fmtUsd(hoverPoint.drawdown)}`}
+          {fmtDate(hoverPoint.timestamp)} · {fmtEquity(hoverPoint.equity)}
+          {hoverPoint.drawdown !== undefined && ` · ${t('detail.drawdownValue')} ${fmtEquity(hoverPoint.drawdown)}`}
         </div>
       )}
     </>
@@ -95,8 +99,9 @@ function RealEquityChart({ points }: { points: EquityPoint[] }) {
 function RealDetail({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const score = s.score;
+  const pointsUnit = s.performanceUnit === 'points';
 
-  const cells: { label: string; value: string; accent?: string }[] = [
+  const cells: { label: string; value: string; accent?: string; title?: string }[] = [
     {
       label: s.scoreVersion ? t('detail.scoreBeta') : t('detail.score'),
       value: score ? String(score.value) : '—',
@@ -113,9 +118,15 @@ function RealDetail({ s }: { s: PublicStrategy }) {
       value: m.frequencyPerMonth !== undefined ? `${fmtNum(m.frequencyPerMonth)} ${t('detail.freqPerMonth')}` : '—',
     },
     {
-      label: t('detail.maxDrawdown'),
-      value: m.maxDrawdownUsd !== undefined ? `-${fmtUsd(m.maxDrawdownUsd)}` : '—',
-      accent: RED,
+      label: pointsUnit ? t('detail.closedTradeDrawdown') : t('detail.maxDrawdown'),
+      value:
+        m.maxDrawdownPoints !== undefined
+          ? fmtPoints(m.maxDrawdownPoints)
+          : m.maxDrawdownUsd !== undefined
+            ? fmtUsd(m.maxDrawdownUsd)
+            : '—',
+      accent: AMBER,
+      title: pointsUnit ? t('detail.drawdownNote') : undefined,
     },
     {
       label: t('detail.costs'),
@@ -128,10 +139,31 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     },
     {
       label: t('detail.netResult'),
-      value: m.netUsd !== undefined ? fmtSignedUsd(m.netUsd) : '—',
-      accent: (m.netUsd ?? 0) >= 0 ? LIME : RED,
+      value:
+        m.netPoints !== undefined
+          ? fmtSignedPoints(m.netPoints)
+          : m.netUsd !== undefined
+            ? fmtSignedUsd(m.netUsd)
+            : '—',
+      accent: (m.netPoints ?? m.netUsd ?? 0) >= 0 ? GREEN : RED,
+    },
+    {
+      label: t('detail.expectancy'),
+      value:
+        m.expectancyPoints !== undefined
+          ? `${fmtNumDec(m.expectancyPoints)} ${t('detail.ptsPerTrade')}`
+          : m.expectancyUsd !== undefined
+            ? `${fmtUsd(m.expectancyUsd)} / trade`
+            : '—',
     },
   ];
+
+  if (m.openPositionsAtEnd !== undefined) {
+    cells.push({
+      label: t('detail.openPositionsAtEnd'),
+      value: String(fmtNum(m.openPositionsAtEnd)),
+    });
+  }
 
   return (
     <>
@@ -153,16 +185,16 @@ function RealDetail({ s }: { s: PublicStrategy }) {
 
         <section className="card chart-card">
           <div className="eyebrow" style={{ marginBottom: 12 }}>
-            {t('detail.equityCurve')}
+            {pointsUnit ? t('detail.closedTradeEquity') : t('detail.equityCurve')}
           </div>
-          <RealEquityChart points={s.equity?.points ?? []} />
+          <RealEquityChart points={s.equity?.points ?? []} unit={pointsUnit ? 'points' : 'usd'} />
         </section>
 
         <section className="metric-grid" style={{ marginTop: 15 }}>
           {cells.map((cell) => (
             <div className="metric-cell" key={cell.label}>
               <small>{cell.label}</small>
-              <strong style={cell.accent ? { color: cell.accent } : undefined}>{cell.value}</strong>
+              <strong title={cell.title} style={cell.accent ? { color: cell.accent } : undefined}>{cell.value}</strong>
             </div>
           ))}
         </section>
@@ -187,6 +219,17 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           {s.scoreVersion && <p className="mono research-note">{t('detail.scoreBetaNote')}</p>}
           <p className="mono research-note">{t('detail.researchNote')}</p>
         </section>
+
+        {pointsUnit && (
+          <section className="card" style={{ marginTop: 15 }}>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>
+              {t('detail.evidence')}
+            </div>
+            <p className="muted" style={{ fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+              {t('detail.evidenceClosedTrade')}
+            </p>
+          </section>
+        )}
 
         <section className="card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 12 }}>

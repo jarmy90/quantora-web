@@ -2,6 +2,7 @@
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const pct = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+const dec2 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
 export function fmtUsd(value: number): string {
   return usd.format(value);
@@ -17,6 +18,21 @@ export function fmtPct(value: number): string {
 
 export function fmtNum(value: number): string {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+}
+
+/** Up to two decimals, no unit (e.g. 2368.75, 11.61). */
+export function fmtNumDec(value: number): string {
+  return dec2.format(value);
+}
+
+/** Points value with unit: "2,368.75 pts". */
+export function fmtPoints(value: number): string {
+  return `${dec2.format(value)} pts`;
+}
+
+/** Signed points value with unit: "+2,368.75 pts" / "-2,368.75 pts". */
+export function fmtSignedPoints(value: number): string {
+  return (value >= 0 ? '+' : '-') + dec2.format(Math.abs(value)) + ' pts';
 }
 
 export function fmtDate(iso: string): string {

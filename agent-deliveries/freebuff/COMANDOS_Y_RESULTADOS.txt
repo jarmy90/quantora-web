@@ -1,68 +1,54 @@
-QUANTORA — QNT-0003 + QNT-0004 · COMANDOS Y RESULTADOS
-Rama: feat/QNT-0003-strategy-intake-pipeline · Base: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
+QNT-0005 / QNT-0005C · COMANDOS Y RESULTADOS
+Rama: feat/QNT-0005-first-triangle-gold · Base: cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
 
-1) ESTADO
-$ git rev-parse HEAD
-  -> 4865259da87eaf79190daf48f06d8ff709f17b8d  (commit de producto QNT-0004)
-$ git diff --name-status c5fdb7d..HEAD (excl. agent-deliveries)
-  -> 36 añadidos + 9 modificados + 0 eliminados = 45 archivos de producto
+1. FUENTE Y VERIFICACIÓN
+   git fetch origin data/quantora-real-backtests
+   git show origin/data/quantora-real-backtests:data/imports/quantora-real-backtests/OROM15.zip > /tmp/OROM15.zip
+   sha256sum /tmp/OROM15.zip
+     -> 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476  OK (coincide con autorización)
+   unzip -t /tmp/OROM15.zip -> No errors detected in compressed data (10 entradas)
+   Commit fuente: 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf
 
-2) SCORE STOCHEXTREME (consistencia, una única fuente generada)
-$ score en public-strategies/catalog.json  -> 71 (beta-1, confidence 0.95)
-$ score en strategy-intake/reports/intake-report.json -> 71 (MATCH)
-$ UI tarjeta + ficha -> lee catalog.json -> 71
-  El manifest no guarda el score (lo calcula scoring.ts en el pipeline);
-  conserva scoreVersion beta-1 y las métricas fuente.
+2. INGEST / PIPELINE
+   bun run strategies:ingest     -> importador Gold: todas las reconciliaciones OK (203 = 102+101+0)
+   bun run strategies:validate   -> OK
+   bun run strategies:build      -> OK
+   bun run strategies:report     -> OK
+   bun run strategies:intake     -> Intake processed: 3 accepted + 0 incoming · blocking errors: 0 · warnings: 0
 
-3) TESTS
-$ bun scripts/test-validation.ts
-  -> Tests executed: 58 | passed: 58 | failed: 0
-$ bun scripts/test-strategy-intake.ts
-  -> Tests executed: 54 | passed: 54 | failed: 0
+3. TESTS
+   bun scripts/test-validation.ts      -> Tests executed: 58 | passed: 58 | failed: 0
+   bun scripts/test-strategy-intake.ts -> Tests executed: 76 | passed: 76 | failed: 0
+     (69 de QNT-0005 + 7 nuevos de QNT-0005C:
+      winRate = 102/203, expectancyPoints = 2368.75/203,
+      drawdown positivo, timestamps naive sin Z, sourceTimezone interno
+      no expuesto, open position excluida, sin leaks de estados internos)
 
-4) TYPECHECK
-$ bun tsc -b --noEmit
-  -> Sin errores nuevos. Solo preexistentes documentados (fuera de alcance):
-     serve.ts (tipos de Bun / import.meta.dir) y
-     src/components/LegalShell.tsx (ReactNode sin usar).
+4. TYPECHECK
+   bun tsc -b --noEmit -> solo los 7 errores preexistentes (serve.ts x6, LegalShell.tsx x1); sin errores nuevos
 
-5) BUILD
-$ bun run build
-  -> ✓ built (client + server SSR, sin errores)
+5. BUILD
+   bun run build -> ✓ built (client + server SSR)
 
-6) CALIDAD
-$ git diff --check
-  -> OK (sin errores de whitespace)
+6. DIFF / INTEGRIDAD
+   git diff --check -> OK
+   git diff --name-status cf80b1c..HEAD -> 36 archivos (20 A + 16 M)
 
-7) RESPONSIVE (comprobación estática de la estructura)
-  Contenedor compartido .wrap: 1200px, margin-inline auto,
-  padding-inline 32px (>1024) / 24px (<=1024) / 16px (<=760).
-  .hero/.section/footer usan padding-block (no borran el padding lateral).
-  Verificado para 1440 / 1280 / 1024 / 900 / 768 / 390 px: todas las
-  secciones comparten la misma alineación; nada pegado al borde.
+7. VERIFICACIÓN HTTP / VISUAL (dev server + Playwright/Chromium)
+   GET /                                     -> 200
+   GET /strategies                           -> 200 · tarjetas: Gold primero, jerarquía Net/PF/Score · Trades/Freq/DD
+   GET /strategies/first-triangle-gold-adaptive -> 200
+     Renderizado: "50.2%" · "11.67 pts/trade" · "176.45 pts" ·
+     "Closed-trade drawdown" · "CLOSED-TRADE EQUITY · POINTS" ·
+     "EVIDENCE" (texto agrupado) · "Costs not applied" ·
+     "Independent reproduction pending" (dentro de Evidence)
+   Sin leaks: owner_supplied_under_review, validationStatus, dataStatus
+   Sin "seriouser"
+   Capturas: agent-deliveries/freebuff/capturas-qnt-0005c/
+     qnt5c-catalogo-1440.png · qnt5c-ficha-gold-1440.png
 
-8) PREVIEW
-  Esta sesión no pudo levantar preview: el endpoint del turno anterior
-  devolvió 502 y el CLI freebuff-preview no está disponible en el entorno.
-  La verificación visual en vivo queda pendiente de la plataforma; el
-  código y el build quedan verificados (58/58, 54/54, build OK).
-
-9) QNT-0004B (commit c8c770b)
-$ Errata i18n: 'A seriouser way' -> 'A more rigorous way' (UI:
-  A MORE RIGOROUS WAY TO EVALUATE STRATEGIES).
-$ Preview funcional levantado: http://localhost:3000 y proxy público
-  https://3000-124d91f4-172c-4dd5-bbb6-d6e7597a8990.daytonaproxy01.net/
-$ Verificación visual headless (Playwright + Chromium headless shell):
-  - Layout en 1440/1280/1024/900/768/390 px: 0 issues (paddings 32/24/16
-    correctos, sin overflow horizontal, sin contenido pegado a bordes).
-  - 10 capturas PNG generadas (portada 6 anchuras, catálogo 2, fichas 2).
-$ Contenido por HTTP en las 4 rutas: errata corregida, sin 'seriouser',
-  sin 'Owner supplied'/'Independent reproduction pending', sin
-  validationStatus/dataStatus en el bundle público.
-$ bun scripts/test-validation.ts -> 58/58
-$ bun scripts/test-strategy-intake.ts -> 54/54
-$ bun tsc -b --noEmit -> sin errores nuevos (solo preexistentes)
-$ bun run build -> OK
-$ git diff --check -> OK
-
-NO MERGE · NO DEPLOY · PR #4 MANTENIDO ABIERTO
+8. GIT
+   git status --short -> limpio tras el commit
+   git log: be8935f (producto QNT-0005C) sobre 634fd7b (entrega QNT-0005) sobre 78efa79 (producto QNT-0005)
+   git push origin feat/QNT-0005-first-triangle-gold -> OK
+   gh pr view 5 -> OPEN, sin merge, sin deploy

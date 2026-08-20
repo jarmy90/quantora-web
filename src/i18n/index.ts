@@ -54,6 +54,8 @@ export const enUS = {
   'common.risk': 'Risk',
   'common.maxDD': 'Max DD',
   'common.mockDemo': 'Strategy catalog / mock data',
+  'common.ownerSupplied': 'Owner supplied',
+  'common.independentReproductionPending': 'Independent reproduction pending',
 
   'catalog.title': 'Find your signal.',
   'catalog.body':
@@ -122,7 +124,18 @@ export const enUS = {
   'detail.scoreBetaNote':
     'Experimental comparative score based on available historical evidence. It is not an independent validation.',
   'detail.costsNotApplied': 'Costs not applied',
-  'detail.costsWarning': 'Reported performance may be reduced after commissions, spread and slippage.',
+  'detail.costsWarning': 'Reported performance may be reduced after commission, spread, slippage and swap.',
+  'detail.historicalBacktest': 'Historical backtest',
+  'detail.resultsInPoints': 'Results in points',
+  'detail.closedTradeDrawdown': 'Closed-trade drawdown',
+  'detail.drawdownNote': 'Peak-to-trough drawdown calculated from closed-trade equity.',
+  'detail.evidence': 'Evidence',
+  'detail.evidenceClosedTrade':
+    'Historical backtest on XAUUSD M15. Results are expressed in points and include 203 closed trades. One position remained open at the end of the test and is excluded from the closed-trade metrics. The equity curve and drawdown are calculated at closed-trade level, not from intratrade account equity. Owner-supplied evidence. Independent reproduction pending.',
+  'detail.closedTradeEquity': 'Closed-trade equity · points',
+  'detail.openPositionsAtEnd': 'Open positions at end',
+  'detail.expectancy': 'Expectancy',
+  'detail.ptsPerTrade': 'pts/trade',
 
   'dashboard.eyebrow': 'Account dashboard / MOCK PREVIEW',
   'dashboard.title': 'Your workspace.',

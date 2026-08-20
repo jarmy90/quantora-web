@@ -1,0 +1,2 @@
+start_time,end_time,months,trading_days,closed_trades_selected,open_at_end,missing_periods,data_source,drawdown_definition
+2025.07.01 01:00:00,2026.08.14 23:56:59,derived_from_trades,not_available,204,true,not_programmatically_detected,Every tick based on real ticks,closed-trade drawdown

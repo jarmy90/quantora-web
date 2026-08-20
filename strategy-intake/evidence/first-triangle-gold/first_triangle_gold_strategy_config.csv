@@ -1,0 +1,2 @@
+strategy_name,strategy_version,run_id,selected_variant_formula,symbol,timeframe,entry_model,stop_model,stop_points,exit_model,trailing_activation_points,trailing_distance_points,opposite_triangle_exit,session,buy_enabled,sell_enabled,lot_size,spread_model,commission_model,slippage_model,tester_mode
+First Triangle Gold Adaptive,research-v3,FIRST_TRIANGLE_GOLD_EVIDENCE_XAUUSD_1751328000,SL55_ACT60_DIST25_BASE,XAUUSD,M15,First Triangle,FIXED,55,TRAILING,60,25,true,ALL_00_24,true,true,0.1,broker spread + stress input,0.0,0.0,Every tick based on real ticks

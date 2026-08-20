@@ -61,6 +61,8 @@ export type CatalogEntry = {
   scoreVersion?: string;
   filterVersion?: string;
   publicationMode?: 'documentary' | 'results';
+  /** Unit of results metrics/equity ("points" or "usd", default "usd"). */
+  performanceUnit?: 'points' | 'usd';
   /** Publication filter outcome (internal — never part of the public catalog). */
   published?: boolean;
   filterReasons?: string[];
@@ -225,6 +227,7 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     costsApplied: manifest.costsApplied,
     filterVersion: manifest.filterVersion,
     scoreVersion: manifest.scoreVersion,
+    performanceUnit: manifest.performanceUnit ?? 'usd',
   };
 
   // Faithful `results` (real owner deliveries) take precedence over the strict
@@ -275,7 +278,8 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     equityPointCount: entry.equity?.points.length,
     periodStart: entry.period?.start,
     periodEnd: entry.period?.end,
-    maxDrawdownUsd: entry.metrics?.maxDrawdownUsd,
+    // Unit-agnostic drawdown value (points-based strategies use maxDrawdownPoints).
+    maxDrawdownUsd: entry.metrics?.maxDrawdownUsd ?? entry.metrics?.maxDrawdownPoints,
     costsApplied: entry.costsApplied,
   });
   entry.published = filter.publish;
@@ -304,10 +308,14 @@ function sortMetrics(value: Record<string, number>): Record<string, number> {
 }
 
 function scoreEntry(entry: CatalogEntry, evidenceComplete?: number, costsApplied?: boolean): QuantoraScore {
+  // The drawdown/net ratio is unit-agnostic: point-based strategies (e.g. First
+  // Triangle Gold) feed the same formula through the point metric names.
+  const net = entry.metrics?.netUsd ?? entry.metrics?.netPoints;
+  const drawdown = entry.metrics?.maxDrawdownUsd ?? entry.metrics?.maxDrawdownPoints;
   return computeQuantoraScore({
     profitFactor: entry.metrics?.profitFactor,
-    netUsd: entry.metrics?.netUsd,
-    maxDrawdownUsd: entry.metrics?.maxDrawdownUsd,
+    netUsd: net,
+    maxDrawdownUsd: drawdown,
     equity: entry.equity?.points.map((point) => ({ timestamp: point.timestamp, equity: point.equity })),
     trades: entry.metrics?.trades,
     frequencyPerMonth: entry.metrics?.frequencyPerMonth,
@@ -352,6 +360,7 @@ export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
     scoreVersion: entry.scoreVersion,
     filterVersion: entry.filterVersion,
     publicationMode: entry.publicationMode,
+    performanceUnit: entry.performanceUnit,
   };
 }
 
