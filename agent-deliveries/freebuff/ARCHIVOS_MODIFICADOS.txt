@@ -1,30 +1,48 @@
-QNT-0005 · ARCHIVOS MODIFICADOS (diff contra base cf80b1c) — 25 archivos
-14 añadidos (A) + 11 modificados (M)
+QNT-0005 / QNT-0005C · FIRST TRIANGLE GOLD ADAPTIVE
+Diff contra la base cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main tras PR #4)
+Total: 36 archivos (20 añadidos + 16 modificados)
 
-A  public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
-A  scripts/intake/ingest-first-triangle-gold.ts
-A  strategy-intake/evidence/first-triangle-gold/README.md
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv
-A  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv
-A  strategy-intake/evidence/first-triangle-gold/source-archive.sha256
-M  docs/STRATEGY_INTAKE.md
-M  package.json
-M  public-strategies/catalog.json
-M  scripts/intake/manifest.ts
-M  scripts/intake/pipeline.ts
-M  scripts/test-strategy-intake.ts
-M  src/domain/publicStrategy.ts
-M  src/format.ts
-M  src/i18n/index.ts
-M  src/routes/strategies.$id.tsx
-M  src/routes/strategies.index.tsx
+AÑADIDOS (20)
+  agent-deliveries/freebuff/QNT-0005_Cambios.zip.txt        (paquete QNT-0005 anterior, sustituido por este)
+  agent-deliveries/freebuff/QNT-0005_PACKAGE_INTEGRITY.txt   (integridad externa)
+  agent-deliveries/freebuff/capturas-qnt-0005/catalogo-qnt5-1440.png
+  agent-deliveries/freebuff/capturas-qnt-0005/ficha-first-triangle-gold-1440.png
+  agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-catalogo-1440.png
+  agent-deliveries/freebuff/capturas-qnt-0005c/qnt5c-ficha-gold-1440.png
+  public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
+  scripts/intake/ingest-first-triangle-gold.ts
+  strategy-intake/evidence/first-triangle-gold/README.md
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv
+  strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv
+  strategy-intake/evidence/first-triangle-gold/source-archive.sha256
 
-Verificación: los 25 archivos del diff están incluidos completos en archivos/.
+MODIFICADOS (16)
+  agent-deliveries/freebuff/ARCHIVOS_MODIFICADOS.txt
+  agent-deliveries/freebuff/CAMBIOS.txt
+  agent-deliveries/freebuff/COMANDOS_Y_RESULTADOS.txt
+  agent-deliveries/freebuff/PACKAGE_INTEGRITY.txt
+  docs/STRATEGY_INTAKE.md
+  package.json
+  public-strategies/catalog.json
+  scripts/intake/manifest.ts
+  scripts/intake/pipeline.ts
+  scripts/test-strategy-intake.ts
+  src/domain/publicStrategy.ts
+  src/format.ts
+  src/i18n/index.ts
+  src/routes/strategies.$id.tsx
+  src/routes/strategies.index.tsx
+  src/styles/app.css
+
+El ZIP nuevo contiene 41 entradas: 5 documentos (CAMBIOS, ARCHIVOS,
+COMANDOS, GIT_DIFF.patch, PACKAGE_INTEGRITY) + 34 archivos en archivos/
+(36 del diff menos el ZIP anterior y menos la copia externa de
+QNT-0005_PACKAGE_INTEGRITY.txt) + 2 capturas en capturas-qnt-0005c/.

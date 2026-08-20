@@ -1,64 +1,54 @@
-QNT-0005 · COMANDOS Y RESULTADOS
-=================================
+QNT-0005 / QNT-0005C · COMANDOS Y RESULTADOS
+Rama: feat/QNT-0005-first-triangle-gold · Base: cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
 
-1) git fetch origin && git checkout -b feat/QNT-0005-first-triangle-gold (desde main cf80b1c)
-   → OK
+1. FUENTE Y VERIFICACIÓN
+   git fetch origin data/quantora-real-backtests
+   git show origin/data/quantora-real-backtests:data/imports/quantora-real-backtests/OROM15.zip > /tmp/OROM15.zip
+   sha256sum /tmp/OROM15.zip
+     -> 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476  OK (coincide con autorización)
+   unzip -t /tmp/OROM15.zip -> No errors detected in compressed data (10 entradas)
+   Commit fuente: 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf
 
-2) Extracción de la fuente (rama data/quantora-real-backtests, commit 2dc5733):
-   git show origin/data/quantora-real-backtests:data/imports/quantora-real-backtests/OROM15.zip
-   sha256sum → 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476  (coincide con la autorizada)
-   unzip → 10 archivos, extracción sin errores.
+2. INGEST / PIPELINE
+   bun run strategies:ingest     -> importador Gold: todas las reconciliaciones OK (203 = 102+101+0)
+   bun run strategies:validate   -> OK
+   bun run strategies:build      -> OK
+   bun run strategies:report     -> OK
+   bun run strategies:intake     -> Intake processed: 3 accepted + 0 incoming · blocking errors: 0 · warnings: 0
 
-3) Reconciliaciones de la variante 174 / BASE (awk sobre los CSV, puntos):
-   - trades: 203 filas, 26 columnas; exit_reason: 18 INITIAL_SL / 113 OPPOSITE_TRIANGLE / 72 TRAILING
-   - signos net: wins=102, losses=101, breakevens=0  → 203 = 102+101+0 ✓
-   - gross profit 5,009.10 · gross loss 2,640.35 · net 2,368.75 · PF 1.8971348495464608 ✓
-   - equity: 203 puntos closed_trade_equity; drawdown máx 176.45 pts ✓
-   - periods: DEVELOPMENT 87 + VALIDATION 51 + LOCKED_OOS 65 = 203 (ALL 203, net 2368.75) ✓
-   - monthly: 12 buckets, 10 positivos / 2 negativos (meses 9 y 12) ✓
+3. TESTS
+   bun scripts/test-validation.ts      -> Tests executed: 58 | passed: 58 | failed: 0
+   bun scripts/test-strategy-intake.ts -> Tests executed: 76 | passed: 76 | failed: 0
+     (69 de QNT-0005 + 7 nuevos de QNT-0005C:
+      winRate = 102/203, expectancyPoints = 2368.75/203,
+      drawdown positivo, timestamps naive sin Z, sourceTimezone interno
+      no expuesto, open position excluida, sin leaks de estados internos)
 
-4) Generación del manifest:
-   bun run strategies:ingest:first-triangle-gold
-   → "203 closed trades (102W/101L/0B), PF 1.89713, net 2368.75 pts, drawdown 176.45 pts, open at end 1"
+4. TYPECHECK
+   bun tsc -b --noEmit -> solo los 7 errores preexistentes (serve.ts x6, LegalShell.tsx x1); sin errores nuevos
 
-5) Pipeline completo:
-   bun run strategies:ingest     → 3 manifests escritos
-   bun run strategies:validate   → 3 accepted, blocking errors 0
-   bun run strategies:build      → blocking errors 0
-   bun run strategies:report     → blocking errors 0
-   bun run strategies:intake     → "Public catalog written (3 published strategies)", errors 0
-   → catalog.json incluye first-triangle-gold-adaptive: score 98 (beta-1, confidence 0.95,
-     costs unavailable), sin dataStatus/validationStatus/status.
+5. BUILD
+   bun run build -> ✓ built (client + server SSR)
 
-6) Tests:
-   bun scripts/test-validation.ts        → Tests executed: 58 | passed: 58 | failed: 0
-   bun scripts/test-strategy-intake.ts   → Tests executed: 69 | passed: 69 | failed: 0
+6. DIFF / INTEGRIDAD
+   git diff --check -> OK
+   git diff --name-status cf80b1c..HEAD -> 36 archivos (20 A + 16 M)
 
-7) Typecheck:
-   bun tsc -b --noEmit → solo errores preexistentes documentados:
-   serve.ts (tipos Bun: ImportMeta.dir, Bun.*, req any) · src/components/LegalShell.tsx (ReactNode unused)
-   Sin errores nuevos en archivos modificados.
+7. VERIFICACIÓN HTTP / VISUAL (dev server + Playwright/Chromium)
+   GET /                                     -> 200
+   GET /strategies                           -> 200 · tarjetas: Gold primero, jerarquía Net/PF/Score · Trades/Freq/DD
+   GET /strategies/first-triangle-gold-adaptive -> 200
+     Renderizado: "50.2%" · "11.67 pts/trade" · "176.45 pts" ·
+     "Closed-trade drawdown" · "CLOSED-TRADE EQUITY · POINTS" ·
+     "EVIDENCE" (texto agrupado) · "Costs not applied" ·
+     "Independent reproduction pending" (dentro de Evidence)
+   Sin leaks: owner_supplied_under_review, validationStatus, dataStatus
+   Sin "seriouser"
+   Capturas: agent-deliveries/freebuff/capturas-qnt-0005c/
+     qnt5c-catalogo-1440.png · qnt5c-ficha-gold-1440.png
 
-8) Build:
-   bun run build → ✓ built in 874ms (client + server SSR)
-
-9) git diff --check → OK (sin whitespace errors)
-
-10) Verificación HTTP (dev server local :3000, SSR):
-    /                                                          → 200
-    /strategies                                                → 200
-    /strategies/first-triangle-gold-adaptive                   → 200 (contiene "2,368.75 pts",
-        "176.45 pts", "11.61 pts/trade", "Costs not applied", "Owner supplied",
-        "Independent reproduction pending", "Closed-trade equity · points",
-        "Open positions at end", "One position remained open at the end ...")
-    /strategies/first-triangle-adaptive                        → 200
-    /strategies/stochextreme-adaptive                          → 200
-    Leaks de estados internos (owner_supplied_under_review / validationStatus / dataStatus):
-    0 ocurrencias en las 5 páginas.
-
-11) Capturas (Chromium headless, 1440 px):
-    capturas-qnt-0005/catalogo-qnt5-1440.png
-    capturas-qnt-0005/ficha-first-triangle-gold-1440.png
-
-12) Entrega:
-    Commit producto 78efa79 · commit entrega (este paquete) · PR #5 OPEN · NO MERGE · NO DEPLOY
+8. GIT
+   git status --short -> limpio tras el commit
+   git log: be8935f (producto QNT-0005C) sobre 634fd7b (entrega QNT-0005) sobre 78efa79 (producto QNT-0005)
+   git push origin feat/QNT-0005-first-triangle-gold -> OK
+   gh pr view 5 -> OPEN, sin merge, sin deploy

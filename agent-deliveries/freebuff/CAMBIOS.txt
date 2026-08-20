@@ -1,112 +1,139 @@
 =====================================================================
-QNT-0005 · FIRST TRIANGLE GOLD ADAPTIVE — CAMBIOS
+QUANTORA · QNT-0005 / QNT-0005C · FIRST TRIANGLE GOLD ADAPTIVE
 =====================================================================
+Paquete de revisión regenerado desde el HEAD exacto del PR #5.
 
-RAMA:        feat/QNT-0005-first-triangle-gold
-BASE:        cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main, tras merge PR #4)
-HEAD:        78efa79 (producto) · PR #5 OPEN
-FUENTE:      data/quantora-real-backtests @ 2dc5733 · OROM15.zip
-             SHA-256 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476
-
----------------------------------------------------------------------
-1. ESTRATEGIA INTEGRADA
----------------------------------------------------------------------
-First Triangle Gold Adaptive (XAUUSD, M15, IC Markets) vía el pipeline
-reutilizable de intake — sin código de tarjeta/ficha específico.
-
-- strategyId:      first-triangle-gold-adaptive
-- modelId:         first-triangle-gold
-- strategyVersion: 3.00
-- variante:        174 de 378 · cost_scenario BASE (SL 55 / activation 60 / distance 25)
-- publicationMode: results · filterVersion beta-1 · scoreVersion beta-1
-- reviewLabel:     Owner supplied · independentReproduction: false
+SHA BASE:   cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main, merge PR #4)
+SHA HEAD:   be8935f (producto QNT-0005C) · PR head: be8935f
+PR:         #5 — feat/QNT-0005-first-triangle-gold (OPEN, sin merge)
+FUENTE:     OROM15.zip · rama data/quantora-real-backtests
+            commit 2dc5733bf3c2d0c5fe549d418530f6ce70644ecf
+            SHA-256 816812315e82e067b2dfd42144b722c2cc73b231e674398a6bb71f2e05467476
+            (verificado byte a byte por el importador antes de leer)
 
 ---------------------------------------------------------------------
-2. CIFRAS AUTORIZADAS (puntos — sin conversión a USD)
+1. QUÉ SE ENTREGÓ EN QNT-0005 (aceptado)
 ---------------------------------------------------------------------
-- Profit Factor: 1.8971348495464608
-- Win rate: 50.0% (fuente: wins ÷ export 204, que incluye la posición abierta)
-- Operaciones cerradas: 203 (102W / 101L / 0B) → 203 = 102 + 101 + 0 ✓
-- Beneficio bruto: 5,009.10 pts · pérdida bruta: 2,640.35 pts
-- Neto: +2,368.75 pts · Expectancy: 11.61 pts/trade
-- Drawdown máximo: 176.45 pts
-- Equity: 203 puntos closed-trade (sin la posición abierta)
-- Periodo: 2025-07-01 01:00:00 → 2026-08-14 23:56:59
-- Frecuencia: ~15 operaciones cerradas al mes
-- Meses positivos: 10 de 12 (monthly.csv; meses 9 y 12 negativos — NO se afirma 12/12)
-- Reconciliación de periodos: DEVELOPMENT 87 + VALIDATION 51 + LOCKED_OOS 65 = 203
-- Posición abierta al final: 1 — excluida de métricas cerradas (no es 204)
+- Pipeline reutilizable de intake con manifest versionado, evidencia
+  privada versionada (strategy-intake/evidence/first-triangle-gold/),
+  importador reproducible y catálogo generado.
+- Importador scripts/intake/ingest-first-triangle-gold.ts:
+  * verifica el SHA-256 del ZIP fuente;
+  * filtra variant_id=174 y cost_scenario=BASE (76,356 filas -> 203);
+  * reconcilia wins/losses/breakevens, PF, gross/net, drawdown,
+    expectancy, equity (203 pts), DEV+VAL+OOS=203 y monthly;
+  * falla ante NaN/Infinity, otra variante, recuento != 203 o si la
+    posición abierta se tratara como cerrada;
+  * costsApplied=false; sin campos USD; performanceUnit="points".
+- Manifest público public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
+  con identidad, variante 174/378, configuración SL55/ACT60/DIST25,
+  limitaciones y procedencia pública segura.
+- Frontend dinámico: tarjeta en /strategies y ficha
+  /strategies/first-triangle-gold-adaptive con gráfica de equity en
+  puntos, métricas, costes no aplicados y posición abierta al final.
+- 15 tests nuevos (total pipeline 69/69 en QNT-0005).
 
 ---------------------------------------------------------------------
-3. COSTES
+2. QUÉ CORRIGE QNT-0005C (este commit)
 ---------------------------------------------------------------------
-- costsApplied = false (commission/slippage 0.0 del export NO se tratan como
-  costes reales confirmados; el manifest fuente advierte que los USD no están
-  disponibles hasta reconciliar costes del broker).
-- Componente de costes del Quantora Score: available = false (0 puntos, nunca 100).
-- Confianza del score: 0.95.
-- UI: "Costs not applied" + "Reported performance may be reduced after
-  commissions, spread, swap and slippage."
+A. MÉTRICAS PÚBLICAS SOBRE OPERACIONES CERRADAS
+   - closedWinRate = 102 / 203 = 50.2463054187%  -> UI "50.2%"
+   - closedExpectancyPoints = 2368.75 / 203 = 11.6687192118 -> UI "11.67 pts/trade"
+   - El valor fuente (winRate=50.0, expectancy=11.6115) se conserva
+     internamente en provenance; no se publica como métrica principal.
+   - Documentado: "Source aggregate used exported count 204, including
+     one open position. Public closed-trade metrics were recomputed
+     from 203 closed trades."
+   - 203 cerradas = 102W + 101L + 0B; 1 posición abierta excluida de
+     PF, win rate, expectancy, neto y equity.
+
+B. TIMESTAMPS
+   - sourceTimezone = null; timestampNormalization = "not_normalized".
+   - Sin sufijo Z; sin declarar UTC; formato YYYY-MM-DDTHH:mm:ss.
+
+C. DRAWDOWN
+   - Valor fuente 176.45 puntos, magnitud positiva en UI ("176.45 pts").
+   - Definición: "Closed-trade drawdown" con tooltip
+     "Peak-to-trough drawdown calculated from closed-trade equity."
+   - Sin porcentaje, sin USD, sin denominarlo intraday/account-equity.
+
+D. JERARQUÍA VISUAL DE TARJETAS (todas las estrategias públicas)
+   - Fila 1: Net result (verde si positivo) · Profit Factor · Score (verde lima)
+   - Fila 2: Total trades · Frequency · drawdown (ámbar apagado, positivo)
+   - Rojo intenso reservado para errores/bloqueos/riesgo crítico.
+   - Gold: +2,368.75 pts · 1.90 · 98 · 203 · 15 / mo · 176.45 pts.
+
+E. TEXTO DE TRANSPARENCIA (ficha Gold)
+   - Evidence: "Historical backtest on XAUUSD M15. Results are
+     expressed in points and include 203 closed trades. One position
+     remained open at the end of the test and is excluded from the
+     closed-trade metrics. The equity curve and drawdown are calculated
+     at closed-trade level, not from intratrade account equity.
+     Owner-supplied evidence. Independent reproduction pending."
+   - Costs: "Costs not applied" + "Reported performance may be reduced
+     after commission, spread, slippage and swap."
+   - Limitations: lista deduplicada del manifest (sin repeticiones).
+   - Tarjeta Gold: "Historical backtest · Results in points · Costs not applied"
+
+F. COSTES
+   - costsApplied=false mantenido; commission=0.0/slippage=0.0 del
+     export no se interpretan como costes reales confirmados.
+
+G. QUANTORA SCORE
+   - Sin cambios en scoring.ts; scoreVersion=beta-1; score 98
+     (confidence 0.95, componente costes unavailable).
+   - Registrada para tarea futura (sin implementar): QNT-SCORE-BETA2
+     (penalización costsApplied=false, closed-trade drawdown only,
+     initial capital unavailable, open position at end, independent
+     reproduction pending).
 
 ---------------------------------------------------------------------
-4. UNIDADES
+3. CIFRAS AUTORIZADAS (variante 174/378, BASE)
 ---------------------------------------------------------------------
-- performanceUnit = "points" (contrato manifest + catálogo público + UI).
-- Frontend formatea: +2,368.75 pts · 176.45 pts · 11.61 pts/trade.
-- Gráfica: "Closed-trade equity · points" con tooltip en puntos.
-- Sin campos USD (netUsd/maxDrawdownUsd/costPerTradeUsd AUSENTES).
+- Profit Factor:       1.8971348495 (filtro beta-1: PF >= 1.15 OK)
+- Win rate (cerradas): 50.2%  (102 / 203)
+- Trades cerradas:     203    (wins 102 · losses 101 · breakevens 0)
+- Posición abierta:    1      (excluida de métricas cerradas)
+- Gross profit:        +5,009.10 pts
+- Gross loss:          -2,640.35 pts
+- Net result:          +2,368.75 pts
+- Max drawdown:        176.45 pts (closed-trade)
+- Expectancy:          11.67 pts/trade
+- Frecuencia:          ~15 operaciones cerradas/mes
+- Periodo:             2025-07-01 01:00:00 -> 2026-08-14 23:56:59
+- Equity:              203 puntos closed-trade
+- DEV 87 + VAL 51 + LOCKED_OOS 65 = 203
+- Monthly: 10 de 12 meses con trades cerrados positivos (calculado
+  desde monthly.csv; no se afirma 12/12)
+- Costes:              costsApplied=false (0.0 del export no es coste real)
+- Unidades:            performanceUnit="points"; sin campos USD
+- Score:               98 (beta-1, confidence 0.95, costs unavailable)
 
 ---------------------------------------------------------------------
-5. IMPORTADOR REPRODUCIBLE
+4. TESTS Y VERIFICACIONES
 ---------------------------------------------------------------------
-scripts/intake/ingest-first-triangle-gold.ts:
-1. Verifica SHA-256 del ZIP fuente contra source-archive.sha256.
-2. Filtra variant_id=174 y cost_scenario=BASE (76,356 filas → 203).
-3. 203 operaciones lógicas cerradas (18 INITIAL_SL / 113 OPPOSITE_TRIANGLE / 72 TRAILING).
-4. Reconciliaciones: wins/losses/breakevens, PF, gross/net, drawdown,
-   expectancy, equity 203 puntos, DEV+VAL+OOS=203, monthly 10/12.
-5. Posición abierta registrada por separado (openPositionsAtEnd=1).
-6. costsApplied=false · performanceUnit=points · sin campos USD.
-7. Fallo ante NaN/Infinity, otra variante, recuento ≠ 203 o posición abierta tratada como cerrada.
+- Dominio:  bun scripts/test-validation.ts        -> 58/58
+- Pipeline: bun scripts/test-strategy-intake.ts   -> 76/76
+  (7 tests QNT-0005C: winRate 102/203, expectancy 2368.75/203,
+   drawdown positivo, timestamps naive, sourceTimezone interno,
+   open position excluida de PF/winRate/neto/equity, sin leaks)
+- build:    bun run build                          -> OK (client + SSR)
+- typecheck: bun tsc -b --noEmit                   -> sin errores nuevos
+  (solo los 7 errores preexistentes: serve.ts x6 + LegalShell.tsx x1)
+- git diff --check                                -> OK
+- HTTP: 200 en /, /strategies y /strategies/first-triangle-gold-adaptive
+- Renderizado verificado por navegador (Playwright): "50.2%",
+  "11.67 pts/trade", "176.45 pts", "Closed-trade drawdown",
+  "EVIDENCE", "Costs not applied"; sin leaks de
+  owner_supplied_under_review / validationStatus / dataStatus;
+  sin "seriouser".
 
 ---------------------------------------------------------------------
-6. MANIFEST Y EVIDENCIA
+5. RESTRICCIONES RESPETADAS
 ---------------------------------------------------------------------
-- public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
-- strategy-intake/evidence/first-triangle-gold/ (10 derivados + README +
-  source-archive.sha256) — copias byte-idénticas de los archivos del ZIP, privados.
-- Interno: dataStatus real · validationStatus owner_supplied_under_review
-  (nunca en el bundle público; verificado por HTTP: 0 ocurrencias).
-
----------------------------------------------------------------------
-7. FRONTEND
----------------------------------------------------------------------
-- Tarjeta del catálogo generada desde los datos (score beta, PF, win rate,
-  203 trades, frecuencia, drawdown en pts, Costs not applied · Owner supplied ·
-  Independent reproduction pending).
-- Ficha /strategies/first-triangle-gold-adaptive: cabecera, gráfica de equity
-  en puntos, métricas (incl. expectancy y Open positions at end = 1), reglas,
-  variante, metodología, limitaciones (posición abierta, costes no aplicados,
-  inicial/zona horaria/servidor no disponibles, 10/12 meses positivos),
-  procedencia pública segura y disclaimer histórico.
-- Sin score manual: Quantora Score · Beta (98) calculado por la fórmula beta-1
-  común; el drawdown en puntos alimenta el componente unit-agnóstico.
-
----------------------------------------------------------------------
-8. TESTS Y VERIFICACIONES
----------------------------------------------------------------------
-- Test dominio: 58/58 · Test pipeline: 69/69 (54 + 15 nuevos QNT-0005)
-- bun run strategies:ingest / validate / build / report / intake: OK (0 errores)
-- bun run build: OK · git diff --check: OK
-- Typecheck: sin errores nuevos (solo los preexistentes documentados:
-  serve.ts tipos Bun, LegalShell ReactNode)
-- HTTP: / , /strategies y las 3 fichas → 200; "2,368.75 pts", "176.45 pts",
-  "11.61 pts/trade", "Costs not applied", "Owner supplied",
-  "Independent reproduction pending", "Closed-trade equity · points",
-  "Open positions at end" visibles; 0 leaks de estados internos.
-- Capturas: catalogo-qnt5-1440.png · ficha-first-triangle-gold-1440.png
-
-NO MERGE · NO DEPLOY · PR #5 abierto.
-El ZIP fuente y los CSV brutos NO se incluyen en el bundle público
-(solo derivados privados versionados + hash del ZIP).
-=====================================================================
+- NO merge · NO deploy · PR #5 abierto
+- No se modificaron: CSV fuente, métricas autorizadas (solo su
+  presentación pública sobre 203 cerradas), scoring.ts, manifiestos
+  de First Triangle / StochExtreme, datos Mock.
+- ZIP y CSV brutos no están en el bundle público (solo derivados
+  versionados bajo strategy-intake/evidence/).
