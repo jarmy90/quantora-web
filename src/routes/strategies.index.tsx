@@ -80,7 +80,7 @@ function PublicCard({ s }: { s: PublicStrategy }) {
         <div>
           <small>{t('detail.maxDrawdown')}</small>
           <strong style={{ color: 'var(--red)' }}>
-            {m.maxDrawdownUsd !== undefined ? `-${fmtUsd(m.maxDrawdownUsd)}` : '—'}
+            {m.maxDrawdownUsd !== undefined ? `${fmtUsd(m.maxDrawdownUsd)}` : '—'}
           </strong>
         </div>
       </div>

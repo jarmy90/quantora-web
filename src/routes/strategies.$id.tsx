@@ -114,7 +114,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     },
     {
       label: t('detail.maxDrawdown'),
-      value: m.maxDrawdownUsd !== undefined ? `-${fmtUsd(m.maxDrawdownUsd)}` : '—',
+      value: m.maxDrawdownUsd !== undefined ? `${fmtUsd(m.maxDrawdownUsd)}` : '—',
       accent: RED,
     },
     {

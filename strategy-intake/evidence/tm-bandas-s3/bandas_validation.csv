@@ -1,0 +1,6 @@
+check_id,name,status,expected,actual,is_blocking
+V001,geometry,pass,0,0,true
+V002,pnl_reconciliation,pass,6984.00000000,6984.00000000,true
+V003,pnl_r,pass,0,0,true
+V004,no_same_bar_exit,pass,0,0,true
+V005,open_at_end,pass,0,0,false

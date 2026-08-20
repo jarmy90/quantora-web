@@ -15,6 +15,11 @@ import { strategies as mockStrategies } from '../src/data.ts';
 import { evaluatePublishFilter, MIN_PROFIT_FACTOR } from './intake/filter.ts';
 import { buildFirstTriangleManifest, MANIFEST_PATH } from './intake/ingest-first-triangle.ts';
 import { buildStochExtremeManifest, STOCHEXTREME_MANIFEST_PATH } from './intake/ingest-stochextreme.ts';
+import {
+  AUTHORIZED_SOURCE_SHA256,
+  buildTmBandasS3Manifest,
+  TM_BANDAS_S3_MANIFEST_PATH,
+} from './intake/ingest-tm-bandas-s3.ts';
 import { computeQuantoraScore, FAVORABLE_PROFIT_FACTOR } from './intake/scoring.ts';
 import { validateManifest } from './intake/manifest.ts';
 import {
@@ -794,6 +799,152 @@ test('the beta score does not change validationStatus', () => {
   assert(result.entry!.score!.version === 'beta-1', 'score version');
   assert(result.entry!.score!.value > 0, `score value: ${result.entry!.score!.value}`);
   assert(result.entry?.validationStatus === before, 'validationStatus must remain unchanged');
+});
+
+// ---------------------------------------------------------------------------
+// QNT-0007: TM Bandas S3 intake
+// ---------------------------------------------------------------------------
+
+// 55. The importer pins the authorized source archive digest.
+test('TM Bandas S3 source archive hash is the authorized digest', () => {
+  assert(
+    AUTHORIZED_SOURCE_SHA256 === '455294f995ede782880b847755828dc07e2b0ef4642040bca754c49f30b67f21',
+    'authorized SHA-256',
+  );
+  const manifest = buildTmBandasS3Manifest();
+  assert(manifest.dataset.strategies[0]?.provenance.sourceFile === 'bandas.zip', 'sourceFile');
+  assert(manifest.dataset.strategies[0]?.provenance.dataStatus === 'real', 'dataStatus real');
+});
+
+// 56. A mismatched source hash is rejected.
+test('TM Bandas S3 rejects a mismatched source archive hash', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'bandas-hash-'));
+  try {
+    writeFileSync(join(dir, 'source-archive.sha256'), 'deadbeef'.repeat(8) + '  bandas.zip\n');
+    let threw = false;
+    try {
+      buildTmBandasS3Manifest(dir);
+    } catch {
+      threw = true;
+    }
+    assert(threw, 'must throw on a mismatched source hash');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// 57. Closed-trade metrics are extracted/reconciled from the raw log.
+test('TM Bandas S3 importer extracts authorized metrics', () => {
+  const manifest = buildTmBandasS3Manifest();
+  const m = manifest.results?.metrics;
+  assert(m, 'results.metrics must exist');
+  assert(m.trades === 621, `trades: ${m.trades}`);
+  assert(m.wins === 228, `wins: ${m.wins}`);
+  assert(m.losses === 393, `losses: ${m.losses}`);
+  assert(m.breakevens === 0, `breakevens: ${m.breakevens}`);
+  assert(m.wins! + m.losses! + m.breakevens! === 621, 'wins+losses+breakevens = 621');
+  assert(Math.abs(m.profitFactor! - 1.74045802) < 1e-7, `profitFactor: ${m.profitFactor}`);
+  assert(Math.abs(m.winRate! - (228 / 621) * 100) < 1e-6, `winRate: ${m.winRate}`);
+  assert(Math.abs(m.expectancyUsd! - 6984 / 621) < 1e-9, `expectancyUsd: ${m.expectancyUsd}`);
+  assert(Math.abs(m.netUsd! - 6984.0) < 0.01, `netUsd: ${m.netUsd}`);
+  assert(Math.abs(m.grossProfit! - 16416.0) < 0.01, `grossProfit: ${m.grossProfit}`);
+  assert(Math.abs(m.grossLoss! - 9432.0) < 0.01, `grossLoss: ${m.grossLoss}`);
+  assert(m.openPositionsAtEnd === 0, `openPositionsAtEnd: ${m.openPositionsAtEnd}`);
+});
+
+// 58. Profit Factor reconciles to gross profit / gross loss.
+test('TM Bandas S3 profit factor equals gross profit over gross loss', () => {
+  const m = buildTmBandasS3Manifest().results!.metrics!;
+  assert(Math.abs(m.profitFactor! - m.grossProfit! / m.grossLoss!) < 1e-9, `PF reconcile: ${m.profitFactor}`);
+});
+
+// 59. Win rate and expectancy use the 621-trade closed denominator only.
+test('TM Bandas S3 winRate/expectancy use the closed-trade denominator', () => {
+  const m = buildTmBandasS3Manifest().results!.metrics!;
+  assert(Math.abs(m.winRate! - (228 / 621) * 100) < 1e-9, `winRate: ${m.winRate}`);
+  assert(Math.abs(m.expectancyUsd! - 6984 / 621) < 1e-9, `expectancyUsd: ${m.expectancyUsd}`);
+  assert(m.openPositionsAtEnd === 0, 'no open position was included in the denominator');
+});
+
+// 60. The system is short-only.
+test('TM Bandas S3 is short-only', () => {
+  const manifest = buildTmBandasS3Manifest();
+  assert(manifest.variant?.includes('short-only') === true, `variant: ${manifest.variant}`);
+  assert(
+    manifest.dataset.strategies[0]?.description?.includes('enters short') === true,
+    'description must state short entry',
+  );
+});
+
+// 61. Equity is reconstructed from closed trades (621 points, final balance).
+test('TM Bandas S3 reconstructs closed-trade equity', () => {
+  const manifest = buildTmBandasS3Manifest();
+  const points = manifest.results!.equity!;
+  assert(points.length === 621, `equity points: ${points.length}`);
+  const last = points[points.length - 1]!;
+  assert(Math.abs(last.equity - 16984.0) < 0.01, `final equity: ${last.equity}`);
+  assert(last.timestamp === '2026-08-19T13:37:00+00:00', `last timestamp: ${last.timestamp}`);
+});
+
+// 62. Drawdown is a positive magnitude.
+test('TM Bandas S3 drawdown is a positive magnitude', () => {
+  const m = buildTmBandasS3Manifest().results!.metrics!;
+  assert(m.maxDrawdownUsd! > 0, `drawdown must be positive: ${m.maxDrawdownUsd}`);
+  assert(Math.abs(m.maxDrawdownUsd! - 384.0) < 0.01, `drawdown: ${m.maxDrawdownUsd}`);
+});
+
+// 63. Timestamps preserve the source's explicit +00:00 offset (not re-normalized).
+test('TM Bandas S3 timestamps preserve the source offset', () => {
+  const manifest = buildTmBandasS3Manifest();
+  const period = manifest.results!.period!;
+  assert(period.start === '2025-09-01T09:56:00+00:00', `start: ${period.start}`);
+  assert(period.end === '2026-08-19T13:37:00+00:00', `end: ${period.end}`);
+  assert(period.timeframe === 'M1', `timeframe: ${period.timeframe}`);
+});
+
+// 64. Costs are recorded as not applied; the score costs component is unavailable.
+test('TM Bandas S3 costsApplied=false with unavailable costs score component', () => {
+  const manifest = buildTmBandasS3Manifest();
+  assert(manifest.costsApplied === false, 'costsApplied false');
+  const result = processManifest(TM_BANDAS_S3_MANIFEST_PATH);
+  assert(result.entry?.published === true, 'must be published');
+  const costs = result.entry!.score!.components.find((c) => c.key === 'costs');
+  assert(costs?.available === false, `costs component unavailable: ${JSON.stringify(costs)}`);
+  assert(result.entry!.score!.confidence < 1, `confidence reduced: ${result.entry!.score!.confidence}`);
+});
+
+// 65. The strategy passes the beta-1 results filter.
+test('TM Bandas S3 passes the results filter', () => {
+  const result = processManifest(TM_BANDAS_S3_MANIFEST_PATH);
+  assert(result.issues.length === 0, `issues: ${JSON.stringify(result.issues)}`);
+  assert(result.entry?.published === true, `published: ${JSON.stringify(result.entry?.filterReasons)}`);
+  assert(result.entry?.publicationMode === 'results', 'publicationMode');
+  assert(result.entry?.filterVersion === 'beta-1', 'filterVersion');
+  assert(result.entry?.scoreVersion === 'beta-1', 'scoreVersion');
+});
+
+// 66. Public catalog strips internal states and keeps the safe review label.
+test('TM Bandas S3 public catalog strips internal states', () => {
+  const result = processManifest(TM_BANDAS_S3_MANIFEST_PATH);
+  const pub = buildPublicCatalog([result.entry!])[0]!;
+  assert(!('validationStatus' in pub), 'no validationStatus');
+  assert(!('dataStatus' in pub), 'no dataStatus');
+  assert(!('status' in pub), 'no status');
+  assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
+  assert(pub.independentReproduction === false, 'independentReproduction false');
+  assert(Math.abs(pub.metrics!.profitFactor! - 1.74045802) < 1e-7, 'PF preserved');
+  assert(pub.equity?.points.length === 621, 'equity preserved');
+});
+
+// 67. Performance is USD and costs 0.00 is never presented as confirmed real cost.
+test('TM Bandas S3 performance is USD with costsApplied=false', () => {
+  const manifest = buildTmBandasS3Manifest();
+  assert(manifest.costs?.commission?.includes('not applied') === true, 'commission note');
+  assert(manifest.costsApplied === false, 'costsApplied false');
+  const metrics = manifest.results!.metrics!;
+  assert(metrics.initialCapital === 10000, `initialCapital: ${metrics.initialCapital}`);
+  assert(metrics.netUsd === 6984, `netUsd: ${metrics.netUsd}`);
+  assert(metrics.maxDrawdownUsd === 384, `maxDrawdownUsd: ${metrics.maxDrawdownUsd}`);
 });
 
 // ---------------------------------------------------------------------------

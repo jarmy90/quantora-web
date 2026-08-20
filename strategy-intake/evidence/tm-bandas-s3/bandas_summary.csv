@@ -1,0 +1,2 @@
+variant,initial_capital,final_balance,net_profit,return_decimal,closed_trades,winners,losers,win_rate,profit_factor,max_drawdown_amount,commission_total,fees_total,open_at_end
+"KEEPER_SL12_TP36",10000.00,16984.00,6984.00,0.69840000,621,228,393,0.36714976,1.74045802,384.00,0.00,0.00,0
