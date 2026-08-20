@@ -83,6 +83,7 @@ function Home() {
           <div className="eyebrow">{t('home.curated')}</div>
           <h2>{t('home.signals')}</h2>
           <p className="muted">{t('home.startingPoint')}</p>
+          <p className="mono demo-note">{t('home.demoNote')}</p>
           <div className="grid" style={{ marginTop: 25 }}>
             {strategies.slice(0, 3).map((s) => (
               <StrategyCard key={s.id} s={s} />
@@ -93,11 +94,12 @@ function Home() {
         <section id="how" className="section wrap">
           <div className="eyebrow">{t('home.workflow')}</div>
           <h2>{t('home.workflowTitle')}</h2>
-          <div className="steps" style={{ marginTop: 25 }}>
+          <p className="section-intro">{t('home.workflowIntro')}</p>
+          <div className="steps" style={{ marginTop: 30 }}>
             {[
-              ['01', 'home.stepExplore', 'home.stepExploreBody'],
-              ['02', 'home.stepInspect', 'home.stepInspectBody'],
-              ['03', 'home.stepDecide', 'home.stepDecideBody'],
+              ['01', 'home.stepAnalyze', 'home.stepAnalyzeBody'],
+              ['02', 'home.stepFilter', 'home.stepFilterBody'],
+              ['03', 'home.stepShow', 'home.stepShowBody'],
             ].map(([n, title, body]) => (
               <div className="card" key={n}>
                 <div className="step-num mono">{n}</div>
@@ -108,13 +110,16 @@ function Home() {
               </div>
             ))}
           </div>
+          <div className="workflow-close">
+            <p>{t('home.workflowClose')}</p>
+          </div>
         </section>
 
         <section id="trust" className="section wrap">
           <div className="card" style={{ borderColor: '#34472a', background: '#101710' }}>
             <div className="eyebrow">{t('trust.eyebrow')}</div>
             <h2 style={{ fontSize: 24 }}>{t('trust.title')}</h2>
-            <p className="muted" style={{ maxWidth: 700, lineHeight: 1.7 }}>
+            <p className="muted" style={{ maxWidth: 760, lineHeight: 1.7 }}>
               {t('trust.body')}
             </p>
           </div>

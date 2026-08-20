@@ -1,0 +1,54 @@
+{
+  "manifestVersion": "1.0",
+  "strategyId": "example-real-under-review",
+  "tagline": "Documentary Under Review strategy (no results yet)",
+  "type": "Explorer",
+  "publicationMode": "documentary",
+  "filterVersion": "beta-1",
+  "reviewLabel": "Owner supplied",
+  "independentReproduction": false,
+  "rules": [
+    "H4/H1 liquidity sweep",
+    "M5 order block confirmation"
+  ],
+  "limitations": [
+    "Under Review: Quantora has not reproduced results yet.",
+    "Synthetic fixture — not a public strategy."
+  ],
+  "evidence": [],
+  "dataset": {
+    "modelVersion": "1.0",
+    "strategies": [
+      {
+        "id": "example-real-under-review",
+        "name": "Example Real Under Review",
+        "version": "1.00",
+        "status": "draft",
+        "validationStatus": "owner_supplied_under_review",
+        "assetIds": [
+          "asset-ustec"
+        ],
+        "backtestIds": [],
+        "createdAt": "2025-06-01T00:00:00Z",
+        "updatedAt": "2025-06-01T00:00:00Z",
+        "provenance": {
+          "dataStatus": "real",
+          "sourceName": "QNT-0003 synthetic fixture",
+          "sourceType": "owner-delivery",
+          "notes": "Structure example demonstrating the real + owner_supplied_under_review combination. No real financial data."
+        }
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-ustec",
+        "symbol": "USTEC",
+        "name": "US Tech 100 Index",
+        "assetClass": "other"
+      }
+    ],
+    "backtests": [],
+    "equityCurves": [],
+    "tradeLogs": []
+  }
+}

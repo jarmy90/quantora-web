@@ -1,0 +1,27 @@
+{
+  "strategy": "First Triangle Adaptive",
+  "source_run_id": "QUANTORA_FIRST_TRIANGLE_FINAL15_@ENQ_1754006400",
+  "selected_branch_id": 5,
+  "selection": {
+    "entry_model": "FIRST_ALTERNATING_TRIANGLE",
+    "stop_mode": "FIXED_200PTS",
+    "exit_mode": "ADAPTIVE_MFE_GIVEBACK"
+  },
+  "metrics": {
+    "closed_trades": 145,
+    "wins": 74,
+    "losses": 71,
+    "win_rate": 51.03448275862069,
+    "gross_profit": 32817.69999999996,
+    "gross_loss": 26130.20000000003,
+    "profit_factor": 1.2559299201689968,
+    "net_usd": 6687.500000000015,
+    "net_r": 17.15375,
+    "expectancy_usd": 46.12068965517251,
+    "max_drawdown_usd": 4474.799999999998,
+    "open_at_end": false
+  },
+  "selection_reason": "Exact match to published control metrics: 145 trades, PF 1.255930, net USD 6687.50, expectancy USD 46.120690, max drawdown USD 4474.80.",
+  "equity_basis": "Closed-trade cumulative net_usd reconstructed from selected branch trades; no synthetic smoothing.",
+  "disclaimer": "Historical results do not predict future performance."
+}

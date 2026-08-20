@@ -1,0 +1,2 @@
+run_id,status,strategy_version,symbol,calculation_mode,execution_mode,start_time,end_time,ticks_processed,closed_trades,structural_wins,structural_losses,net_profit,profit_factor,max_drawdown_absolute,max_drawdown_percent,warnings
+SEA2575_AMP_@ENQ_1754006400,COMPLETED,1.07,@ENQ,LIVE_INTRABAR,TESTER_ORDERS,2025.08.01 00:00:00,2026.08.07 20:59:59,509489041,421,200,221,6582.0,1.151392131381321,4690.0,26.53315229689975,none

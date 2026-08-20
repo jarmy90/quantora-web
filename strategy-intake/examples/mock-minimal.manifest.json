@@ -1,0 +1,35 @@
+{
+  "manifestVersion": "1.0",
+  "strategyId": "example-mock-minimal",
+  "tagline": "Minimal mock strategy example",
+  "type": "Fixture",
+  "limitations": [
+    "Mock fixture for pipeline testing only — not a public strategy."
+  ],
+  "evidence": [],
+  "dataset": {
+    "modelVersion": "1.0",
+    "strategies": [
+      {
+        "id": "example-mock-minimal",
+        "name": "Example Mock Minimal",
+        "version": "1.0.0",
+        "status": "draft",
+        "validationStatus": "mock",
+        "assetIds": [],
+        "backtestIds": [],
+        "createdAt": "2025-01-01T00:00:00Z",
+        "updatedAt": "2025-01-01T00:00:00Z",
+        "provenance": {
+          "dataStatus": "mock",
+          "sourceName": "Synthetic fixture",
+          "sourceType": "fixture"
+        }
+      }
+    ],
+    "assets": [],
+    "backtests": [],
+    "equityCurves": [],
+    "tradeLogs": []
+  }
+}

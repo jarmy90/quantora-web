@@ -2,10 +2,15 @@
 
 This repository currently has a frontend-only catalog. Phase 2A adds versioned domain contracts and a pure importer; it does **not** run a backend, create strategies, or claim that the existing demo metrics are real.
 
+> **Strategy intake (QNT-0003):** new strategies are now added through the
+> data-driven manifest pipeline in `docs/STRATEGY_INTAKE.md` (folders
+> `strategy-intake/` and `public-strategies/`). The JSON/CSV importer documented
+> below remains available for raw domain datasets.
+
 ## Source separation and status
 
 - Existing UI records remain mock Phase 1 fixtures in `src/data.ts`.
-- Future owner deliveries belong outside mock fixtures (for example `data/real/`, which is gitignored in deployment workflows). Never copy owner data into mock files.
+- Future owner deliveries belong outside mock fixtures, in the intake pipeline's `strategy-intake/incoming/` and `public-strategies/` folders. Never copy owner data into mock files.
 - Every real record must carry `provenance.dataStatus: "real"`; mock fixtures must carry `"mock"`. The UI should show a clear status guardrail before presenting any imported record.
 - Every `Strategy` must also carry `validationStatus`, one of: `mock`, `owner_supplied_under_review`, `quantora_validated`, or `rejected`. It is independent from `provenance.dataStatus` and the operational `status` field.
 - Allowed combinations: `dataStatus: "mock"` pairs with `validationStatus: "mock"`; `dataStatus: "real"` pairs with `owner_supplied_under_review`, `quantora_validated`, or `rejected`. For example, a real owner delivery awaiting review uses `dataStatus: "real"` with `validationStatus: "owner_supplied_under_review"`.

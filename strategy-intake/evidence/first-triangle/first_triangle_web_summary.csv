@@ -1,0 +1,2 @@
+run_id,branch_id,entry_model,stop_mode,exit_mode,closed_trades,wins,losses,win_rate,gross_profit,gross_loss,profit_factor,net_usd,net_r,expectancy_usd,max_drawdown_usd,max_consecutive_wins,max_consecutive_losses,open_at_end
+QUANTORA_FIRST_TRIANGLE_FINAL15_@ENQ_1754006400,5,FIRST_ALTERNATING_TRIANGLE,FIXED_200PTS,ADAPTIVE_MFE_GIVEBACK,145,74,71,51.03448275862069,32817.69999999996,26130.20000000003,1.2559299201689968,6687.500000000015,17.15375,46.12068965517251,4474.799999999998,8,6,False

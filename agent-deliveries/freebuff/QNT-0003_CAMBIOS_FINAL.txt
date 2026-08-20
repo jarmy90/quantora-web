@@ -1,0 +1,109 @@
+QUANTORA — QNT-0003 · Pipeline reutilizable de incorporación de estrategias
+Rama: feat/QNT-0003-strategy-intake-pipeline
+PR: #4 (QNT-0003: reusable strategy intake pipeline)
+Entrega: First Triangle Adaptive + StochExtreme Adaptive — filtro beta-1, Quantora Score beta, catálogo y fichas
+
+RESUMEN DE CAMBIOS
+1. Pipeline de intake reutilizable (scripts/intake/* + scripts/strategy-intake.ts)
+   - Manifests versionados en public-strategies/manifests/; plantillas y ejemplos en
+     strategy-intake/templates y strategy-intake/examples.
+   - Comandos: strategies:validate, strategies:build, strategies:report,
+     strategies:intake, strategies:ingest (y variantes por estrategia).
+   - El intake valida estructura y referencias, calcula hashes de evidencia,
+     impide exponer archivos privados, construye el catálogo normalizado y genera
+     informes humano y máquina; exit code != 0 ante errores bloqueantes.
+
+2. Importador reproducible First Triangle (scripts/intake/ingest-first-triangle.ts)
+   - Lee los 5 archivos autorizados (manifest, summary, trades, equity, signals) y
+     genera el manifest versionado. Autocomprueba las cifras contra las autorizadas.
+
+3. Importador reproducible StochExtreme (scripts/intake/ingest-stochextreme.ts)
+   - Lee los derivados web autorizados en strategy-intake/evidence/stochextreme/
+     (procedentes de STOCHEXTREME.rar en data/quantora-real-backtests; SHA-256 del
+     RAR 09cc6fd3... verificado).
+   - Cuenta SOLO los 421 trades cerrados. Cruces, confirmaciones canceladas y
+     SESSION_BLOCKED NO se cuentan como operaciones.
+   - Equity reconstruida (354 puntos diarios, incluye el punto de máximo drawdown).
+
+4. Filtro de publicación común versionado (scripts/intake/filter.ts)
+   - filterVersion = "beta-1" · publicationMode = "documentary" | "results".
+   - RESULTS exige: identidad, Profit Factor finito >= 1.15 (umbral beta
+     provisional, no validación independiente), >= 1 operación cerrada, equity
+     con >= 2 puntos, periodo, drawdown y costsApplied definido explícitamente.
+     PF >= 1.20 es el tramo favorable, no obligatorio. costsApplied=false no
+     bloquea: se muestra, reduce la confianza y deja el componente de costes
+     no disponible.
+   - DOCUMENTARY permite publicar sin PF/operaciones/equity cuando hay ID,
+     nombre, versión, descripción o reglas, activo o mercado, procedencia
+     válida, validationStatus compatible, limitaciones y fuente/evidencia
+     identificable. Nunca fabrica métricas ni equity y no recibe score sin
+     resultados suficientes.
+
+5. Quantora Score beta (scripts/intake/scoring.ts)
+   - scoreVersion = "beta-1". Puntuación común 0-100 basada solo en datos
+     disponibles; la fórmula no se ajusta por estrategia.
+   - Pesos: Profit Factor 25% (PF >= 1.20 tramo favorable +5 documentado,
+     topado a 100), Drawdown vs resultado 25%, Estabilidad de la equity 15%,
+     Nº de operaciones 10%, Consistencia temporal 10%, Frecuencia 5%, Costes 5%,
+     Completitud de evidencia 5%.
+   - Un componente ausente se excluye (neutral) y reduce la confianza; nunca se
+     inventa. Con costsApplied=false el componente de costes queda no disponible
+     (0 puntos) y la confianza se reduce (StochExtreme: 0.95).
+   - El score es experimental y comparativo; no es validación independiente y
+     no cambia validationStatus.
+
+6. Transparencia pública (QNT-0003H)
+   - El contrato público añade: reviewLabel ("Owner supplied"),
+     independentReproduction (false), costsApplied, scoreVersion, filterVersion
+     y publicationMode.
+   - Los estados internos (dataStatus, validationStatus, status) siguen sin
+     llegar al cliente. "owner_supplied_under_review" nunca aparece en la UI.
+   - La UI muestra: "Owner supplied", "Independent reproduction pending",
+     "Quantora Score · Beta" (+ nota de que es experimental, no validación),
+     "Costs not applied" + aviso de comisiones/spread/slippage cuando
+     costsApplied=false.
+
+7. Frontend dinámico (src/catalog.ts, src/routes/strategies.index.tsx,
+   src/routes/strategies.$id.tsx, src/domain/publicStrategy.ts, src/format.ts,
+   src/styles/app.css, src/i18n/index.ts)
+   - Tarjeta y ficha generadas desde los datos, nunca métricas escritas a mano.
+   - Catálogo /strategies: tarjetas con nombre, versión, activo, Quantora Score,
+     Profit Factor, win rate, operaciones, frecuencia, drawdown y badges de
+     procedencia pública.
+   - Ficha /strategies/:id: cabecera, gráfica de equity grande con tooltip,
+     métricas principales, explicación sencilla, limitaciones, disclaimer y
+     avisos de costes no aplicados.
+   - Fixtures Mock intactos y etiquetados como demo.
+
+CIFRAS AUTORIZADAS (extraídas de los archivos, no inventadas)
+- First Triangle Adaptive: PF 1.25593 · Win rate 51.03% · 145 operaciones ·
+  ~12/mes · Drawdown máx -4,474.80 USD · Neto +6,687.50 USD · Expectancy 46.12
+  USD · Net R 17.15 · Coste 1.20 USD/operación (costsApplied=true) · Periodo
+  2025-08-14 a 2026-08-07.
+- StochExtreme Adaptive: PF 1.15139 · Win rate 45.13% (190 wins / 231 losses) ·
+  421 operaciones cerradas · ~34/mes · Drawdown máx -4,690.00 USD (26.53%) ·
+  Neto +6,582.00 USD · Expectancy 15.63 USD/op · Coste 0.00 USD/operación
+  (costsApplied=false; el cero del export no es coste real confirmado) ·
+  Periodo 2025-08-01 a 2026-08-07.
+
+RESULTADO DEL FILTRO (beta-1)
+- First Triangle Adaptive: PUBLICADA (results · PF 1.25593 >= 1.15) · Score 68/100.
+- StochExtreme Adaptive: PUBLICADA (results · PF 1.15139 >= 1.15) · Score 72/100
+  (confianza 0.95 por costes no aplicados).
+
+VERIFICACIÓN
+- bun scripts/test-validation.ts -> 58/58 passed.
+- bun scripts/test-strategy-intake.ts -> 54/54 passed (27 originales + 27 nuevos
+  de QNT-0003H: transparency, costsApplied, score/filter beta, documentary/results).
+- bun run strategies:ingest / validate / build / report / intake -> OK (0 errores).
+- bun tsc -b --noEmit -> sin errores nuevos (solo los preexistentes documentados:
+  serve.ts tipos de Bun, LegalShell ReactNode sin usar).
+- bun run build -> OK (client + server SSR).
+- git diff --check -> OK.
+- Preview temporal activo (no es producción): /, /strategies,
+  /strategies/first-triangle-adaptive, /strategies/stochextreme-adaptive.
+- Comprobado por HTTP: "Owner supplied", "Independent reproduction pending" y
+  "Quantora Score · Beta" visibles; "Costs not applied" + aviso en StochExtreme;
+  ausencia de owner_supplied_under_review / validationStatus / dataStatus.
+
+NO MERGE · NO DEPLOY · SIN PAGOS · SIN AUTENTICACIÓN

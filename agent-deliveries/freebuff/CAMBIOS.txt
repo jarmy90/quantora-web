@@ -1,0 +1,181 @@
+QUANTORA — QNT-0003 + QNT-0004 · Pipeline de estrategias + corrección responsive y posicionamiento de marca
+Rama: feat/QNT-0003-strategy-intake-pipeline
+PR: #4 (QNT-0003: reusable strategy intake pipeline) — OPEN, sin merge
+HEAD de producto: 4865259da87eaf79190daf48f06d8ff709f17b8d (QNT-0004)
+Base oficial: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
+
+=====================================================================
+QNT-0004 · CORRECCIÓN RESPONSIVE Y POSICIONAMIENTO DE MARCA
+=====================================================================
+1. MARGEN LATERAL CORREGIDO (estructura, no títulos sueltos)
+   - Contenedor compartido .wrap: max-width 1200px, margin-inline auto,
+     padding lateral 32px (escritorio) / 24px (tablet <=1024) / 16px
+     (móvil <=760).
+   - .hero y .section usan padding-block (antes su shorthand padding
+     borraba el padding horizontal de .wrap y dejaba secciones pegadas al
+     borde). Footer (footer-grid/footer-bar) idéntico tratamiento.
+   - Se quitó max-width:850px del hero: ahora todas las secciones
+     (CURATED SYSTEMS, Signals worth a closer look, How it works, tarjetas
+     de estrategias y proceso, bloque verde Trust & Transparency, nav y
+     footer) comparten la misma alineación horizontal en 1440/1280/1024/
+     900/768/390 px. Sin contenido pegado a los bordes.
+
+2. PORTADA
+   - Titular principal mantenido: "Strategies you can understand."
+   - Nuevo subtítulo: "Cut through the noise of unverified bots and
+     trading promises. Explore rules-based strategies evaluated through
+     structured backtesting, with performance, risk and limitations shown
+     clearly."
+
+3. HOW IT WORKS (sección central de marca)
+   - EYEBROW: "A SERIOUSER WAY TO EVALUATE STRATEGIES"
+   - TÍTULO: "Less promise. More evidence."
+   - INTRO: internet y redes llenos de estrategias/señales/bots con
+     capturas atractivas y afirmaciones difíciles de verificar; Quantora
+     ofrece una alternativa rigurosa: estrategias explicables evaluadas
+     con metodología de backtesting consistente y resultados completos
+     incluyendo riesgo y limitaciones.
+   - PASO 01 Analyze: procesamos el registro histórico con metodología
+     estructurada; trades cerrados, equity, Profit Factor, drawdown,
+     frecuencia, estabilidad y costes disponibles.
+   - PASO 02 Filter: criterios de publicación comunes; evidencia
+     insuficiente o mínimo no alcanzado => no aparece en el catálogo.
+   - PASO 03 Show the complete picture: potencial y riesgo juntos, sin
+     seleccionar los mejores periodos; el usuario inspecciona equity,
+     métricas, Quantora Score y limitaciones.
+   - CIERRE: "We do not promise returns. We build a clearer and more
+     rigorous way to evaluate strategies."
+
+4. TRUST & TRANSPARENCY
+   - EYEBROW: "TRANSPARENCY BY DESIGN"
+   - TÍTULO: "The complete picture, not just the best trades."
+   - TEXTO: rendimiento histórico junto con drawdown, número de
+     operaciones, costes, periodo analizado y limitaciones conocidas;
+     estrategias reales y datos demo claramente separados; resultados
+     históricos son evidencia para evaluar, no promesa de futuro.
+
+5. MENSAJES MOCK ACTUALIZADOS
+   - "ALL PERFORMANCE SHOWN IS MOCK / DEMO DATA" sustituido por
+     "HISTORICAL RESULTS DO NOT GUARANTEE FUTURE PERFORMANCE".
+   - MOCK ENVIRONMENT permanece solo en preview técnico (no se renderiza
+     en builds de producción: gate por import.meta.env.PROD).
+   - Los datos demo quedan identificados únicamente dentro de su propia
+     sección (nota demo en portada + sección demo del catálogo).
+
+6. JERARQUÍA DEL CATÁLOGO
+   - First Triangle Adaptive y StochExtreme Adaptive aparecen primero, en
+     una sección destacada (real-section con borde/glow discreto).
+   - La sección "Demo strategies · mock data" queda visualmente rebajada
+     (colores atenuados) y sus filtros siguen siendo solo de demo.
+   - Métricas intactas; nada recalculado.
+
+7. ETIQUETAS PÚBLICAS
+   - "Owner supplied" e "Independent reproduction pending" retiradas de
+     tarjetas y fichas. Los campos se conservan internamente en el dataset
+     generado (trazabilidad), no dominan la experiencia pública.
+   - Se mantienen: Quantora Score · Beta (discreto), "Costs not applied"
+     + aviso de comisiones/spread/slippage en StochExtreme, y el
+     disclaimer histórico.
+
+8. CONSISTENCIA DEL SCORE
+   - StochExtreme: 71/100 (beta-1, confidence 0.95, costs unavailable)
+     en catalog.json, informe de intake y UI (tarjeta + ficha), todo
+     generado por el pipeline (única fuente). El manifest no guarda el
+     score: lo calcula scoring.ts. No se escribe el valor a mano.
+
+=====================================================================
+QNT-0003 · PIPELINE REUTILIZABLE (base de esta rama)
+=====================================================================
+1. Pipeline de intake reutilizable (scripts/intake/* + scripts/strategy-intake.ts)
+   - Manifests versionados en public-strategies/manifests/; plantillas y
+     ejemplos en strategy-intake/templates y strategy-intake/examples.
+   - Comandos: strategies:validate, strategies:build, strategies:report,
+     strategies:intake, strategies:ingest (y variantes por estrategia).
+   - Intake: valida estructura y referencias, calcula hashes de evidencia,
+     impide exponer archivos privados, construye el catálogo normalizado y
+     genera informes humano y máquina; exit code != 0 ante errores bloqueantes.
+
+2. Importador reproducible First Triangle (ingest-first-triangle.ts)
+   - Lee los 5 archivos autorizados (manifest, summary, trades, equity,
+     signals) y genera el manifest versionado. Autocomprueba las cifras.
+
+3. Importador reproducible StochExtreme (ingest-stochextreme.ts)
+   - Lee los derivados web autorizados en strategy-intake/evidence/
+     stochextreme/ (procedentes de STOCHEXTREME.rar en data/quantora-real-
+     backtests; SHA-256 del RAR 09cc6fd3... verificado).
+   - Cuenta SOLO los 421 trades cerrados. Cruces, confirmaciones
+     canceladas y SESSION_BLOCKED NO se cuentan como operaciones.
+   - Equity reconstruida (354 puntos diarios, incluye el punto de máximo
+     drawdown). Autocomprueba PF, neto, drawdown, wins/losses y counts.
+
+4. Filtro de publicación común versionado (filter.ts)
+   - filterVersion = "beta-1" · publicationMode = "documentary" | "results".
+   - RESULTS exige: identidad, Profit Factor finito >= 1.15 (umbral beta
+     provisional, no validación independiente), >= 1 operación cerrada,
+     equity con >= 2 puntos, periodo, drawdown y costsApplied definido.
+   - PF >= 1.20 NO es obligatorio: es el tramo favorable en el score (+5
+     en el componente Profit Factor, topado a 100).
+   - costsApplied=false no bloquea; se muestra, reduce confianza y deja el
+     componente de costes no disponible.
+   - DOCUMENTARY: identidad + procedencia suficientes; nunca fabrica
+     métricas/equity/score.
+
+5. Quantora Score reutilizable (scoring.ts, scoreVersion = "beta-1")
+   - 0-100 ponderado sobre componentes disponibles: Profit Factor 25%,
+     Drawdown vs resultado 25%, Estabilidad de equity 15%, Operaciones 10%,
+     Consistencia temporal 10%, Frecuencia 5%, Costes 5%, Evidencia 5%.
+   - Componentes ausentes se excluyen y reducen confidence; nunca se
+     inventan. El drawdown penaliza visiblemente sin bloquear.
+
+6. Transparencia pública (QNT-0003H)
+   - Contrato público con reviewLabel, independentReproduction,
+     costsApplied, scoreVersion, filterVersion, publicationMode.
+   - dataStatus / validationStatus / status NUNCA cruzan al bundle.
+   - First Triangle: costsApplied=true · StochExtreme: costsApplied=false.
+
+CIFRAS AUTORIZADAS (sin recálculo en QNT-0004)
+- First Triangle Adaptive: PF 1.25593 · 145 trades · win 51.03% · neto
+  +6,687.50 USD · drawdown 4,474.80 USD · score 68/100 · costsApplied=true
+  · periodo 2025-08-14 a 2026-08-07.
+- StochExtreme Adaptive: PF 1.151392131381321 (>= 1.15 publicable, sin
+  bonus 1.20) · 421 trades cerrados (190 wins / 231 losses) · win rate
+  45.13% · neto +6,582.00 USD (bruto 50,058.50 / bruto pérdida 43,476.50)
+  · drawdown 4,690.00 USD (26.53%) · score 71/100 (beta-1, confidence 0.95,
+  costs unavailable) · costsApplied=false · frecuencia ~34/mes · periodo
+  2025-08-01 a 2026-08-07 · equity 354 puntos.
+
+VERIFICACIONES EJECUTADAS (HEAD 4865259)
+- bun scripts/test-validation.ts          -> 58/58 passed
+- bun scripts/test-strategy-intake.ts     -> 54/54 passed (27 + 27 QNT-0003H)
+- bun tsc -b --noEmit                     -> sin errores nuevos (solo los
+  preexistentes documentados: serve.ts tipos Bun y LegalShell ReactNode)
+- bun run build                           -> OK (client + server SSR)
+- git diff --check                        -> OK (sin errores de whitespace)
+- Score StochExtreme 71/100 idéntico en catalog.json, intake-report y UI.
+
+=====================================================================
+QNT-0004B · ERRATA DE COPIA + PREVIEW FINAL (commit c8c770b)
+=====================================================================
+1. Errata corregida en i18n: "A seriouser way to evaluate strategies"
+   -> "A more rigorous way to evaluate strategies". La UI muestra
+   "A MORE RIGOROUS WAY TO EVALUATE STRATEGIES". Sin "seriouser".
+2. Preview funcional levantado y verificado por navegador headless
+   (Playwright + Chromium). Comprobación de layout en 1440 / 1280 / 1024 /
+   900 / 768 / 390 px: 0 issues (padding 32/24/16 correcto en .wrap, sin
+   overflow horizontal, sin contenido pegado a bordes) en portada,
+   catálogo y fichas. CSS sin selectores concatenados ni bloques sin cerrar
+   (build + parse de las media queries OK).
+3. Capturas (10 PNG) en agent-deliveries/freebuff/capturas-qnt-0004b/:
+   portada 1440/1280/1024/900/768/390, catálogo 1440/1024, fichas
+   First Triangle y StochExtreme.
+4. Contenido comprobado por HTTP: errata corregida, "Less promise.",
+   "Cut through the noise", disclaimer histórico, sin "Owner supplied" /
+   "Independent reproduction pending" en tarjeta/ficha, sin
+   validationStatus/dataStatus en el bundle.
+5. Verificaciones re-ejecutadas: 58/58 dominio + 54/54 pipeline,
+   bun tsc -b --noEmit sin errores nuevos, bun run build OK,
+   git diff --check OK.
+6. Sin merge, sin deploy. PR #4 abierto (head c8c770b).
+
+NO MERGE · NO DEPLOY · SIN PAGOS · SIN AUTENTICACIÓN
+PR #4 MANTENIDO ABIERTO · Preview: https://3000-124d91f4-172c-4dd5-bbb6-d6e7597a8990.daytonaproxy01.net/
