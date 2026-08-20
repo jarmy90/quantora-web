@@ -1,68 +1,53 @@
-QUANTORA — QNT-0003 + QNT-0004 · COMANDOS Y RESULTADOS
-Rama: feat/QNT-0003-strategy-intake-pipeline · Base: c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
+QNT-0007 · COMANDOS Y RESULTADOS
+================================
 
-1) ESTADO
-$ git rev-parse HEAD
-  -> 4865259da87eaf79190daf48f06d8ff709f17b8d  (commit de producto QNT-0004)
-$ git diff --name-status c5fdb7d..HEAD (excl. agent-deliveries)
-  -> 36 añadidos + 9 modificados + 0 eliminados = 45 archivos de producto
+Fuente
+------
+git fetch origin +refs/heads/data/quantora-real-backtests:refs/remotes/origin/data/quantora-real-backtests
+  → tip 24c161929325679bbf6f14a0a079b331a2cd7f5e
+git ls-tree -r origin/data/quantora-real-backtests | grep -i bandas
+  → data/imports/quantora-real-backtests/bandas.zip
 
-2) SCORE STOCHEXTREME (consistencia, una única fuente generada)
-$ score en public-strategies/catalog.json  -> 71 (beta-1, confidence 0.95)
-$ score en strategy-intake/reports/intake-report.json -> 71 (MATCH)
-$ UI tarjeta + ficha -> lee catalog.json -> 71
-  El manifest no guarda el score (lo calcula scoring.ts en el pipeline);
-  conserva scoreVersion beta-1 y las métricas fuente.
+Integridad
+----------
+sha256sum bandas.zip
+  → 455294f995ede782880b847755828dc07e2b0ef4642040bca754c49f30b67f21 (25,696 bytes)
+unzip -t bandas.zip
+  → "No errors detected in compressed data" · 7 entries
 
-3) TESTS
-$ bun scripts/test-validation.ts
-  -> Tests executed: 58 | passed: 58 | failed: 0
-$ bun scripts/test-strategy-intake.ts
-  -> Tests executed: 54 | passed: 54 | failed: 0
+Reconciliación de trades (bun, sobre los 621 cerrados)
+-----------------------------------------------------
+sides: sell (621) · exit_reasons: SL 393 / TP 228 · status: closed (621)
+costs_included: false (621) · variants: KEEPER_SL12_TP36 (621)
+winners 228 + losers 393 + breakevens 0 = 621
+grossProfit 16,416.00 · grossLoss -9,432.00 · net 6,984.00
+PF 1.74045802 · winRate 36.71497584% · expectancy 11.2464 USD
+final equity 16,984.00 · max closed-trade drawdown 384.00 · NaN: 0
 
-4) TYPECHECK
-$ bun tsc -b --noEmit
-  -> Sin errores nuevos. Solo preexistentes documentados (fuera de alcance):
-     serve.ts (tipos de Bun / import.meta.dir) y
-     src/components/LegalShell.tsx (ReactNode sin usar).
+Pipeline
+--------
+bun run strategies:ingest:tm-bandas-s3
+  → Manifest written · 621 trades, PF 1.74046, net $6984.00
+bun run strategies:ingest   → 3 manifests, OK
+bun run strategies:validate → 3 accepted, 0 errores, 0 warnings
+bun run strategies:build    → catalog.json (3 publicadas), 0 errores
+bun run strategies:report   → 0 errores
+bun run strategies:intake   → 0 errores
 
-5) BUILD
-$ bun run build
-  -> ✓ built (client + server SSR, sin errores)
+Tests
+-----
+bun scripts/test-validation.ts        → 58/58
+bun scripts/test-strategy-intake.ts   → 67/67 (13 nuevos QNT-0007)
 
-6) CALIDAD
-$ git diff --check
-  -> OK (sin errores de whitespace)
+Build / typecheck
+-----------------
+bun tsc -b --noEmit  → solo los 7 errores preexistentes (serve.ts, LegalShell.tsx)
+bun run build        → OK (client + SSR, 776ms)
+git diff --check     → OK
 
-7) RESPONSIVE (comprobación estática de la estructura)
-  Contenedor compartido .wrap: 1200px, margin-inline auto,
-  padding-inline 32px (>1024) / 24px (<=1024) / 16px (<=760).
-  .hero/.section/footer usan padding-block (no borran el padding lateral).
-  Verificado para 1440 / 1280 / 1024 / 900 / 768 / 390 px: todas las
-  secciones comparten la misma alineación; nada pegado al borde.
-
-8) PREVIEW
-  Esta sesión no pudo levantar preview: el endpoint del turno anterior
-  devolvió 502 y el CLI freebuff-preview no está disponible en el entorno.
-  La verificación visual en vivo queda pendiente de la plataforma; el
-  código y el build quedan verificados (58/58, 54/54, build OK).
-
-9) QNT-0004B (commit c8c770b)
-$ Errata i18n: 'A seriouser way' -> 'A more rigorous way' (UI:
-  A MORE RIGOROUS WAY TO EVALUATE STRATEGIES).
-$ Preview funcional levantado: http://localhost:3000 y proxy público
-  https://3000-124d91f4-172c-4dd5-bbb6-d6e7597a8990.daytonaproxy01.net/
-$ Verificación visual headless (Playwright + Chromium headless shell):
-  - Layout en 1440/1280/1024/900/768/390 px: 0 issues (paddings 32/24/16
-    correctos, sin overflow horizontal, sin contenido pegado a bordes).
-  - 10 capturas PNG generadas (portada 6 anchuras, catálogo 2, fichas 2).
-$ Contenido por HTTP en las 4 rutas: errata corregida, sin 'seriouser',
-  sin 'Owner supplied'/'Independent reproduction pending', sin
-  validationStatus/dataStatus en el bundle público.
-$ bun scripts/test-validation.ts -> 58/58
-$ bun scripts/test-strategy-intake.ts -> 54/54
-$ bun tsc -b --noEmit -> sin errores nuevos (solo preexistentes)
-$ bun run build -> OK
-$ git diff --check -> OK
-
-NO MERGE · NO DEPLOY · PR #4 MANTENIDO ABIERTO
+HTTP (verificación de render)
+-----------------------------
+GET /                          → 200
+GET /strategies                → 200
+GET /strategies/tm-bandas-s3   → 200 (TM Bandas S3, 1.74, 36.7%, 621,
+                                     Costs not applied, Nasdaq-100; sin leaks)

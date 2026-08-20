@@ -1,60 +1,26 @@
-QUANTORA — QNT-0003 + QNT-0004 · Archivos del diff final vs base c5fdb7d48affe78a6b2c97bf5a858e78cff22c62
-Total: 45 archivos de producto (36 añadidos + 9 modificados + 0 eliminados)
+QNT-0007 · ARCHIVOS MODIFICADOS (diff contra origin/main cf80b1c3)
+==================================================================
 
-AÑADIDOS (36):
-- docs/STRATEGY_INTAKE.md
-- public-strategies/catalog.json
-- public-strategies/datasets/README.md
-- public-strategies/manifests/README.md
-- public-strategies/manifests/first-triangle-adaptive.manifest.json
-- public-strategies/manifests/stochextreme-adaptive.manifest.json
-- scripts/intake/filter.ts
-- scripts/intake/ingest-first-triangle.ts
-- scripts/intake/ingest-stochextreme.ts
-- scripts/intake/manifest.ts
-- scripts/intake/pipeline.ts
-- scripts/intake/scoring.ts
-- scripts/strategy-intake.ts
-- scripts/test-strategy-intake.ts
-- src/catalog.ts
-- src/domain/publicStrategy.ts
-- src/format.ts
-- strategy-intake/evidence/first-triangle/README.md
-- strategy-intake/evidence/first-triangle/first_triangle_web_equity.csv
-- strategy-intake/evidence/first-triangle/first_triangle_web_manifest.json
-- strategy-intake/evidence/first-triangle/first_triangle_web_signals.csv
-- strategy-intake/evidence/first-triangle/first_triangle_web_summary.csv
-- strategy-intake/evidence/first-triangle/first_triangle_web_trades.csv
-- strategy-intake/evidence/stochextreme/README.md
-- strategy-intake/evidence/stochextreme/stochextreme_coverage.csv
-- strategy-intake/evidence/stochextreme/stochextreme_equity_daily.csv
-- strategy-intake/evidence/stochextreme/stochextreme_manifest.csv
-- strategy-intake/evidence/stochextreme/stochextreme_strategy_config.csv
-- strategy-intake/evidence/stochextreme/stochextreme_symbol_specifications.csv
-- strategy-intake/evidence/stochextreme/stochextreme_trades.csv
-- strategy-intake/examples/mock-minimal.manifest.json
-- strategy-intake/examples/real-under-review-minimal.manifest.json
-- strategy-intake/examples/real-under-review-with-metrics.manifest.json
-- strategy-intake/incoming/README.md
-- strategy-intake/reports/README.md
-- strategy-intake/templates/manifest.template.json
+Total: 16 archivos (5 modificados + 11 añadidos).
 
-MODIFICADOS (9):
-- .gitignore
-- docs/REAL_DATA_IMPORT.md
-- package.json
-- src/components/Nav.tsx            <- QNT-0004 (MOCK ENVIRONMENT solo fuera de producción)
-- src/i18n/index.ts                 <- QNT-0004 (copia de portada/how-it-works/trust/footer)
-- src/routes/index.tsx              <- QNT-0004 (portada: subtítulo, How it works, Trust)
-- src/routes/strategies.$id.tsx     <- QNT-0004 (retiradas etiquetas de revisión de la ficha)
-- src/routes/strategies.index.tsx   <- QNT-0004 (jerarquía catálogo + retirada etiquetas tarjeta)
-- src/styles/app.css                <- QNT-0004 (contenedor responsive compartido)
+MODIFICADOS (5)
+---------------
+1. package.json
+2. public-strategies/catalog.json
+3. scripts/test-strategy-intake.ts
+4. src/routes/strategies.$id.tsx
+5. src/routes/strategies.index.tsx
 
-ELIMINADOS (0): ninguno.
-
-QNT-0004 tocó 6 archivos (los 9 modificados incluyen 3 que ya venían de
-QNT-0003: .gitignore, docs/REAL_DATA_IMPORT.md, package.json). No se tocó
-ningún importador, filtro, fórmula de score, CSV, manifest, métrica ni dato.
-
-Nota: el diff bruto contra la base incluye además los artefactos de entrega
-en agent-deliveries/freebuff/ (este paquete), que no son código de producto.
+AÑADIDOS (11)
+-------------
+6.  public-strategies/manifests/tm-bandas-s3.manifest.json
+7.  scripts/intake/ingest-tm-bandas-s3.ts
+8.  strategy-intake/evidence/tm-bandas-s3/README.md
+9.  strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv
+10. strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv
+11. strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv
+12. strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv
+13. strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv
+14. strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv
+15. strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv
+16. strategy-intake/evidence/tm-bandas-s3/source-archive.sha256

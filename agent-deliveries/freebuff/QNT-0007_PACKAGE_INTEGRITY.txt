@@ -1,0 +1,45 @@
+QNT-0007 · PACKAGE INTEGRITY (final)
+====================================
+
+ZIP PATH:    agent-deliveries/freebuff/QNT-0007_Cambios.zip.txt
+ZIP SIZE:    137,354 bytes
+ZIP SHA-256: 55a7734e1d0e9a266b7430e7d79c28ccfebd3ffce7c450c5831ee3e95a160716
+FECHA:       2026-08-20
+
+SHA BASE:  cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae
+SHA HEAD:  69277706c763da4f437f5270d8828c610e3968bd
+PR:        #6 — https://github.com/jarmy90/quantora-web/pull/6
+
+ARCHIVOS AÑADIDOS:    11
+ARCHIVOS MODIFICADOS:  5
+TOTAL DIFF FILES:     16
+ARCHIVOS COMPLETOS BAJO archivos/: 16
+ENTRIES TOTALES DEL ZIP: 21 (5 documentos raíz + 16 archivos)
+
+EXTRACTION CHECK: OK (unzip -t: "No errors detected in compressed data")
+
+ENTRADAS DEL ZIP
+----------------
+CAMBIOS.txt
+ARCHIVOS_MODIFICADOS.txt
+COMANDOS_Y_RESULTADOS.txt
+PACKAGE_INTEGRITY.txt
+GIT_DIFF.patch
+archivos/package.json
+archivos/public-strategies/catalog.json
+archivos/public-strategies/manifests/tm-bandas-s3.manifest.json
+archivos/scripts/intake/ingest-tm-bandas-s3.ts
+archivos/scripts/test-strategy-intake.ts
+archivos/src/routes/strategies.$id.tsx
+archivos/src/routes/strategies.index.tsx
+archivos/strategy-intake/evidence/tm-bandas-s3/README.md
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv
+archivos/strategy-intake/evidence/tm-bandas-s3/source-archive.sha256
+
+NO SECRETOS · NO node_modules · NO dist · SIN RUTAS LOCALES PRIVADAS.
