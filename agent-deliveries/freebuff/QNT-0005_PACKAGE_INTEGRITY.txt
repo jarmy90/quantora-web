@@ -1,0 +1,33 @@
+QNT-0005 · PACKAGE INTEGRITY — copia legible (valores finales entregados)
+=========================================================================
+
+SHA BASE:   cf80b1c3a50e69238f48ffcb3c7758f3fd68aeae (main, tras merge PR #4)
+SHA HEAD:   78efa792bf3814ce51adf8a2b9ebd31a49e1d89d (producto QNT-0005)
+PR:         #5 — QNT-0005: First Triangle Gold Adaptive (OPEN)
+FECHA:      2026-08-20
+
+Nombre del ZIP:      QNT-0005_Cambios.zip.txt
+Tamaño del ZIP:      3,487,075 bytes
+SHA-256 del ZIP:     5a3c4198869c42200d8c6c70226e847d151d46e072ef4e745d3f0ea0b6f036a5
+Entradas del ZIP:    47 (5 docs + GIT_DIFF.patch + archivos/ 25 + capturas-qnt-0005/ 2 + entradas de directorio + entries.txt)
+Extracción:          OK (verificado: unzip -q → sin errores, 25 archivos en archivos/)
+
+Archivos añadidos (A):    14
+Archivos modificados (M): 11
+Archivos eliminados (D):  0
+Total diff files:         25
+Archivos completos en archivos/: 25 (100% del diff, ninguno vacío)
+
+Comprobaciones automáticas:
+- Cada archivo del git diff dentro del ZIP: OK (MATCH)
+- Ningún archivo completo vacío: OK
+- Sin node_modules · sin dist · sin rutas locales privadas · sin secretos
+- Sin estados internos en el catálogo público (0 ocurrencias en las 5 páginas)
+- El ZIP fuente OROM15.zip y los CSV brutos NO están en el bundle público
+
+Contenido de la raíz:
+  CAMBIOS.txt · ARCHIVOS_MODIFICADOS.txt · GIT_DIFF.patch ·
+  COMANDOS_Y_RESULTADOS.txt · PACKAGE_INTEGRITY.txt · entries.txt ·
+  archivos/ (25) · capturas-qnt-0005/ (2 PNG)
+
+NO MERGE · NO DEPLOY · PR #5 abierto.
