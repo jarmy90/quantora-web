@@ -1,0 +1,66 @@
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0008)
+================================================
+
+[1] PREPARACIÓN
+    git status                          -> limpio (main)
+    git fetch origin && git pull --ff-only origin main -> 0cd1c1a
+    git checkout -b fix/QNT-0008-local-build-portability -> OK
+
+[2] NORMALIZACIÓN EOL
+    .gitattributes creado (texto eol=lf; binarios sin transformación)
+    git add --renormalize .             -> índice LF
+    git checkout-index -f -a (tras commit base) -> working tree LF
+    python (chequeo): 0 archivos de evidencia con CRLF
+    git diff --ignore-cr-at-eol         -> solo 4 manifests (43+/7-)
+    ingest x4 (node --experimental-strip-types scripts/intake/*.ts)
+        -> manifiestos regenerados con hashes LF; métricas idénticas
+           (145/421/203/621 trades; PF 1.256/1.151/1.897/1.740)
+
+[3] BUILD CSS
+    npx vite build antes: Rollup failed to resolve "~/styles/app.css?url"
+    Fix: import lateral ../styles/app.css en __root.tsx
+    npx vite build después: client OK (130+ módulos, CSS 14.12 kB) y
+        SSR OK (dist/server/server.js 58.29 kB)
+
+[4] TYPECHECK
+    npx tsc --noEmit antes: 7 errores (6 serve.ts Bun/ImportMeta + 1
+        LegalShell ReactNode)
+    npm install --save-dev @types/bun --no-package-lock
+    tsconfig.json: "types": ["vite/client", "bun"]
+    LegalShell.tsx: import sin uso eliminado
+    npx tsc --noEmit después: 0 errores (exit 0)
+
+[5] PREVIEW LOCAL
+    npx vite dev --port 3000
+    curl /, /strategies, /strategies/first-triangle-adaptive,
+         /strategies/first-triangle-gold-adaptive,
+         /strategies/stochextreme-adaptive,
+         /strategies/tm-bandas-s3, /dashboard, /legal/terms
+        -> 200 en todas (antes 404 en todas)
+    Consola del navegador: solo vite connect + aviso React DevTools
+    /strategies renderiza las 4 estrategias reales con sus métricas
+
+[6] VALIDACIÓN FINAL (árbol completo, previo al commit)
+    node --experimental-strip-types scripts/test-validation.ts
+        -> 58 passed / 0 failed
+    node --experimental-strip-types scripts/test-strategy-intake.ts
+        -> 90 passed / 0 failed
+    node --experimental-strip-types scripts/strategy-intake.ts validate
+        -> 4 accepted + 0 incoming | blocking errors: 0 | warnings: 0
+    node --experimental-strip-types scripts/strategy-intake.ts build
+        -> catalog 4 publicadas | blocking errors: 0
+    node --experimental-strip-types scripts/strategy-intake.ts report
+        -> reports 8 | blocking errors: 0
+    npx tsc --noEmit                        -> exit 0
+    npx vite build                          -> client + SSR OK
+    git diff --check                        -> OK
+    grep secretos/tokens/MQ5/EX5/SET/.env   -> sin hallazgos
+
+[7] GIT
+    git reset --soft main + git add (31 archivos) + commit único
+        -> 19b22e3 fix(QNT-0008): normalize EOLs and unblock local
+           build/typecheck/preview
+    git status --porcelain (sin .vscode)    -> 0 líneas (limpio)
+    Sin push (sin credenciales en el entorno) · Sin merge · Sin deploy
+    Nota: node_modules/, dist/, src/routeTree.gen.ts son gitignored y
+    no se incluyen en el paquete.
