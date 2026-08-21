@@ -42,49 +42,49 @@
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv",
       "kind": "other",
       "classification": "private",
-      "sha256": "67eefd5caa672478c5d15b56dd785b176a33199d923076b824bc9eb0c7ce4ac1",
+      "sha256": "d4ce9d9e182c422af11880a3f1930bdeaf3dcb74d3e06c3e4804c2cef2585974",
       "note": "Export write/format self-test (WRITE_OK)"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "63654a9a90f736fbe96f83cd00b06966d83e51035f1542b6171952ae0c5983e7",
+      "sha256": "f73fcd60b19829e2e358d49c7a413a86bd802a050a0f3b5c8ec383516a9dd1e9",
       "note": "Run metadata and unit specification"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "64a4eab9be050fdece0ee6fda5767e04d5047276e575810ecfa053bf24e2b8a6",
+      "sha256": "9d2c41d23621e87a8b37a88310bc629e780ca29433b822167cb83770a6b90478",
       "note": "Strategy parameters"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv",
       "kind": "trades",
       "classification": "private",
-      "sha256": "56b0796eb86daf36373834ece9cf5da76876dab7063c62895a58f77e65e8d923",
+      "sha256": "81c4c3974e79f867dcef735282152815554d3e187f3c9431c24d73766b071394",
       "note": "Closed-trade log (621 trades)"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv",
       "kind": "summary",
       "classification": "private",
-      "sha256": "dfa5cc32932434e8c942d793e74fe12888e8d7b9e2bda7f0e27d2a394feccee2",
+      "sha256": "70b921a20810c702fba312027aa8ad0d658e7b9e088d4e789bc4b9c12a4438c6",
       "note": "Closed-run summary metrics"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv",
       "kind": "summary",
       "classification": "private",
-      "sha256": "18ce7101670f27084a93c8f8cd8dda467d06959b55dc13e8c4ec7f0b1690ef08",
+      "sha256": "95fb2dce5e6a7d197a7008815e45953d64feb399e74c888132c93bf4f4e2babc",
       "note": "Monthly breakdown (12 months)"
     },
     {
       "file": "../../strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv",
       "kind": "other",
       "classification": "private",
-      "sha256": "efa8985ac4e1c789638ff8df9c4f5fdf20520bcce57ceafe1477ac69623f375a",
+      "sha256": "86a85034dd1429628aabdb87fd93ec424173667f8c1519a702fd0dd611c2f474",
       "note": "Source self-checks (all pass)"
     }
   ],

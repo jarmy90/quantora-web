@@ -42,70 +42,70 @@
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json",
       "kind": "manifest",
       "classification": "private",
-      "sha256": "c12450004a0f93eda565885c87cefe465a5d7c6d360f88295638e0c8bd69e945",
+      "sha256": "a25cfa398fc59517efc0556c27cc48ceb137b73781841b6cd62ae433a2f90e3f",
       "note": "Source identity, selected variant and warnings (verbatim)"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "d8a509a74ff34261817deba494e9f8385e8ed5552e3d44e8569c06a3eb23af5b",
+      "sha256": "aa2caa80145f513df6c67770927908e9477c9fe5f08f2e8f54e15d48f7850f3b",
       "note": "Strategy configuration and rules"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "2a98fe6311fb086c5719606e600141dd8c43c592a098adf79774b9ff07304e27",
+      "sha256": "1c59e908b629dca629993c38c6656704e329ad640193f0cd924d5361ad7c50ca",
       "note": "Broker/symbol specifications"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "aa239116e0397349b661317326945288b901b10eb1232ac0874305b5ffd28913",
+      "sha256": "2b6ea39c622bdf1d6c78d61d2d664875c882c01fcb1c9a24377ea40e8178c4f2",
       "note": "Period and open-at-end declaration"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv",
       "kind": "summary",
       "classification": "private",
-      "sha256": "7e1ff62e5345896d77b75ccd1bce0f4b0c160406de639270aee73792ed10b4e0",
+      "sha256": "d7cbea3d2f5782e763a992a86ef26b969e0a68b6d074e4ead24d85124fbca75a",
       "note": "Closed-run summary metrics per variant (points)"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv",
       "kind": "trades",
       "classification": "private",
-      "sha256": "54ca3c19220abf9bf189c5089bf0e52cc87ca265861975c645c033b868d35018",
+      "sha256": "36c140142fc96fdf47090679eb052d6f885d6b45cd9c82509a0478811e752eaa",
       "note": "Closed-trade log for all 378 variants (points)"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv",
       "kind": "equity",
       "classification": "private",
-      "sha256": "f60b7384c75d7a1a306ba3b63154a736cabdf693cb3b820127b72488a59de6c4",
+      "sha256": "c4a5c25fc380f37b8831482e2e7ece70f2247717a06d5dfffda9dd4368707bf4",
       "note": "203 closed-trade equity points (points)"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "e6d1cfd6bb022bc1480f78409cb1c960f3e4df4cee5196852cd99d6eae03e3a1",
+      "sha256": "7658c15cffb35009b7c709a93ec915b6bdc25387e7c20bed76e53d62e9005381",
       "note": "Monthly buckets per variant"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "64a127e9100ce3f4ea11d3f72fee8ef869f2fd1fa0229bfa717ee4327dda3090",
+      "sha256": "5ac9e0b0905c3e7d3465fddfa37805f17c70dd24ed783c708c90fd88cbd5520c",
       "note": "DEVELOPMENT/VALIDATION/LOCKED_OOS/H1/H2/ALL per variant"
     },
     {
       "file": "../../strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "6fed0a20925172833fdb5b7f8b15469ddf5d0f359c40093def75a81034630773",
+      "sha256": "a797e91e437709540bbf9449972d223bda858c189e5c1f6c6e323068a827d5a9",
       "note": "378-variant robustness surface (research evidence, not public)"
     },
     {

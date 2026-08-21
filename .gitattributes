@@ -1,0 +1,36 @@
+# QNT-0008 — line-ending normalization for reproducible evidence hashes.
+#
+# Text files (code, docs, data) are stored and checked out with LF so that
+# SHA-256 digests over evidence files are identical on Windows and Linux
+# regardless of core.autocrlf. Binary artifacts are never transformed.
+
+* text=auto
+
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sha256 text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
+# Delivery packages are real ZIP archives named *.zip.txt — never convert.
+*.zip.txt binary
+
+*.zip binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
