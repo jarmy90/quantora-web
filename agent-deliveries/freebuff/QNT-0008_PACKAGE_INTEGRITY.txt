@@ -1,0 +1,6 @@
+QNT-0008 · PACKAGE INTEGRITY
+============================
+PAQUETE: QNT-0008_Cambios.zip.txt
+RUTA: C:\Quantora\quantora-web\quantora-web\agent-deliveries\freebuff\QNT-0008_Cambios.zip.txt
+TAMAÑO (bytes): 2993752
+SHA-256: 9bda8e9579097c944226f58e9b72262c54d29477d04063fdf9a9f32679ae4e7f

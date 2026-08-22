@@ -1,0 +1,52 @@
+ARCHIVOS AÑADIDOS (1)
+---------------------
+.gitattributes
+
+ARCHIVOS MODIFICADOS (31)
+--------------------------
+package.json
+bun.lock
+tsconfig.json
+src/routes/__root.tsx
+src/components/LegalShell.tsx
+public-strategies/catalog.json
+public-strategies/manifests/first-triangle-gold-adaptive.manifest.json
+public-strategies/manifests/stochextreme-adaptive.manifest.json
+public-strategies/manifests/tm-bandas-s3.manifest.json
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_coverage.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_equity.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_manifest.json
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_monthly.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_periods.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_robustness_surface.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_strategy_config.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_summary.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_symbol_specifications.csv
+strategy-intake/evidence/first-triangle-gold/first_triangle_gold_trades.csv
+strategy-intake/evidence/stochextreme/stochextreme_coverage.csv
+strategy-intake/evidence/stochextreme/stochextreme_manifest.csv
+strategy-intake/evidence/stochextreme/stochextreme_strategy_config.csv
+strategy-intake/evidence/stochextreme/stochextreme_symbol_specifications.csv
+strategy-intake/evidence/stochextreme/stochextreme_trades.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_manifest.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_monthly.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_parameters.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_summary.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_trades.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_validation.csv
+strategy-intake/evidence/tm-bandas-s3/bandas_write_test.csv
+
+CAMBIO LÓGICO POR GRUPO
+-----------------------
+- .gitattributes: nuevo (normalización EOL).
+- package.json: +@types/bun (devDependency, tipos del runtime Bun).
+- bun.lock: +@types/bun y bun-types (sync del lockfile con
+  package.json; corrección QNT-0008C).
+- tsconfig.json: +"bun" en compilerOptions.types.
+- src/routes/__root.tsx: import CSS lateral (fix build).
+- src/components/LegalShell.tsx: -import ReactNode sin uso.
+- public-strategies/catalog.json: solo generatedAt (regeneración).
+- public-strategies/manifests/*.json (3): sha256 de evidencia
+  recalculados sobre contenido LF.
+- strategy-intake/evidence/** (22): renormalizados LF (sin cambio
+  lógico; verificado con --ignore-cr-at-eol).

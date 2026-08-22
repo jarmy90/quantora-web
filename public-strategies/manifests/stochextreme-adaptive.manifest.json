@@ -45,35 +45,35 @@
       "file": "../../strategy-intake/evidence/stochextreme/stochextreme_manifest.csv",
       "kind": "summary",
       "classification": "private",
-      "sha256": "9d54c26f528214aa917db2cd6afee08939a212f1a1b9e6dc12830995a11a1145",
+      "sha256": "e3c1e16cfcd1782582babeb69c0958271aee61be3cd16f0f19f5dd5cb88bea0f",
       "note": "Closed-run summary metrics"
     },
     {
       "file": "../../strategy-intake/evidence/stochextreme/stochextreme_strategy_config.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "1657a43048d3860a3bd9725456d86b31a86283fbda09ca7bcc36c5b803fef18c",
+      "sha256": "3a2520a46121f5a6b2e5718c89141b469d62c1d8e375d6b00467e49fa294f759",
       "note": "Strategy configuration and rules"
     },
     {
       "file": "../../strategy-intake/evidence/stochextreme/stochextreme_symbol_specifications.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "79cc0523ccc2562d5192de492f0365a3a5f4dcc3dbcc1cf10204048217e7e140",
+      "sha256": "cc484a76a70fbe596c8e0f6c83ab94510355c093bf3693697fb1508976e5ed13",
       "note": "Broker/symbol specifications"
     },
     {
       "file": "../../strategy-intake/evidence/stochextreme/stochextreme_coverage.csv",
       "kind": "source",
       "classification": "private",
-      "sha256": "db912ede5c9bdff7f8e85cdfd45ccede7b78aa5c83612f9c5c460b8723938fa0",
+      "sha256": "62d7a55ed810746ac5d18788fb2eea167bf8b13ab35135ee7d9712a1e93c46ee",
       "note": "Tick/warmup coverage"
     },
     {
       "file": "../../strategy-intake/evidence/stochextreme/stochextreme_trades.csv",
       "kind": "trades",
       "classification": "private",
-      "sha256": "73ddafe9b5ef089efa41eb42f0bf084e51dc89d6af39db5252c79fce25c3e753",
+      "sha256": "a3d715e2ffef2b094c5a45a9472322497cd9cd0746bfa3fb73132af8f9edc305",
       "note": "Closed-trade log (421 trades)"
     }
   ],

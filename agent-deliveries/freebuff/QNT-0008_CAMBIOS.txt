@@ -1,0 +1,96 @@
+QNT-0008 · NORMALIZAR ENTORNO LOCAL Y DESBLOQUEAR BUILD
+============================================================
+Rama: fix/QNT-0008-local-build-portability
+Base: main (0cd1c1a)
+
+OBJETIVO ALCANZADO
+------------------
+Corregidos los cuatro problemas técnicos detectados en la auditoría local
+(QNT-CHECKPOINT), sin tocar lógica de estrategias, métricas, catálogo
+comercial, diseño visual, scoring ni datos reales.
+
+1) NORMALIZACIÓN EOL (hashes reproducibles Windows/Linux)
+   - Nuevo .gitattributes: eol=lf para texto (*.ts, *.tsx, *.js, *.jsx,
+     *.json, *.csv, *.md, *.txt, *.sha256, *.css, *.html, *.yml, *.yaml,
+     *.sh) y binary para artefactos (*.zip, *.png, *.jpg, *.jpeg, *.gif,
+     *.webp, *.ico, *.pdf, *.woff, *.woff2, *.zip.txt).
+   - 22 archivos de evidencia renormalizados a LF (solo EOL; contenido
+     lógico idéntico, verificado con `git diff --ignore-cr-at-eol`).
+   - Manifests regenerados por el pipeline (hashes calculados sobre LF);
+     `strategies:validate` y los tests de intake pasan con 0 errores.
+   - La causa raíz era core.autocrlf=true + evidencia commiteada con
+     mezcla LF/CRLF, lo que rompía los SHA-256 en checkout Windows.
+
+2) BUILD CSS (~/styles/app.css?url)
+   - __root.tsx usaba `import appCss from "~/styles/app.css?url"` con
+     alias `~`, que Rollup no resolvía. Se sustituyó por el import
+     lateral relativo `../styles/app.css`, el mismo patrón que ya usaban
+     las demás rutas. Sin cambios de estilos ni de diseño.
+
+3) TYPECHECK
+   - serve.ts (entrypoint Bun) fallaba por falta de tipos Bun
+     (`Bun.serve`, `Bun.$`, `Bun.file`, `import.meta.dir`, req implícito).
+     Solución canónica: devDependency @types/bun + "bun" en tsconfig types.
+   - LegalShell.tsx: import sin uso (ReactNode) eliminado.
+   - Resultado: tsc --noEmit = 0 errores.
+
+4) PREVIEW LOCAL
+   - `vite dev` (puerto 3000) ahora sirve con HTTP 200: /, /strategies,
+     las 4 fichas, /dashboard y /legal/*. Consola del navegador limpia.
+     El 404 previo era artefacto de servidor dev obsoleto/caché de
+     optimización de dependencias; un arranque limpio sirve SSR completo.
+
+VALIDACIÓN FINAL
+----------------
+- Tests de dominio (test-validation.ts): 58/58
+- Tests de intake (test-strategy-intake.ts): 90/90
+- strategies:validate: 4 aceptados, 0 errores bloqueantes, 0 warnings
+- Pipeline build + report: 0 errores bloqueantes
+- Typecheck (tsc --noEmit): 0 errores
+- vite build: client + SSR OK (CSS 14.12 kB, SSR dist/server/server.js)
+- Preview local: rutas principales HTTP 200, consola limpia
+- git diff --check: OK
+- Escaneo de secretos / MQ5 / EX5 / SET / .env: sin hallazgos
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+- No se modificó ninguna métrica, manifest comercial, scoring, backtest,
+  contenido legal, pago, autenticación ni acceso al vault privado.
+- El catálogo solo cambió su sello generatedAt (regeneración del pipeline);
+  los 4 strategy_id, nombres, símbolos, timeframes y métricas son idénticos.
+
+QNT-0008C · CORRECCIÓN FINAL PRE-PUSH
+=====================================
+Rama: fix/QNT-0008-local-build-portability (misma rama, sin rama nueva)
+
+1) BUN LOCKFILE SINCRONIZADO
+   - package.json ya incluía @types/bun (^1.4.0), pero bun.lock no estaba
+     actualizado. Ejecutado `bun install` (bun 1.4.0) desde la raíz real
+     del repositorio.
+   - bun.lock: +5 líneas — "@types/bun": "^1.4.0" en devDependencies del
+     workspace y entradas de paquete @types/bun@1.4.0 + bun-types@1.4.0
+     (bun-types es dependencia de @types/bun).
+   - Sin cambios de versión de ningún otro paquete; sin upgrades masivos.
+   - No se creó package-lock.json, yarn.lock ni pnpm-lock.yaml.
+
+2) WORKING TREE ESTRICTAMENTE LIMPIO
+   - .vscode/ y opencode.json (configuraciones locales de herramientas,
+     nunca versionadas) excluidos vía .git/info/exclude. La modificación
+     de .git/info/exclude es local y no forma parte del commit ni del
+     paquete. .gitignore no fue modificado.
+   - git status --porcelain = 0 líneas tras el commit correctivo.
+
+3) VALIDACIÓN REPETIDA (tras bun install)
+   - Tests de dominio (test-validation.ts): 58/58
+   - Tests de intake (test-strategy-intake.ts): 90/90
+   - strategies:validate: 4 aceptados, 0 errores bloqueantes, 0 warnings
+   - tsc --noEmit: 0 errores
+   - vite build (client + SSR): OK
+   - git diff --check: OK
+
+4) ENTREGA
+   - Mismo paquete actualizado: QNT-0008_Cambios.zip.txt (incluye bun.lock
+     y GIT_DIFF.patch actualizado).
+   - Documentos .txt de la entrega actualizados.
+   - Commit correctivo local único en la misma rama. Sin push (el usuario
+     lo realizará vía GitHub Desktop). Sin PR. Sin merge. Sin deploy.
