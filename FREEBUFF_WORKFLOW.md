@@ -369,3 +369,32 @@ agent-deliveries/freebuff/QNT-WORKFLOW-LOCAL_Cambios.zip.txt
 - No hacer deploy.
 
 Al finalizar, responder con el formato simplificado y un único enlace principal.
+
+---
+
+## 14. CI AUTOMÁTICO
+
+`quantora-web` dispone de integración continua en GitHub Actions:
+
+- **Workflow:** `.github/workflows/quantora-ci.yml` (`Quantora CI`).
+- **Disparadores:** cada `pull_request` dirigido a `main`, cada `push` a
+  `main` y ejecución manual (`workflow_dispatch`).
+
+El CI valida automáticamente:
+
+- instalación reproducible con `bun install --frozen-lockfile`;
+- tests de dominio;
+- tests de intake;
+- `strategies:validate` y pipeline de estrategias;
+- typecheck (`bun x tsc --noEmit`);
+- build cliente y SSR;
+- `git diff --check`;
+- protección de archivos privados (sin MQ5, EX5, SET ni DLL versionados,
+  sin `.env`/claves/tokens).
+
+Reglas:
+
+- **Un PR contra `main` no debe fusionarse si `Quantora CI` está en rojo.**
+- El CI **no hace deploy**: solo valida.
+- El merge sigue siendo manual.
+- MQ5, EX5, SET y DLL están **prohibidos** en `quantora-web`.

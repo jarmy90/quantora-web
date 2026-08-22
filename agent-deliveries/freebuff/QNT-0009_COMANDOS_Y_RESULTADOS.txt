@@ -1,0 +1,46 @@
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0009)
+================================================
+
+[1] PREPARACIÓN
+    git rev-parse --show-toplevel      -> C:/quantora/quantora-web/quantora-web
+    git status --short                 -> 0 líneas (limpio, en main)
+    git branch --show-current          -> main
+    git remote -v                      -> origin https://github.com/jarmy90/quantora-web.git
+    git fetch origin                   -> OK
+    git rev-parse origin/main          -> 05f45a0 (PR #8/QNT-0008 fusionado)
+    git merge-base --is-ancestor 38d0ea9 origin/main -> YES (QNT-0008 en main)
+    git checkout -b chore/QNT-0009-github-actions-ci -> OK (no existía)
+
+[2] DISEÑO DEL CI (comandos reales del repositorio)
+    scripts en package.json usados por el CI:
+      - bun run scripts/test-validation.ts        (tests de dominio)
+      - bun run scripts/test-strategy-intake.ts   (tests de intake)
+      - bun run strategies:validate
+      - bun run strategies:build / strategies:report
+      - bun x tsc --noEmit                        (typecheck)
+      - bun run build                             (client + SSR)
+    Sin scripts nuevos innecesarios: solo el check de archivos privados.
+
+[3] VALIDACIÓN LOCAL (bun 1.4.0, binario oficial en /tmp)
+    python (PyYAML) parse .github/workflows/quantora-ci.yml -> YAML válido
+    bun install --frozen-lockfile   -> Checked 139 installs (no changes), exit 0
+    bash .github/scripts/check-private-files.sh -> OK
+    bun run scripts/test-validation.ts      -> 58 passed / 0 failed
+    bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
+    bun run strategies:validate             -> 4 accepted | 0 errors | 0 warnings
+    bun run strategies:build                -> catalog 4 publicadas | 0 errors
+    bun run strategies:report               -> reports 8 | 0 errors
+    git status --porcelain (tras pipeline)  -> solo M public-strategies/catalog.json
+    bun x tsc --noEmit                      -> exit 0 (0 errores)
+    bun run build                           -> client + SSR OK
+    git diff --check                        -> OK
+    git checkout -- public-strategies/catalog.json (restaurar timestamp local)
+
+[4] PAQUETE
+    python (builder) -> QNT-0009_Cambios.zip.txt + documentos .txt
+    Prueba de integridad ZIP (zipfile.testzip) -> OK
+
+[5] GIT
+    Commit único local -> chore(ci): add automated Quantora quality checks
+    Sin push si faltan credenciales (AUTHENTICATION REQUIRED -> GitHub Desktop)
+    Sin merge · Sin deploy · Rama no eliminada

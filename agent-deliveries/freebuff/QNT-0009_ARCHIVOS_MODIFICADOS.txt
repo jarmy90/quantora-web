@@ -1,0 +1,20 @@
+ARCHIVOS AÑADIDOS (2)
+---------------------
+.github/workflows/quantora-ci.yml
+.github/scripts/check-private-files.sh
+
+ARCHIVOS MODIFICADOS (1)
+------------------------
+FREEBUFF_WORKFLOW.md
+
+CAMBIO POR GRUPO
+----------------
+- .github/workflows/quantora-ci.yml: workflow Quantora CI
+  (pull_request a main, push a main, workflow_dispatch; permisos
+  contents: read; un único job quality con 13 pasos; Bun 1.4.0;
+  bun install --frozen-lockfile; comprobación del estado del
+  workspace tras el pipeline; sin continue-on-error).
+- .github/scripts/check-private-files.sh: protección de archivos
+  privados versionados (MQ5/EX5/SET/DLL, .env, claves, tokens);
+  solo rutas en el log, nunca contenido.
+- FREEBUFF_WORKFLOW.md: nueva sección 14 · CI AUTOMÁTICO (breve).

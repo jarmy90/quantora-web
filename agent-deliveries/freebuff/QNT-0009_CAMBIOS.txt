@@ -1,0 +1,81 @@
+QNT-0009 · CI AUTOMÁTICO DE QUANTORA EN GITHUB ACTIONS
+======================================================
+Rama: chore/QNT-0009-github-actions-ci
+Base: main (05f45a0 · incluye QNT-0008 fusionado vía PR #8)
+
+OBJETIVO ALCANZADO
+------------------
+Integración continua en GitHub Actions que valida automáticamente cada
+Pull Request dirigido a main. Infraestructura de validación únicamente:
+no se tocaron estrategias, señales, métricas, scoring, catálogo,
+manifiestos, backtests, frontend, diseño, textos, autenticación, pagos,
+licencias ni descargas.
+
+ARCHIVOS
+--------
+AÑADIDOS:
+- .github/workflows/quantora-ci.yml        (Quantora CI)
+- .github/scripts/check-private-files.sh   (protección de archivos privados)
+MODIFICADO:
+- FREEBUFF_WORKFLOW.md  (+sección 14 · CI AUTOMÁTICO, breve)
+
+WORKFLOW QUANTORA CI
+--------------------
+- Disparadores: pull_request -> main, push -> main, workflow_dispatch.
+- Permisos mínimos: contents: read. Sin secretos, sin tokens personales.
+- Runner: ubuntu-latest, Bun 1.4.0 (setup-bun oficial), instalación con
+  bun install --frozen-lockfile (integridad del lockfile).
+- Un único job "quality" (una sola instalación de dependencias):
+  1. Checkout
+  2. Setup Bun (1.4.0)
+  3. Versiones (bun, node si existe)
+  4. bun install --frozen-lockfile
+  5. git diff --check
+  6. Protección de archivos privados (git ls-files)
+  7. Tests de dominio
+  8. Tests de intake
+  9. strategies:validate
+  10. Pipeline: strategies:build + strategies:report
+  11. Estado del workspace (solo catalog.json regenerado)
+  12. Typecheck (bun x tsc --noEmit)
+  13. Build cliente y SSR (vite build)
+- Sin continue-on-error, sin || true para ocultar fallos, sin skips.
+- El job falla inmediatamente si falla cualquier comprobación.
+- El CI no hace deploy, no hace commits y no modifica GitHub.
+
+CONTROL DE SEGURIDAD
+--------------------
+check-private-files.sh (solo archivos versionados con git ls-files):
+- Falla si hay .mq5/.ex5/.set/.dll versionados.
+- Falla si hay .env, .env.local o .env.* versionados (.env.example se
+  permite expresamente).
+- Falla si hay credenciales, claves privadas (.pem/.key/.p12/.pfx,
+  id_rsa/id_ed25519, .git-credentials, .netrc) o archivos de configuración
+  con token/secret/credential en el nombre.
+- En caso de fallo imprime solo las rutas, nunca el contenido.
+
+VALIDACIÓN LOCAL (comandos idénticos a los del CI)
+--------------------------------------------------
+- YAML válido (PyYAML 6.0.3)
+- bun install --frozen-lockfile: OK (139 installs, sin cambios)
+- Tests de dominio: 58/58
+- Tests de intake: 90/90
+- strategies:validate: 4 aceptados, 0 errores bloqueantes, 0 warnings
+- Pipeline build + report: 0 errores bloqueantes
+- Estado del workspace tras pipeline: solo public-strategies/catalog.json
+  (output esperado; verificado con git status --porcelain)
+- tsc --noEmit: 0 errores
+- vite build (client + SSR): OK
+- check-private-files.sh: OK
+- git diff --check: OK
+
+GITHUB ACTIONS RUN
+------------------
+Pendiente hasta la creación del PR (requiere push a origin; si el entorno
+no dispone de credenciales interactivas, el push se realiza vía GitHub
+Desktop y el resultado real del CI se consulta en el PR).
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+- Ninguna estrategia, métrica, manifest, catálogo ni scoring modificado.
+- Sin merge. Sin deploy.

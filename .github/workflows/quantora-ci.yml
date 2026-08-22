@@ -1,0 +1,74 @@
+name: Quantora CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantora-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Show versions
+        run: |
+          bun --version
+          node --version 2>/dev/null || echo "Node not available (Bun runtime)"
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Check git diff
+        run: git diff --check
+
+      - name: Private EA file protection
+        run: bash .github/scripts/check-private-files.sh
+
+      - name: Domain tests
+        run: bun run scripts/test-validation.ts
+
+      - name: Intake tests
+        run: bun run scripts/test-strategy-intake.ts
+
+      - name: Validate strategies
+        run: bun run strategies:validate
+
+      - name: Strategy pipeline (catalog + reports)
+        run: |
+          bun run strategies:build
+          bun run strategies:report
+
+      - name: Check workspace state (expected derived outputs only)
+        run: |
+          actual="$(git status --porcelain)"
+          expected=" M public-strategies/catalog.json"
+          if [ -n "$actual" ] && [ "$actual" != "$expected" ]; then
+            echo "::error::Unexpected workspace modifications after strategy pipeline:"
+            printf '%s\n' "$actual"
+            exit 1
+          fi
+          echo "Workspace state OK (only public-strategies/catalog.json regenerated)"
+
+      - name: Typecheck
+        run: bun x tsc --noEmit
+
+      - name: Build client and SSR
+        run: bun run build
