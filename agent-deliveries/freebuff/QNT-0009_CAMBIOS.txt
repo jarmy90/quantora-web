@@ -37,8 +37,16 @@ WORKFLOW QUANTORA CI
   9. strategies:validate
   10. Pipeline: strategies:build + strategies:report
   11. Estado del workspace (solo catalog.json regenerado)
-  12. Typecheck (bun x tsc --noEmit)
-  13. Build cliente y SSR (vite build)
+  12. Build cliente y SSR (vite build; regenera src/routeTree.gen.ts)
+  13. Typecheck (bun x tsc --noEmit)
+
+NOTA DE CORRECCIÓN CI (primer run):
+- El primer run de GitHub Actions falló en "Typecheck" porque
+  src/routeTree.gen.ts está gitignored y solo se genera durante
+  build/dev; en el clon fresco del CI no existía (TS2307/TS2345).
+- Corregido moviendo el build ANTES del typecheck (el build regenera
+  routeTree.gen.ts). Verificado localmente: rm routeTree.gen.ts &&
+  bun run build -> regenerado (7872 B) -> tsc exit 0.
 - Sin continue-on-error, sin || true para ocultar fallos, sin skips.
 - El job falla inmediatamente si falla cualquier comprobación.
 - El CI no hace deploy, no hace commits y no modifica GitHub.
@@ -71,9 +79,10 @@ VALIDACIÓN LOCAL (comandos idénticos a los del CI)
 
 GITHUB ACTIONS RUN
 ------------------
-Pendiente hasta la creación del PR (requiere push a origin; si el entorno
-no dispone de credenciales interactivas, el push se realiza vía GitHub
-Desktop y el resultado real del CI se consulta en el PR).
+- PR #9 creado automáticamente. Primer run: Quantora CI falló en
+  "Typecheck" (src/routeTree.gen.ts gitignored, ausente en el clon
+  fresco). Corregido reordenando build antes de typecheck en la misma
+  rama; run pendiente de volver a ejecutarse en verde.
 
 SIN CAMBIOS DE NEGOCIO
 ----------------------

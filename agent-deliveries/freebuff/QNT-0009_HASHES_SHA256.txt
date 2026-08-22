@@ -1,6 +1,6 @@
 QNT-0009 · SHA-256 de archivos incluidos en QNT-0009_Cambios.zip.txt
 ========================================================================
 fc5eb4c5f9d04e53d03161fa8e64432043055201a79ed4c3b0187cc15f932ea9  .github/scripts/check-private-files.sh
-d3b2d8930739c952291685e1cda50682c61c25fc4d571ae42d7942ffc82aa2d4  .github/workflows/quantora-ci.yml
+ee69d855aa4f7f325e209113079ea8c24c6aff84519a3026bac3f7fe33c4cce2  .github/workflows/quantora-ci.yml
 a73eec3d05028a5faebed4de86fb4ecba30cac51fb9259d56bd5c3adbc1d7b43  FREEBUFF_WORKFLOW.md
 GIT_DIFF.patch  (ver hash en PACKAGE_INTEGRITY)

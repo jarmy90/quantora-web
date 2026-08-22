@@ -67,8 +67,8 @@ jobs:
           fi
           echo "Workspace state OK (only public-strategies/catalog.json regenerated)"
 
-      - name: Typecheck
-        run: bun x tsc --noEmit
-
       - name: Build client and SSR
         run: bun run build
+
+      - name: Typecheck
+        run: bun x tsc --noEmit

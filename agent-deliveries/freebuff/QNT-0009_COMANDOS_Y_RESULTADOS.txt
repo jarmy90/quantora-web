@@ -40,6 +40,19 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0009)
     python (builder) -> QNT-0009_Cambios.zip.txt + documentos .txt
     Prueba de integridad ZIP (zipfile.testzip) -> OK
 
+[5] GITHUB ACTIONS (primer run, PR #9)
+    push -u origin HEAD                  -> OK (rama remota 28e9b68)
+    PR #9 creado vía API (token del credential manager, sin imprimir)
+    Run Quantora CI 32562045742 -> failure en paso "Typecheck"
+    Log: TS2307 Cannot find module './routeTree.gen' (src/router.tsx)
+         + TS2345 en rutas (tipos derivados de routeTree.gen)
+    Causa: src/routeTree.gen.ts es gitignored (generado por build/dev)
+    Reproducido local: rm src/routeTree.gen.ts -> mismos errores
+    Fix verificado: bun run build regenera routeTree.gen.ts (7872 B)
+         -> bun x tsc --noEmit exit 0
+    Workflow actualizado: build ANTES de typecheck. Commit correctivo
+    en la misma rama, mismo PR, sin PR nuevo.
+
 [5] GIT
     Commit único local -> chore(ci): add automated Quantora quality checks
     Sin push si faltan credenciales (AUTHENTICATION REQUIRED -> GitHub Desktop)

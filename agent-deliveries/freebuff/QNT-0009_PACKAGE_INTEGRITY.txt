@@ -2,5 +2,5 @@ QNT-0009 · PACKAGE INTEGRITY
 ============================
 PAQUETE: QNT-0009_Cambios.zip.txt
 RUTA: C:\Quantora\quantora-web\quantora-web\agent-deliveries\freebuff\QNT-0009_Cambios.zip.txt
-TAMAÑO (bytes): 11957
-SHA-256: 85a2c49fbe92ebd478ffbac1d194e5ee35125f992c84fc8a7fb4bc9f03ea467d
+TAMAÑO (bytes): 12517
+SHA-256: 6ca5f7646b6b6f4726b4b3471e24ab6f00d2fc32f956a67aea70c326cbeea7d5
