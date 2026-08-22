@@ -56,7 +56,24 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0008)
     git diff --check                        -> OK
     grep secretos/tokens/MQ5/EX5/SET/.env   -> sin hallazgos
 
-[7] GIT
+[7b] QNT-0008C · CORRECCIÓN FINAL PRE-PUSH
+    bun 1.4.0 (binario oficial descargado a /tmp, caché en /tmp;
+        sin instalación global, eliminado al finalizar)
+    bun install                             -> Saved lockfile; bun.lock:
+        +5 líneas (@types/bun ^1.4.0 + bun-types@1.4.0); sin upgrades
+    .git/info/exclude += .vscode/, opencode.json (solo local)
+    bun run scripts/test-validation.ts      -> 58 passed / 0 failed
+    bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
+    bun run strategies:validate             -> 4 accepted | 0 errors | 0 warnings
+    bun x tsc --noEmit                      -> exit 0
+    bun run build                           -> client + SSR OK
+    git diff --check                        -> OK
+    Paquete QNT-0008_Cambios.zip.txt regenerado (incluye bun.lock)
+    git add (bun.lock + archivos de entrega) + commit correctivo único
+    git status --porcelain                  -> 0 líneas (limpio)
+    Sin push (GitHub Desktop) · Sin PR · Sin merge · Sin deploy
+
+[8] GIT
     git reset --soft main + git add (31 archivos) + commit único
         -> 19b22e3 fix(QNT-0008): normalize EOLs and unblock local
            build/typecheck/preview

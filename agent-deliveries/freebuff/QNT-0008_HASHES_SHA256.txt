@@ -1,6 +1,7 @@
 QNT-0008 · SHA-256 de archivos incluidos en QNT-0008_Cambios.zip.txt
 ========================================================================
 69662506e53795a1fcb6f44e715f3af2221518d5502db24033291e24dc28b2f2  .gitattributes
+461763448bfc2347aa17d73ab051c42a0c00ca682e8b12287077f387357058c1  bun.lock
 b1549c379b4e34c12b8b8e0d2b81276b00bc0594f2f6e3085f0efb34c375e658  package.json
 8a6cb9b085be8f36346b59e49f7f783e739eb27ac43040a873bb67d4a96bd9d5  public-strategies/catalog.json
 064413480d08faae3f83d7fcd0df6ba8d20b937ceac46f729ac4fd725194cb3b  public-strategies/manifests/first-triangle-gold-adaptive.manifest.json

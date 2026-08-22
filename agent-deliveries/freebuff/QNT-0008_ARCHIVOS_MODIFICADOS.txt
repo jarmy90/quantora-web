@@ -2,9 +2,10 @@ ARCHIVOS AÑADIDOS (1)
 ---------------------
 .gitattributes
 
-ARCHIVOS MODIFICADOS (30)
+ARCHIVOS MODIFICADOS (31)
 --------------------------
 package.json
+bun.lock
 tsconfig.json
 src/routes/__root.tsx
 src/components/LegalShell.tsx
@@ -39,6 +40,8 @@ CAMBIO LÓGICO POR GRUPO
 -----------------------
 - .gitattributes: nuevo (normalización EOL).
 - package.json: +@types/bun (devDependency, tipos del runtime Bun).
+- bun.lock: +@types/bun y bun-types (sync del lockfile con
+  package.json; corrección QNT-0008C).
 - tsconfig.json: +"bun" en compilerOptions.types.
 - src/routes/__root.tsx: import CSS lateral (fix build).
 - src/components/LegalShell.tsx: -import ReactNode sin uso.
