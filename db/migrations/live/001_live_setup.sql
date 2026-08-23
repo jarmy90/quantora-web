@@ -8,8 +8,9 @@
 -- It combines, in order:
 --   1. base commercial foundation (QNT-0012, migration 0001)
 --   2. auth -> customer relation (QNT-0013, migration 0002)
---   3. minimal RLS for customers
---   4. OPTIONAL trigger: auto-create a customer row on sign-up
+--   3. RLS closed by default on all commercial tables
+--   4. privileges revoked for anon/authenticated on commercial tables
+--   5. customer onboarding trigger (standard part of the setup)
 --
 -- Expected result: a green "Success" banner and a fresh `customers` row the
 -- first time a test user confirms their email. See
@@ -163,30 +164,64 @@ ALTER TABLE customers
 CREATE INDEX IF NOT EXISTS idx_customers_auth_user ON customers (auth_user_id);
 
 -- ---------------------------------------------------------------------------
--- 3) Minimal Row Level Security for customers
+-- 3) Row Level Security: closed by default on every commercial table
 -- ---------------------------------------------------------------------------
--- A signed-in user may read and update ONLY their own row. No USING (true),
--- no anonymous access to personal data, nothing exposed for orders,
--- licenses, entitlements, plans or products.
-ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+-- RLS is enabled on ALL commercial tables. In this phase only `customers`
+-- gets policies (read own row only); the rest stay closed to anon and
+-- authenticated alike (no policies = every access attempt returns zero
+-- rows). No USING (true) anywhere, no premature commercial policies.
+ALTER TABLE products      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE plans         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE licenses      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE entitlements  ENABLE ROW LEVEL SECURITY;
 
+-- Idempotent policy creation: drop first, then recreate.
+DROP POLICY IF EXISTS customers_read_own ON customers;
 CREATE POLICY customers_read_own ON customers
     FOR SELECT
     USING (auth.uid() = auth_user_id);
 
-CREATE POLICY customers_update_own ON customers
-    FOR UPDATE
-    USING (auth.uid() = auth_user_id)
-    WITH CHECK (auth.uid() = auth_user_id);
+-- No UPDATE policy in this phase: a signed-in user may only read their own
+-- row. Profile editing (with column-level restrictions so role/status/email
+-- cannot be changed from the client) will be introduced together with the
+-- profile screen.
 
 -- ---------------------------------------------------------------------------
--- 4) OPTIONAL: auto-create a customer row when a user signs up
+-- 4) Privileges: close commercial tables to anon/authenticated
 -- ---------------------------------------------------------------------------
--- Only the auth user id is used as the identity. email/display_name respect
--- the contract's nullability (email comes from auth.users and may be NULL for
--- non-email signups; display_name stays NULL until the profile mechanism
--- lands). Idempotent: a repeated sign-up event never fails (ON CONFLICT DO
--- NOTHING on auth_user_id).
+-- Supabase grants broad table access by default; these revokes close every
+-- commercial table. `products` stays closed too: the public catalog is
+-- served from the versioned catalog file, never directly from Postgres.
+REVOKE ALL ON products     FROM anon, authenticated;
+REVOKE ALL ON plans        FROM anon, authenticated;
+REVOKE ALL ON orders       FROM anon, authenticated;
+REVOKE ALL ON payments     FROM anon, authenticated;
+REVOKE ALL ON licenses     FROM anon, authenticated;
+REVOKE ALL ON entitlements FROM anon, authenticated;
+
+-- customers: anonymous gets nothing; a signed-in user may only SELECT the
+-- columns the account area needs (read-only, no UPDATE until profile
+-- editing exists). The SELECT policy above still filters to the own row.
+REVOKE ALL ON customers FROM anon;
+REVOKE ALL ON customers FROM authenticated;
+GRANT SELECT (customer_id, auth_user_id, email, display_name, role, status, created_at, updated_at)
+    ON customers TO authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5) Customer onboarding trigger (standard part of the setup)
+-- ---------------------------------------------------------------------------
+-- Runs AFTER INSERT on auth.users: creates the `customers` row (pending)
+-- using only the auth user id and the auth email; display_name stays NULL;
+-- ON CONFLICT avoids duplicates on repeated sign-up events. It never
+-- creates orders, payments, licenses or entitlements.
+--
+-- SECURITY DEFINER is required because the function writes to `customers`
+-- while the insert happens on auth.users: as the definer (the migration
+-- role) it can write the row even though the caller only has auth-scoped
+-- rights. search_path is pinned to `public` to prevent search-path attacks.
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -200,6 +235,10 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+
+-- The function exists only to be executed by the trigger, never directly by
+-- API clients.
+REVOKE ALL ON FUNCTION public.handle_new_auth_user() FROM PUBLIC;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

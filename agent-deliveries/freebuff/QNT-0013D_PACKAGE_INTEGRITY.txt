@@ -1,5 +1,5 @@
 QNT-0013D · PACKAGE INTEGRITY
 ============================
 Archivo: QNT-0013D_Cambios.zip.txt
-Tamaño: 60739 bytes
-SHA-256: a66403f129b742e34d9b7aaef4c18320ae9a1ba0a07cdadede05ce99f361172e
+Tamaño: 105147 bytes
+SHA-256: 39feff49e23f0e2343e7af7f4ca4d42f1fd0e90114deabecf923f10f6f949944

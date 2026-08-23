@@ -40,10 +40,50 @@ test('live setup SQL exists and is ordered with BEGIN/COMMIT', () => {
   const begin = sql.indexOf('BEGIN;');
   const commit = sql.indexOf('COMMIT;');
   assert(begin !== -1 && commit !== -1 && begin < commit, 'BEGIN must come before COMMIT');
-  // Ordered sections: foundation -> auth relation -> RLS -> trigger.
+  // Ordered sections: foundation -> auth relation -> RLS -> privileges -> trigger.
   assert(sql.indexOf('base commercial foundation') < sql.indexOf('Auth -> customer relation'), '0001 must precede 0002');
   assert(sql.indexOf('Auth -> customer relation') < sql.indexOf('Row Level Security'), '0002 must precede RLS');
-  assert(sql.indexOf('Row Level Security') < sql.indexOf('OPTIONAL: auto-create a customer'), 'RLS must precede the trigger');
+  assert(sql.indexOf('Row Level Security') < sql.indexOf('Privileges'), 'RLS must precede privileges');
+  assert(sql.indexOf('Privileges') < sql.indexOf('Customer onboarding trigger'), 'privileges must precede the trigger');
+});
+
+test('every non-idempotent object has an explicit replace strategy', () => {
+  const code = read(LIVE_SQL)
+    .split(/\r?\n/)
+    .filter((l) => !l.trim().startsWith('--'))
+    .join('\n');
+  // CREATE POLICY -> a DROP POLICY IF EXISTS must appear earlier in the file.
+  for (const m of code.matchAll(/CREATE POLICY (\w+) ON/g)) {
+    const name = m[1];
+    assert(
+      code.slice(0, m.index).includes(`DROP POLICY IF EXISTS ${name} ON`),
+      `CREATE POLICY ${name} must be preceded by DROP POLICY IF EXISTS`,
+    );
+  }
+  // CREATE TRIGGER -> DROP TRIGGER IF EXISTS earlier.
+  for (const m of code.matchAll(/CREATE TRIGGER (\w+) ON/g)) {
+    const name = m[1];
+    assert(
+      code.slice(0, m.index).includes(`DROP TRIGGER IF EXISTS ${name} ON`),
+      `CREATE TRIGGER ${name} must be preceded by DROP TRIGGER IF EXISTS`,
+    );
+  }
+  // CREATE FUNCTION -> CREATE OR REPLACE FUNCTION.
+  assert(code.includes('CREATE OR REPLACE FUNCTION'), 'functions must use CREATE OR REPLACE');
+  assert(!/CREATE (?!OR REPLACE )FUNCTION/.test(code), 'no plain CREATE FUNCTION without OR REPLACE');
+  // CREATE TABLE / INDEX -> IF NOT EXISTS.
+  assert(code.includes('CREATE TABLE IF NOT EXISTS'), 'tables must use IF NOT EXISTS');
+  assert(code.includes('CREATE INDEX IF NOT EXISTS'), 'indexes must use IF NOT EXISTS');
+  assert(!/CREATE TABLE (?!IF NOT EXISTS)/.test(code), 'no CREATE TABLE without IF NOT EXISTS');
+  // INSERT -> ON CONFLICT DO NOTHING (scan to the end of each statement).
+  for (const m of code.matchAll(/INSERT INTO /g)) {
+    const rest = code.slice(m.index);
+    const end = rest.indexOf(';');
+    const chunk = rest.slice(0, end);
+    assert(chunk.includes('ON CONFLICT') && chunk.includes('DO NOTHING'), 'every INSERT must be ON CONFLICT DO NOTHING');
+  }
+  assert(!/DROP TABLE/i.test(code), 'must never DROP TABLE');
+  assert(!/TRUNCATE/i.test(code), 'must never TRUNCATE');
 });
 
 test('live setup SQL is idempotent (no destructive rewrites)', () => {
@@ -51,33 +91,68 @@ test('live setup SQL is idempotent (no destructive rewrites)', () => {
   assert(sql.includes('CREATE TABLE IF NOT EXISTS'), 'tables must use IF NOT EXISTS');
   assert(sql.includes('ADD COLUMN IF NOT EXISTS'), 'column add must be idempotent');
   assert(sql.includes('CREATE INDEX IF NOT EXISTS'), 'indexes must be idempotent');
+  assert(sql.includes('DROP POLICY IF EXISTS customers_read_own ON customers'), 'policy drop must exist');
   assert(sql.includes('ON CONFLICT (product_id) DO NOTHING'), 'product seed must be idempotent');
   assert(sql.includes('ON CONFLICT (auth_user_id) DO NOTHING'), 'customer trigger insert must be idempotent');
-  assert(!/DROP TABLE/i.test(sql), 'must never DROP TABLE');
-  assert(!/TRUNCATE/i.test(sql), 'must never TRUNCATE');
 });
 
-test('live setup SQL never opens private tables with USING (true)', () => {
-  // Strip comment lines so prose never pollutes the check.
+test('RLS is enabled on all seven commercial tables and only customers has policies', () => {
   const code = read(LIVE_SQL)
     .split(/\r?\n/)
     .filter((l) => !l.trim().startsWith('--'))
-    .join('\n');
+    .join('\n')
+    .replace(/\s+/g, ' ');
   assert(!/USING\s*\(\s*true\s*\)/i.test(code), 'no USING (true) policy anywhere');
-  // The only policies are read/update own on customers.
+  const tables = ['products', 'plans', 'customers', 'orders', 'payments', 'licenses', 'entitlements'];
+  for (const t of tables) {
+    assert(code.includes(`ALTER TABLE ${t} ENABLE ROW LEVEL SECURITY;`), `RLS must be enabled on ${t}`);
+  }
+  // The only policy is the owner-scoped SELECT on customers.
+  const createPolicyCount = (code.match(/CREATE POLICY /g) ?? []).length;
+  assert(createPolicyCount === 1, `exactly one CREATE POLICY expected, got ${createPolicyCount}`);
+  assert(code.includes('CREATE POLICY customers_read_own ON customers'), 'only customers_read_own policy expected');
+  assert(!code.includes('customers_update_own'), 'no UPDATE policy in this phase');
+  assert(!/FOR UPDATE/i.test(code), 'no UPDATE policy in this phase');
   const ownCount = (code.match(/auth\.uid\(\) = auth_user_id/g) ?? []).length;
-  assert(ownCount >= 2, 'only owner-scoped policies are allowed on customers');
-  assert(code.includes('ENABLE ROW LEVEL SECURITY'), 'customers RLS must be enabled');
+  assert(ownCount >= 1, 'owner-scoped predicate must exist');
 });
 
-test('customer trigger uses only auth user id + nullable fields and never invents data', () => {
+test('anon and authenticated get no commercial grants; customers is SELECT-only', () => {
+  const code = read(LIVE_SQL)
+    .split(/\r?\n/)
+    .filter((l) => !l.trim().startsWith('--'))
+    .join('\n')
+    .replace(/\s+/g, ' ');
+  for (const t of ['products', 'plans', 'orders', 'payments', 'licenses', 'entitlements']) {
+    assert(code.includes(`REVOKE ALL ON ${t} FROM anon, authenticated;`), `REVOKE ALL on ${t} expected`);
+  }
+  // customers is revoked per-role (its SELECT grant for authenticated comes after).
+  assert(code.includes('REVOKE ALL ON customers FROM anon;'), 'anon must lose all on customers');
+  assert(code.includes('REVOKE ALL ON customers FROM authenticated;'), 'authenticated must lose all on customers');
+  assert(code.includes('GRANT SELECT ('), 'only SELECT grants on customers');
+  assert(!/GRANT (?!SELECT)/.test(code), 'no INSERT/UPDATE/DELETE grants anywhere');
+  assert(!code.includes('GRANT UPDATE'), 'no UPDATE grant on customers (no profile editing yet)');
+  // role / status / auth_user_id cannot be changed by the user: no UPDATE
+  // privilege and no UPDATE policy exist at all.
+  assert(!code.includes('FOR UPDATE'), 'no FOR UPDATE policy');
+});
+
+test('customer onboarding trigger is standard, safe and documented as such', () => {
   const sql = read(LIVE_SQL);
+  const doc = read(DOC);
+  assert(sql.includes('Customer onboarding trigger'), 'SQL must label the trigger as standard onboarding');
+  assert(sql.includes('SECURITY DEFINER'), 'function must be SECURITY DEFINER');
+  assert(sql.includes('SET search_path = public'), 'search_path must be pinned');
+  assert(sql.includes('REVOKE ALL ON FUNCTION public.handle_new_auth_user() FROM PUBLIC;'), 'function must be revoked from PUBLIC');
   const insert = sql.slice(sql.indexOf('INSERT INTO customers (auth_user_id'));
   assert(insert.includes('NEW.id'), 'identity must be the auth user id');
   assert(insert.includes('NEW.email'), 'email may come from auth.users');
   assert(insert.includes("NULL, 'customer', 'pending'"), 'display_name must stay NULL; role/status fixed');
   assert(insert.includes('ON CONFLICT (auth_user_id) DO NOTHING'), 'repeated signup must not error');
   assert(!/password|secret|token/i.test(insert), 'trigger must not touch credentials');
+  // The trigger is standard: the docs must not call it optional anymore.
+  assert(!/trigger\s+opcional|optional\s+trigger/i.test(doc), 'docs must not describe the trigger as optional');
+  assert(doc.includes('Trigger de alta de cliente'), 'docs must label the trigger as standard');
 });
 
 test('live setup SQL keeps the four products coming_soon with downloads off', () => {

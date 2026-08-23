@@ -1,4 +1,4 @@
-COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013D)
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013D + QNT-0013E)
 =============================================================
 
 [1] PREPARACIÓN
@@ -33,6 +33,21 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013D)
     git diff --check                        -> OK
     bash .github/scripts/check-private-files.sh -> OK
     Escaneo del bundle -> sin secretos ni service role (solo nombres de var)
+
+[4b] ENDURECIMIENTO QNT-0013E
+    db/migrations/live/001_live_setup.sql:
+      - DROP POLICY IF EXISTS antes de CREATE POLICY (customers_read_own)
+      - ENABLE ROW LEVEL SECURITY en las 7 tablas comerciales
+      - REVOKE ALL de anon/authenticated sobre products/plans/orders/
+        payments/licenses/entitlements; customers solo SELECT de columnas
+      - Trigger de alta de cliente estándar (SECURITY DEFINER, search_path
+        fijo, REVOKE ALL ON FUNCTION FROM PUBLIC)
+    docs/SUPABASE_LIVE_SETUP.md: RLS 7 tablas, verificación ampliada,
+      rollback actualizado, trigger estándar, customers SELECT-only.
+    scripts/test-qnt-0013d.ts: 15 tests (drop-before-create, RLS 7 tablas,
+      revokes, update-scope, trigger estándar, estrategia de idempotencia).
+    Validación: 58+90+12+26+32+15 tests OK, build OK, tsc 0 errores,
+    git diff --check OK, check-private-files OK.
 
 [5] PREVIEW LOCAL (vite dev, puerto 3000)
     HTTP 200: /, /strategies, /register, /login, /forgot-password

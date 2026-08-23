@@ -18,8 +18,9 @@ El archivo aplica, en orden:
 |-------|------|--------|
 | 1 | Fundación comercial (products, plans, customers, orders, payments, licenses, entitlements + seed de 4 productos `coming_soon`) | migración 0001 (QNT-0012) |
 | 2 | Relación `customers.auth_user_id → auth.users.id` (uuid UNIQUE + índice) | migración 0002 (QNT-0013) |
-| 3 | RLS mínima en `customers` (leer/editar solo la propia fila) | 0002 (activada) |
-| 4 | Trigger opcional: crea una fila `customers` al registrarse (solo `auth_user_id` + email nullable; idempotente) | nuevo |
+| 3 | RLS cerrada por defecto en las 7 tablas comerciales; `customers` con política SELECT de la propia fila | 0002 (endurecido QNT-0013E) |
+| 4 | Privilegios: `REVOKE ALL` de anon/authenticated sobre products, plans, orders, payments, licenses, entitlements; `customers` solo SELECT de columnas mínimas | nuevo (QNT-0013E) |
+| 5 | Trigger de alta de cliente (estándar, no opcional): crea la fila `customers` al registrarse | nuevo (QNT-0013E) |
 
 ## Resultado esperado
 
@@ -44,28 +45,60 @@ WHERE c.auth_user_id IS NOT NULL;
 -- Constraints de billing
 SELECT conname FROM pg_constraint WHERE conname = 'plans_billing_combination';
 
--- RLS activa
+-- RLS activa (deben salir las 7 filas con relrowsecurity = t)
 SELECT relname, relrowsecurity FROM pg_class
-WHERE relname IN ('customers','orders','licenses','entitlements');
+WHERE relname IN ('products','plans','customers','orders','payments','licenses','entitlements')
+ORDER BY relname;
+
+-- Políticas existentes (solo debe haber customers_read_own)
+SELECT schemaname, tablename, policyname FROM pg_policies
+WHERE schemaname = 'public' ORDER BY tablename, policyname;
+
+-- Grants de tablas comerciales (debe quedar solo customers -> authenticated, SELECT)
+SELECT grantee, table_name, privilege_type FROM information_schema.role_table_grants
+WHERE table_schema = 'public'
+  AND table_name IN ('products','plans','customers','orders','payments','licenses','entitlements')
+ORDER BY table_name, grantee;
 ```
 
 Comprobaciones de seguridad tras aplicar:
 
-- `customers` tiene RLS activa; las políticas solo permiten `auth.uid() =
-  auth_user_id`.
-- No existe ninguna política con `USING (true)` sobre tablas privadas.
+- Las 7 tablas comerciales tienen RLS activa (`relrowsecurity = t`).
+- La única política es `customers_read_own` con `auth.uid() = auth_user_id`;
+  no existe `USING (true)` en ninguna parte.
+- `anon` y `authenticated` no tienen ningún privilegio sobre products, plans,
+  orders, payments, licenses ni entitlements (revocados).
+- `customers`: `anon` sin privilegios; `authenticated` solo `SELECT` (las
+  columnas mínimas) y filtrado por la política a la propia fila. Sin UPDATE
+  en esta fase.
 - No hay filas en `orders`, `payments`, `licenses` ni `entitlements`.
 - `plans` sigue vacía y sin precios.
+
+Notas de arquitectura:
+
+- `products` continúa consumiéndose desde el catálogo versionado del
+  repositorio (`public-strategies/catalog.json`), no desde Postgres.
+- Las tablas comerciales están cerradas por defecto; el acceso server-side o
+  de administración futuro se diseñará en fases posteriores (QNT-0015+).
+- El service role no se utiliza en la aplicación actual y no está en
+  `.env.local`.
 
 ## Rollback
 
 ```sql
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_new_auth_user();
-DROP POLICY IF EXISTS customers_read_own  ON customers;
-DROP POLICY IF EXISTS customers_update_own ON customers;
-ALTER TABLE customers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE customers DROP COLUMN IF EXISTS auth_user_id;
+DROP POLICY IF EXISTS customers_read_own ON customers;
+ALTER TABLE products      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE plans         DISABLE ROW LEVEL SECURITY;
+ALTER TABLE customers     DISABLE ROW LEVEL SECURITY;
+ALTER TABLE orders        DISABLE ROW LEVEL SECURITY;
+ALTER TABLE payments      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE licenses      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE entitlements  DISABLE ROW LEVEL SECURITY;
+-- Re-concede los grants por defecto de Supabase si quieres volver al estado
+-- inicial (o vuelve a ejecutar el setup desde cero).
+-- ALTER TABLE customers DROP COLUMN IF EXISTS auth_user_id;
 -- (las tablas base pueden dejarse: son inofensivas y preparatorias)
 ```
 
@@ -75,7 +108,9 @@ ALTER TABLE customers DROP COLUMN IF EXISTS auth_user_id;
 - Exposición pública de `products`, `plans`, `orders`, `payments`,
   `licenses` o `entitlements` vía la API de Supabase. Si el dashboard de
   Supabase expone tablas por defecto, no publicar ninguna de esas tablas.
-- `customers`: solo el propio usuario autenticado puede leer/editar su fila.
+- `customers`: solo el propio usuario autenticado puede LEER su fila
+  (SELECT); la edición de perfil (UPDATE con restricciones de columna) se
+  habilitará junto a la pantalla de perfil.
 - Monitorización demo, portal de creadores, roles avanzados, OAuth, MFA.
 
 ## Variables de entorno (nunca en Git)

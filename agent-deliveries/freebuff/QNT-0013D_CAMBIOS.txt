@@ -56,8 +56,30 @@ vite dev estable. HTTP 200 en /, /strategies, /register, /login,
 /forgot-password. /account -> 307 a /login (protegida). Consola limpia.
 /login muestra el estado AUTH_NOT_CONFIGURED (correcto sin credenciales).
 
+ENDURECIMIENTO QNT-0013E (misma rama, mismo PR #13)
+----------------------------------------------------
+1. Idempotencia real de políticas: cada CREATE POLICY lleva antes un
+   DROP POLICY IF EXISTS (customers_read_own). El SQL completo puede
+   ejecutarse 1.ª y 2.ª vez sin error por objetos existentes, sin duplicar
+   productos ni triggers y sin eliminar datos.
+2. RLS defensiva: activada en las 7 tablas comerciales (products, plans,
+   customers, orders, payments, licenses, entitlements). Solo customers
+   tiene política (SELECT de la propia fila, auth.uid() = auth_user_id); el
+   resto queda cerrada (sin políticas = cero filas para anon/authenticated).
+   Sin USING (true).
+3. Privilegios: REVOKE ALL de anon y authenticated sobre products, plans,
+   orders, payments, licenses y entitlements. customers: anon sin acceso,
+   authenticated solo SELECT de columnas mínimas (sin UPDATE en esta fase;
+   role/status/auth_user_id no pueden modificarse desde el cliente).
+4. Trigger de alta de cliente: estándar (ya no se documenta como opcional),
+   SECURITY DEFINER con search_path fijo, REVOKE ALL ON FUNCTION FROM
+   PUBLIC; crea la fila customers pending tras INSERT en auth.users con
+   ON CONFLICT DO NOTHING. No crea pedidos, pagos, licencias ni permisos.
+5. Paquete regenerado AL FINAL: PACKAGE_INTEGRITY con el tamaño y SHA-256
+   reales del ZIP final, inventario 1:1 e hashes internos verificados.
+
 SIN CAMBIOS DE NEGOCIO
 ----------------------
 Sin cambios en estrategias, métricas, scoring, manifests ni datos.
 Sin pagos, precios, licencias, descargas ni despliegue.
-Sin merge. Sin deploy.
+Sin merge. Sin deploy. Sin ejecutar el SQL remoto.
