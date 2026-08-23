@@ -75,3 +75,6 @@ jobs:
 
       - name: QNT-0011 UI contract tests
         run: bun run scripts/test-qnt-0011.ts
+
+      - name: QNT-0012 commercial foundation tests
+        run: bun run scripts/test-qnt-0012.ts

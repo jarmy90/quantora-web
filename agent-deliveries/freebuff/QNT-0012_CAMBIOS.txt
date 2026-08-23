@@ -1,0 +1,115 @@
+QNT-0012 · FUNDACIÓN COMERCIAL Y DE USUARIO
+============================================
+Rama: feat/QNT-0012-commercial-user-foundation
+Base: main (cad1f7b · incluye QNT-0011 fusionado vía PR #10)
+
+OBJETIVO ALCANZADO
+------------------
+Fundación técnica y contractual del sistema comercial y de usuarios, SIN
+activar autenticación, compras, pagos, licencias ni descargas. Todo lo
+comercial permanece deshabilitado por contrato, por reglas de estado y por
+feature flags server-side (todos false por defecto). Nada se construye
+directamente en componentes React sin contratos.
+
+CONTRATOS DE DOMINIO (src/domain/commercial/)
+---------------------------------------------
+product.ts     - Product (productId, strategyId, displayName, status,
+                 deliveryFormat='ex5', commercialDownloadEnabled; sin rutas
+                 del vault, nombres MQ5, hashes ni archivos fuente).
+plan.ts        - Plan (billingModel rental|purchase, billingInterval
+                 monthly|quarterly|annual|one_time, status draft|inactive|
+                 active|retired, priceAmountMinor=null, currency=null
+                 mientras draft; null nunca es cero; hasUsablePrice).
+customer.ts    - Customer futuro (customer|creator|admin; pending|active|
+                 suspended|closed). Sin credenciales, sin contraseñas, sin
+                 decidir hashing ni proveedor de identidad.
+order.ts       - Order (draft|pending_payment|paid|cancelled|expired|
+                 refunded|failed). paid solo puede fijarse en servidor.
+payment.ts     - Payment (provider null; providerReference server-only,
+                 nunca expuesto públicamente; succeeded requiere orderId).
+license.ts     - License (pending|active|grace_period|expired|revoked;
+                 activa requiere pedido paid; startsAt/expiresAt null
+                 mientras pending; maxActivations nunca inventado).
+entitlement.ts - Entitlement (pending|granted|suspended|expired|revoked;
+                 canDownload=false inicial; la UI nunca decide seguridad).
+rules.ts       - Máquinas de estado puras: canPurchaseProduct (solo
+                 available), canSelectPlan (solo active + precio real),
+                 canStartCheckout, canMarkOrderPaidFromClient (siempre
+                 false), canActivateLicense (pending + order paid),
+                 canGrantDownload (todas las condiciones),
+                 getProductAvailability (nunca frontera de seguridad).
+repositories.ts      - Interfaces desacopladas (7 repos).
+memory-repositories.ts - Implementación in-memory claramente marcada
+                 TEST-ONLY; nunca usada como demo pública.
+
+Con los datos actuales TODAS las comprobaciones devuelven false: 4
+productos coming_soon, commercialDownloadEnabled=false, sin planes
+activos, sin pedidos, pagos, licencias ni entitlements.
+
+CATÁLOGO COMERCIAL SEGURO (src/commercial/catalog.ts)
+-----------------------------------------------------
+Deriva 4 productos desde las estrategias públicas (sin duplicados):
+productId, strategyId, displayName, productStatus, deliveryFormat,
+commercialDownloadEnabled, availability {canStartCheckout, canDownload,
+canNotify}. Sin métricas duplicadas, sin paths/vault/hashes/credenciales.
+
+ENTORNO (src/config.ts + .env.example)
+--------------------------------------
+- Validador server-only: AppEnv development|test|staging|production;
+  feature flags AUTH_ENABLED/PAYMENTS_ENABLED/DOWNLOADS_ENABLED/
+  DEMO_MONITORING_ENABLED=false por defecto; getPublicFeatureFlags()
+  devuelve solo booleanos, nunca secretos; sin variables VITE_ para
+  secretos; import-safe en cliente (fallback a false).
+- .env.example: nombres de variables agrupados por fase (now/future,
+  server-only, nunca VITE_), sin valores que parezcan credenciales.
+
+SERVIDOR (src/commercial/server.ts)
+-----------------------------------
+Server function de SOLO LECTURA (createServerFn): getCommercialCatalog
+devuelve catálogo seguro + flags públicos. Sin endpoints de escritura.
+
+BASE DE DATOS (db/migrations/0001_commercial_foundation.sql)
+------------------------------------------------------------
+Esquema preparatorio (NO aplicado a ninguna base): products, plans,
+customers, orders, payments, licenses, entitlements con UUID,
+timestamptz, FKs, CHECK de estados, índices, precios en unidades menores
+enteras, currency nullable. Seed declarativo ÚNICAMENTE de los 4 productos
+(coming_soon, download false, sin precio). Sin usuarios/pedidos/pagos/
+licencias/entitlements insertados, sin contraseñas, sin datos personales.
+
+UI (dashboard preview)
+----------------------
+Nueva sección discreta "ACCOUNT ACCESS" -> "Not enabled yet" +
+"Secure sign-in and customer access will be introduced in a later phase."
+Sin botones que parezcan funcionales. QNT-0011 visualmente intacto.
+
+DOCUMENTACIÓN
+-------------
+docs/COMMERCIAL_ARCHITECTURE.md (entidades, estados, público/privado,
+fronteras de seguridad, decisiones definitivas y pendientes).
+docs/COMMERCIAL_ROADMAP.md (QNT-0013..QNT-0017 con prerequisitos, datos,
+frontera de seguridad y definition of done).
+
+TESTS
+-----
+scripts/test-qnt-0012.ts (18 tests): 4 productos derivados; productId !=
+strategyId; coming_soon; download false; checkout/download false; sin
+precios/planes/pedidos/pagos/licencias/entitlements; reglas de estado
+(coming_soon no comprable, draft no seleccionable, paid nunca del cliente,
+licencia sin pedido paid, descarga con todas las condiciones); flags
+false; secretos no expuestos; .env.example sin valores; catálogo seguro
+sin paths/vault/hashes; migración con 7 tablas y seed solo de productos;
+4 estrategias y métricas intactas; UI sin Buy/Rent/Checkout/Pay/Download;
+dashboard preview. Añadido al CI como "QNT-0012 commercial foundation
+tests" y a package.json (test:qnt-0012).
+
+CAPTURAS
+--------
+2 capturas nuevas (dashboard desktop 1440 y móvil 390) en
+agent-deliveries/freebuff/capturas-qnt-0012/.
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+Sin cambios en estrategias, métricas, scoring, manifests ni datos.
+Sin autenticación, precios, checkout, pagos, licencias ni descargas.
+Sin merge. Sin deploy.

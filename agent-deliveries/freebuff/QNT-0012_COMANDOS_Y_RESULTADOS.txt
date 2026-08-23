@@ -1,0 +1,50 @@
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0012)
+=================================================
+
+[1] PREPARACIÓN
+    git rev-parse --show-toplevel -> C:/quantora/quantora-web/quantora-web
+    git status --short            -> 0 líneas (limpio)
+    git fetch origin && git checkout main && git pull --ff-only origin main
+        -> main cad1f7b (PR #10/QNT-0011 fusionado)
+    git checkout -b feat/QNT-0012-commercial-user-foundation -> OK
+
+[2] DESCUBRIMIENTO (verificado, no asumido)
+    - src/db.ts: neon serverless, lazy, server-only, requiere DATABASE_URL
+      (no establecida en este entorno). Sin tablas ni migraciones previas.
+    - Hosting: preview Bun en :3000 (serve.ts) y Vercel (go-live.sh).
+    - TanStack Start: createServerFn disponible (server fn añadida).
+    - Sin .env.example previo. Bun auto-carga .env.
+
+[3] IMPLEMENTACIÓN
+    Contratos de dominio, reglas de estado, catálogo seguro, config de
+    entorno, server function de solo lectura, migración SQL preparatoria,
+    repositorios (+ TEST-ONLY in-memory), docs de arquitectura/roadmap,
+    sección ACCOUNT ACCESS en dashboard, tests y paso CI.
+
+[4] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp, caché en /tmp)
+    bun install --frozen-lockfile    -> Checked 139 installs (no changes)
+    bun run scripts/test-validation.ts      -> 58 passed / 0 failed
+    bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
+    bun run scripts/test-qnt-0011.ts        -> 12 passed / 0 failed
+    bun run scripts/test-qnt-0012.ts        -> 18 passed / 0 failed
+    bun run strategies:validate             -> 4 accepted | 0 errors
+    bun run strategies:build + report       -> 0 errores bloqueantes
+    bun run build                           -> client + SSR OK (server fn)
+    bun x tsc --noEmit                      -> exit 0 (0 errores)
+    git diff --check                        -> OK
+    bash .github/scripts/check-private-files.sh -> OK
+    git checkout -- public-strategies/catalog.json (restaurar timestamp)
+
+[5] PREVIEW LOCAL (vite dev, puerto 3000)
+    HTTP 200 en /, /strategies, /strategies/{4 fichas}, /dashboard
+    Consola del navegador: limpia (solo vite/React DevTools)
+    Dashboard: ACCOUNT ACCESS -> Not enabled yet (texto correcto),
+      sin precios, sin botones transaccionales, menú móvil operativo.
+
+[6] CAPTURAS
+    dashboard-desktop-1440.png + dashboard-mobile-390.png (Chrome
+    headless) en agent-deliveries/freebuff/capturas-qnt-0012/.
+
+[7] GIT
+    Commit único local (tras validaciones) + push + PR contra main.
+    Sin merge · Sin deploy · Sin rama eliminada.
