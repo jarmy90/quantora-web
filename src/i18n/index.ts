@@ -208,6 +208,10 @@ export const enUS = {
   'dashboard.emptyDownloads': 'No downloads available yet.',
   'dashboard.emptyHistory': 'No activity recorded.',
   'dashboard.viewStrategy': 'View',
+  'dashboard.accountAccess': 'Account access',
+  'dashboard.accountAccessBody':
+    'Secure sign-in and customer access will be introduced in a later phase.',
+  'dashboard.notEnabledYet': 'Not enabled yet',
 
   'legal.eyebrow': 'Legal / PLACEHOLDER',
   'legal.review':

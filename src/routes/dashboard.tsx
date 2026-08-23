@@ -96,6 +96,18 @@ function Dashboard() {
 
         <section className="card" style={{ marginBottom: 18 }}>
           <div className="eyebrow" style={{ marginBottom: 16 }}>
+            {t('dashboard.accountAccess')}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span className="status-chip not-connected">{t('dashboard.notEnabledYet')}</span>
+            <p className="muted" style={{ margin: 0, fontSize: 13, lineHeight: 1.6, maxWidth: 640 }}>
+              {t('dashboard.accountAccessBody')}
+            </p>
+          </div>
+        </section>
+
+        <section className="card" style={{ marginBottom: 18 }}>
+          <div className="eyebrow" style={{ marginBottom: 16 }}>
             {t('dashboard.downloads')}
           </div>
           <DownloadsList />

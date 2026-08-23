@@ -1,0 +1,48 @@
+ARCHIVOS AÑADIDOS (21)
+----------------------
+.env.example
+db/migrations/0001_commercial_foundation.sql
+docs/COMMERCIAL_ARCHITECTURE.md
+docs/COMMERCIAL_ROADMAP.md
+scripts/test-qnt-0012.ts
+src/commercial/catalog.ts
+src/commercial/server.ts
+src/config.ts
+src/domain/commercial/ (11: product, plan, customer, order, payment,
+  license, entitlement, rules, repositories, memory-repositories, index)
+agent-deliveries/freebuff/capturas-qnt-0012/ (2 PNG)
+
+ARCHIVOS MODIFICADOS (4)
+------------------------
+.github/workflows/quantora-ci.yml
+package.json
+src/i18n/index.ts
+src/routes/dashboard.tsx
+
+MODIFICADOS POR LA CORRECCIÓN QNT-0012C (9)
+-------------------------------------------
+db/migrations/0001_commercial_foundation.sql (id/product_id/product_ref,
+  CHECK billing, seed por product_id)
+src/domain/commercial/customer.ts (email/displayName string | null)
+src/domain/commercial/plan.ts (isBillingCombinationValid)
+src/domain/commercial/rules.ts (canSelectPlan exige combinación válida)
+src/domain/commercial/repositories.ts (findByProductId)
+src/domain/commercial/memory-repositories.ts (findByProductId)
+scripts/test-qnt-0012.ts (18 -> 26 tests, nuevas aserciones QNT-0012C)
+docs/COMMERCIAL_ARCHITECTURE.md (contrato de identidad + billing)
+docs/COMMERCIAL_ROADMAP.md (nota identidad + billing)
+
+CAMBIO POR GRUPO
+----------------
+- src/domain/commercial/: contratos de dominio + reglas de estado
+  puras + interfaces de repositorio (+ in-memory TEST-ONLY).
+- src/commercial/catalog.ts: catálogo comercial seguro derivado.
+- src/commercial/server.ts: server function de solo lectura.
+- src/config.ts: validador de entorno server-only + feature flags.
+- .env.example: contrato de variables por fase.
+- db/migrations/0001_commercial_foundation.sql: esquema preparatorio
+  (no aplicado) + seed de los 4 productos + corrección de identidad.
+- src/routes/dashboard.tsx + i18n: sección ACCOUNT ACCESS (Not
+  enabled yet) en el preview.
+- scripts/test-qnt-0012.ts (26 tests) + package.json + CI.
+- docs/: COMMERCIAL_ARCHITECTURE.md y COMMERCIAL_ROADMAP.md.

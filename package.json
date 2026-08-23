@@ -19,7 +19,8 @@
     "strategies:ingest:stochextreme": "bun run scripts/intake/ingest-stochextreme.ts",
     "strategies:ingest:first-triangle-gold": "bun run scripts/intake/ingest-first-triangle-gold.ts",
     "strategies:ingest:tm-bandas-s3": "bun run scripts/intake/ingest-tm-bandas-s3.ts",
-    "test:qnt-0011": "bun run scripts/test-qnt-0011.ts"
+    "test:qnt-0011": "bun run scripts/test-qnt-0011.ts",
+    "test:qnt-0012": "bun run scripts/test-qnt-0012.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

@@ -1,0 +1,5 @@
+QNT-0012 · PACKAGE INTEGRITY
+============================
+Archivo: QNT-0012_Cambios.zip.txt
+Tamaño: 562446 bytes
+SHA-256: 58a0fe3a658447db14ac76b4e063049439f72d7cbf36aa9c692b245536ce3196
