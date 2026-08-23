@@ -21,7 +21,8 @@
     "strategies:ingest:tm-bandas-s3": "bun run scripts/intake/ingest-tm-bandas-s3.ts",
     "test:qnt-0011": "bun run scripts/test-qnt-0011.ts",
     "test:qnt-0012": "bun run scripts/test-qnt-0012.ts",
-    "test:qnt-0013": "bun run scripts/test-qnt-0013.ts"
+    "test:qnt-0013": "bun run scripts/test-qnt-0013.ts",
+    "test:qnt-0013d": "bun run scripts/test-qnt-0013d.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

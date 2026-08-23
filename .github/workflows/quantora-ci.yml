@@ -85,3 +85,6 @@ jobs:
 
       - name: QNT-0013 authentication tests
         run: bun run scripts/test-qnt-0013.ts
+
+      - name: QNT-0013D live Supabase setup tests
+        run: bun run scripts/test-qnt-0013d.ts
