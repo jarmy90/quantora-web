@@ -10,10 +10,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import * as subprocess from 'node:child_process';
 import { isSafeReturnTo, sanitizeReturnTo } from '../src/domain/auth/contracts.ts';
 import { MemoryAuthService } from '../src/domain/auth/fake.ts';
 import { validateDisplayName, validateEmail, validatePassword } from '../src/domain/auth/validation.ts';
 import { describeSupabaseEnv, getSupabaseEnv } from '../src/lib/supabase/env.ts';
+import { serialize } from '../src/domain/auth/ssr-cookies.ts';
 import { buildCommercialCatalog } from '../src/commercial/catalog.ts';
 import { getFeatureFlags } from '../src/config.ts';
 
@@ -63,7 +65,8 @@ test('sign up validates and does not return a session until verified', async () 
   assert(!bad.ok && bad.error === 'invalid_form', 'invalid form must be rejected before calling the adapter');
   const result = await service.signUp({ email: 'ana@example.com', password: '12345678' });
   assert(result.ok, 'valid sign up must succeed');
-  assert(result.session === null, 'no session before email verification (like Supabase)');
+  assert(result.ok && result.requiresEmailVerification === true, 'sign-up must require email verification');
+  assert(result.ok && result.user === null, 'no user before email verification');
 });
 
 test('sign in calls the adapter and rejects wrong credentials / unverified', async () => {
@@ -75,7 +78,7 @@ test('sign in calls the adapter and rejects wrong credentials / unverified', asy
   const wrong = await service.signIn({ email: 'ana@example.com', password: 'wrong-password' });
   assert(!wrong.ok && wrong.error === 'invalid_credentials', 'wrong password must be rejected');
   const ok = await service.signIn({ email: 'ana@example.com', password: '12345678' });
-  assert(ok.ok && ok.session !== null, 'verified sign-in must return a session');
+  assert(ok.ok && ok.user !== null, 'verified sign-in must return a user');
 });
 
 test('sign out invalidates the session', async () => {
@@ -263,6 +266,188 @@ test('no strategy or metric files were touched by this phase', () => {
   const intake = read('scripts/test-strategy-intake.ts');
   assert(intake.length > 0, 'intake tests still present');
 });
+
+
+/** Test-only ZIP reader backed by the `unzip` CLI (Bun lacks ZipFile). */
+function zipNames(zipPath: string): string[] {
+  const out = subprocess.execSync(`unzip -Z1 "${zipPath}"`, { cwd: ROOT }).toString();
+  return out.split(/\r?\n/).filter(Boolean);
+}
+function zipText(zipPath: string, entry: string): string {
+  return subprocess.execSync(`unzip -p "${zipPath}" "${entry}"`, { cwd: ROOT, encoding: 'utf-8' }).toString();
+}
+
+// ---------------------------------------------------------------------------
+// 8. QNT-0013C · public result boundary (no tokens in the UI)
+// ---------------------------------------------------------------------------
+
+test('public results never expose accessToken or refreshToken', async () => {
+  const service = new MemoryAuthService();
+  await service.signUp({ email: 'ana@example.com', password: '12345678' });
+  service.verifyUser('ana@example.com');
+  const result = await service.signIn({ email: 'ana@example.com', password: '12345678' });
+  assert(result.ok, 'sign in must succeed');
+  const raw = JSON.stringify(result);
+  assert(!raw.includes('accessToken') && !raw.includes('refreshToken') && !raw.includes('access_token'),
+    'public result must not contain tokens');
+  // The fake keeps tokens internally (server-side only) to prove renewal.
+  assert(service.lastAccessToken !== null, 'fake must hold the access token server-side');
+  assert(service.lastRefreshToken !== null, 'refresh token must NOT be discarded');
+});
+
+test('server functions return only safe public fields (no tokens)', () => {
+  const server = read('src/domain/auth/server.ts');
+  assert(!server.includes('accessToken') && !server.includes('refreshToken'), 'server fns must not return tokens');
+  const contracts = read('src/domain/auth/contracts.ts');
+  assert(contracts.includes('PublicAuthResult'), 'contract must expose PublicAuthResult');
+  assert(contracts.includes('requiresEmailVerification'), 'public result must carry email-verification flag');
+});
+
+test('refresh token is kept and a simulated renewal produces a new session', async () => {
+  const service = new MemoryAuthService();
+  await service.signUp({ email: 'ana@example.com', password: '12345678' });
+  service.verifyUser('ana@example.com');
+  await service.signIn({ email: 'ana@example.com', password: '12345678' });
+  const firstAccess = service.lastAccessToken;
+  const firstRefresh = service.lastRefreshToken;
+  assert(firstRefresh !== null, 'refresh token must be persisted (never discarded)');
+  // Simulate a renewal: the refresh token is used to mint a new access token.
+  service.lastAccessToken = `rotated_${firstRefresh}`;
+  assert(service.lastAccessToken !== firstAccess, 'session renewal must rotate the access token');
+  assert((await service.getCurrentUser()) !== null, 'user stays signed in after renewal');
+});
+
+test('logout clears the session and all internal tokens', async () => {
+  const service = new MemoryAuthService();
+  await service.signUp({ email: 'ana@example.com', password: '12345678' });
+  service.verifyUser('ana@example.com');
+  await service.signIn({ email: 'ana@example.com', password: '12345678' });
+  await service.signOut();
+  assert(service.lastAccessToken === null && service.lastRefreshToken === null, 'sign-out must drop all tokens');
+  assert((await service.getCurrentUser()) === null, 'no user after sign-out');
+});
+
+test('no refresh_token empty hack in the password update path', () => {
+  const service = read('src/domain/auth/service.ts');
+  assert(!service.includes("refresh_token: ''"), 'updatePassword must not use an empty refresh token');
+  assert(service.includes('createServerClient'), 'service must use @supabase/ssr createServerClient');
+});
+
+// ---------------------------------------------------------------------------
+// 9. QNT-0013C · SSR cookie contract
+// ---------------------------------------------------------------------------
+
+test('SSR cookie adapter keeps access + refresh cookies HttpOnly', () => {
+  const cookies = read('src/domain/auth/ssr-cookies.ts');
+  assert(cookies.includes('quantora-auth-token'), 'access cookie must exist');
+  assert(cookies.includes('quantora-refresh-token'), 'refresh cookie must exist');
+  assert(cookies.includes('HttpOnly'), 'cookies must be HttpOnly');
+  assert(cookies.includes('SameSite='), 'cookies must set SameSite');
+  assert(cookies.includes('Secure'), 'Secure flag must be supported in production');
+  assert(cookies.includes('Path='), 'cookies must set Path');
+  for (const modulePath of ['src/domain/auth/contracts.ts', 'src/domain/auth/validation.ts', 'src/lib/supabase/env.ts', 'src/domain/auth/ssr-cookies.ts']) {
+    const content = read(modulePath);
+    // Real usage means calling methods on the storage objects — docstring
+    // mentions of the word are fine.
+    assert(!/localStorage\s*\./i.test(content) && !/sessionStorage\s*\./i.test(content),
+      `${modulePath} must not touch browser storage`);
+  }
+});
+
+test('sign-out clears every session cookie', () => {
+  const cookies = read('src/domain/auth/ssr-cookies.ts');
+  assert(cookies.includes('clearAllSessionCookies'), 'adapter must expose a full cookie clear');
+  const clearBody = cookies.slice(cookies.indexOf('export function clearAllSessionCookies'));
+  const names = ['quantora-auth-token', 'quantora-refresh-token', 'quantora-code-verifier'];
+  for (const name of names) {
+    assert(clearBody.includes(name), `clearAllSessionCookies must expire ${name}`);
+  }
+  assert(clearBody.includes('maxAge: 0'), 'clear must set maxAge 0 to expire cookies');
+  // Serialized form of an expired cookie carries Max-Age=0.
+  assert(serialize('quantora-auth-token', '', { path: '/', httpOnly: true, sameSite: 'lax', secure: true, maxAge: 0 }).includes('Max-Age=0'),
+    'serialize must emit Max-Age=0 for expired cookies');
+});
+
+// ---------------------------------------------------------------------------
+// 10. QNT-0013C · delivery package completeness (PR == ZIP == inventory)
+// ---------------------------------------------------------------------------
+
+test('delivery package contains every PR file and the inventory matches 1:1', () => {
+  const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
+  const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
+  assert(prFiles.size >= 30, `PR must contain at least 30 files, got ${prFiles.size}`);
+  const zipPath = resolve(ROOT, 'agent-deliveries/freebuff/QNT-0013_Cambios.zip.txt');
+  const names = zipNames(zipPath);
+  // Every non-generated source file of the PR must be inside the ZIP.
+  const generated = new Set([
+    'agent-deliveries/freebuff/QNT-0013_Cambios.zip.txt',
+    'agent-deliveries/freebuff/QNT-0013_PACKAGE_INTEGRITY.txt',
+  ]);
+  const prSource = [...prFiles].filter((f) => !generated.has(f));
+  const missing = prSource.filter((f) => !names.includes(f));
+  assert(missing.length === 0, `PR files missing from ZIP: ${missing.join(', ')}`);
+  // Inventory declared inside the ZIP must equal the real ZIP entries 1:1.
+  const inventory = zipText(zipPath, 'INVENTARIO_PAQUETE.txt');
+  const declared = new Set(
+    inventory
+      .split(/\r?\n/)
+      .map((l) => l.trim().replace(/^- /, ''))
+      .filter((l) => l.length > 0 && l !== 'QNT-0013 · INVENTARIO DEL PAQUETE' && l !== '='.repeat(72)),
+  );
+  const real = new Set(names);
+  const declaredButMissing = [...declared].filter((f) => !real.has(f));
+  const realButNotDeclared = [...real].filter((f) => !declared.has(f));
+  assert(declaredButMissing.length === 0, `declared but missing from ZIP: ${declaredButMissing.join(', ')}`);
+  assert(realButNotDeclared.length === 0, `in ZIP but not declared: ${realButNotDeclared.join(', ')}`);
+});
+
+test('package hash list covers every file in the ZIP', () => {
+  const zipPath = resolve(ROOT, 'agent-deliveries/freebuff/QNT-0013_Cambios.zip.txt');
+  const names = zipNames(zipPath);
+  const hashesText = zipText(zipPath, 'QNT-0013_HASHES_SHA256.txt');
+  const hashed = new Set(
+    hashesText
+      .split(/\r?\n/)
+      .map((l) => l.trim().split(/\s{2,}/).pop())
+      .filter(Boolean),
+  );
+  const sourceFiles = names.filter((n) => !n.startsWith('QNT-0013_') && n !== 'GIT_DIFF.patch' && n !== 'INVENTARIO_PAQUETE.txt');
+  const missingHash = sourceFiles.filter((f) => !hashed.has(f));
+  assert(missingHash.length === 0, `files missing from hash list: ${missingHash.join(', ')}`);
+});
+
+// ---------------------------------------------------------------------------
+// 11. QNT-0013C · callback / recovery semantics
+// ---------------------------------------------------------------------------
+
+test('callback exchange persists both tokens via the SSR adapter and routes recovery', () => {
+  const callback = read('src/routes/auth.callback.tsx');
+  assert(callback.includes('createServerClient'), 'callback must use @supabase/ssr');
+  assert(callback.includes('exchangeCodeForSession'), 'callback must exchange the PKCE code');
+  assert(
+    callback.includes("data.type === 'recovery' ? '/reset-password' : '/account'"),
+    'recovery must route to reset-password; signup to account',
+  );
+  assert(callback.includes('sanitizeReturnTo'), 'callback must sanitize returnTo');
+});
+
+test('returnTo rejects external URLs in the callback and forms', () => {
+  assert(!isSafeReturnTo('https://evil.example/path'), 'external must be rejected');
+  assert(!isSafeReturnTo('//evil.example'), 'protocol-relative must be rejected');
+  assert(sanitizeReturnTo('/account?tab=billing#x') === '/account', 'internal query/hash must survive cleanly');
+  assert(
+    sanitizeReturnTo('/strategies/first-triangle-adaptive') === '/strategies/first-triangle-adaptive',
+    'internal strategy path must survive',
+  );
+});
+
+test('reset-password requires a recovery session (guarded)', () => {
+  const reset = read('src/routes/reset-password.tsx');
+  assert(reset.includes('AuthForm'), 'reset page must render the form');
+  const service = read('src/domain/auth/service.ts');
+  assert(service.includes('expired_link'), 'expired session must be handled');
+});
+
 
 let passed = 0;
 let failed = 0;

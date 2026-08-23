@@ -2,21 +2,27 @@ QNT-0013 · AUTENTICACIÓN Y EXPERIENCIA DE USUARIO (Supabase Auth)
 =============================================================================
 Rama: feat/QNT-0013-supabase-auth
 Base: main (dd4dc85 · incluye QNT-0012C fusionado vía PR #11)
+Corrección QNT-0013C aplicada en la misma rama (PR #12 actualizado).
 
 OBJETIVO ALCANZADO
 ------------------
 Base real de autenticación con Supabase Auth (email + contraseña) y sesiones
-SSR mediante cookie HttpOnly. El usuario puede registrarse, confirmar correo,
-iniciar/cerrar sesión, solicitar recuperación de contraseña y establecer una
-nueva. Existe zona protegida /account con estados vacíos honestos. Sin
-pagos, licencias, precios ni descargas activadas.
+SSR renovables. El usuario puede registrarse, confirmar correo, iniciar/cerrar
+sesión, solicitar recuperación de contraseña y establecer una nueva. Existe
+zona protegida /account con estados vacíos honestos. Sin pagos, licencias,
+precios ni descargas activadas.
 
 ARQUITECTURA
 ------------
 - Proveedor: Supabase Auth (email + password). PKCE para el callback.
-- Sesión: cookie HttpOnly `quantora-auth-token` (SameSite=Lax, Secure en
-  prod) con el access token; verificación server-side vía getUser(token).
-  Nunca localStorage. Service role NUNCA usado.
+- Sesión SSR renovable: @supabase/ssr (createServerClient) con adaptador de
+  cookies server-side (src/domain/auth/ssr-cookies.ts). Access y refresh
+  tokens en cookies HttpOnly separadas (quantora-auth-token /
+  quantora-refresh-token); el refresh token nunca se descarta, por lo que la
+  sesión se renueva con la expiración y rotación de Supabase. Sin
+  localStorage/sessionStorage. Service role NUNCA usado. Los tokens jamás
+  llegan a la UI: AuthResult público contiene solo ok/error/message/user
+  seguro/requiresEmailVerification/redirectTo interno.
 - Separación: la app depende de `AuthService` (src/domain/auth/contracts.ts),
   no del SDK. Implementación única: `SupabaseAuthService` (service.ts).
   `fake.ts` es TEST-ONLY.
@@ -44,6 +50,20 @@ ENTORNO
 SUPABASE_SERVICE_ROLE_KEY (server-only, reservada, sin usar). .env/.env.local
 ignorados.
 
+CORRECCIÓN QNT-0013C
+--------------------
+1. Sesión SSR renovable real: se sustituyó la cookie única de access token con
+   Max-Age fijo (7 días, sin refresh) por createServerClient + adaptador de
+   cookies (getAll/setAll) con access + refresh en cookies HttpOnly, Path=/,
+   SameSite=Lax, Secure en producción y renovación según Supabase. Sign-out
+   expira las tres cookies de sesión. Recuperación conserva sesión válida
+   después del intercambio del código.
+2. Paquete de entrega completo: el ZIP se regenera desde
+   `git diff --name-only origin/main...HEAD` (+ archivos nuevos del working
+   tree), por lo que incluye TODOS los archivos del PR. INVENTARIO_PAQUETE.txt
+   coincide 1:1 con las entradas reales del ZIP y QNT-0013_HASHES_SHA256.txt
+   cubre todos los archivos incluidos. Se añadió test automático de entrega.
+
 FIX DEV SERVER
 --------------
 vite.config.ts: optimizeDeps.exclude de @tanstack/start-server-core y
@@ -55,21 +75,25 @@ ya funcionaba.
 
 TESTS
 -----
-scripts/test-qnt-0013.ts (20 tests, TEST-ONLY fake, sin Supabase real):
-validación email/contraseña/displayName; flujos signUp/signIn/signOut;
-reset sin filtrar existencia; updatePassword; not_configured; returnTo seguro
+scripts/test-qnt-0013.ts (32 tests, TEST-ONLY fake, sin Supabase real):
+validación email/contraseña/displayName; flujos signUp/signIn/signOut; reset
+sin filtrar existencia; updatePassword; not_configured; returnTo seguro
 (externos rechazados); estados de entorno sin secretos; .env.example sin
 valores; service role no leído en cliente; migración 0002 (auth_user_id uuid
 UNIQUE, no destructiva); customer email/displayName nullable; 4 productos
-siguen coming_soon; sin pedidos/pagos/licencias; rutas auth existen y
-/account está protegida; manifests intactos. Añadido al CI como "QNT-0013
-authentication tests" y a package.json (test:qnt-0013).
+siguen coming_soon; sin pedidos/pagos/licencias; rutas auth existen y /account
+está protegida; manifests intactos. Bloque QNT-0013C: cookies HttpOnly
+access+refresh, clearAllSessionCookies expira las tres, resultado público sin
+tokens, callback PKCE con createServerClient, recovery -> reset-password,
+updatePassword sin refresh_token vacío, paquete completo PR==ZIP==inventario,
+hashes completos. Añadido al CI como "QNT-0013 authentication tests".
 
 DOCUMENTACIÓN
 -------------
 docs/AUTHENTICATION.md (arquitectura, variables, configuración pendiente de
 Supabase, callbacks, confirmación de correo, reset, relación auth/customer,
-tests, pasos manuales futuros, qué no está implementado).
+tests, pasos manuales futuros, qué no está implementado; sesión descrita como
+"SSR renovable gestionada mediante cookies de Supabase", sin claim de 7 días).
 docs/COMMERCIAL_ROADMAP.md: QNT-0013 marcado como implemented (code) —
 proyecto live pendiente de configuración del owner.
 

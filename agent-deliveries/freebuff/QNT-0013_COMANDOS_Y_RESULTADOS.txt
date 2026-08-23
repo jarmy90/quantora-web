@@ -1,5 +1,5 @@
-COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013)
-=============================================
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013 + QNT-0013C)
+=============================================================
 
 [1] PREPARACIÓN
     git rev-parse --show-toplevel -> C:/Quantora/quantora-web/quantora-web
@@ -22,13 +22,23 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013)
     - Nav con Sign in; CTA de interés en fichas con returnTo seguro.
     - vite.config.ts: optimizeDeps.exclude (fix dev server tras instalar).
 
-[4] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp)
-    bun install --frozen-lockfile    -> Checked 150 installs (no changes)
+[4] CORRECCIÓN QNT-0013C
+    - src/domain/auth/ssr-cookies.ts: adaptador getAll/setAll + serialize +
+      clearAllSessionCookies (expira access/refresh/verifier).
+    - service.ts: createServerClient de @supabase/ssr; AuthResult público sin
+      tokens (access/refresh solo en cookies); updatePassword via setSession.
+    - auth.callback.tsx: intercambio PKCE con createServerClient; recovery ->
+      /reset-password; signup -> /account; returnTo sanitizado.
+    - contracts.ts: AuthResult público sin accessToken/refreshToken.
+    - Paquete regenerado con git diff --name-only origin/main...HEAD.
+
+[5] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp)
+    bun install --frozen-lockfile    -> Checked installs (no changes)
     bun run scripts/test-validation.ts      -> 58 passed / 0 failed
     bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
     bun run scripts/test-qnt-0011.ts        -> 12 passed / 0 failed
     bun run scripts/test-qnt-0012.ts        -> 26 passed / 0 failed
-    bun run scripts/test-qnt-0013.ts        -> 20 passed / 0 failed
+    bun run scripts/test-qnt-0013.ts        -> 32 passed / 0 failed
     bun run strategies:validate             -> 4 accepted | 0 errores
     bun run build                           -> client + SSR OK
     bun x tsc --noEmit                      -> exit 0 (0 errores)
@@ -36,16 +46,16 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013)
     bash .github/scripts/check-private-files.sh -> OK
     public-strategies/catalog.json          -> sin cambios (métricas intactas)
 
-[5] PREVIEW LOCAL (vite dev, puerto 3000)
+[6] PREVIEW LOCAL (vite dev, puerto 3000)
     HTTP 200: /, /strategies, 4 fichas, /dashboard, /login, /register,
     /forgot-password, /reset-password, /auth/callback
     /account -> 307 a /login (protegida, sin sesión)
     Consola: limpia (corregido nested <a> en AuthCard: hydration error)
     Estado AUTH_NOT_CONFIGURED visible en login/register/forgot/reset
 
-[6] CAPTURAS (Chrome headless)
+[7] CAPTURAS (Chrome headless)
     agent-deliveries/freebuff/capturas-qnt-0013/: login desktop 1440 + móvil
     390, register desktop + móvil, forgot desktop + móvil, account-redirect.
 
-[7] GIT
+[8] GIT
     Commit local + push + PR contra main. Sin merge · Sin deploy.

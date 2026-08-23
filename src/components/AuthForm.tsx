@@ -72,12 +72,9 @@ export function AuthForm({
         const result = await signIn({ data: { email, password, returnTo: target } });
         if (!result.ok) {
           setError(result.message);
-        } else if (result.session) {
-          setDone(t('login.success'));
-          await router.navigate({ to: target as never });
         } else {
           setDone(t('login.success'));
-          await router.navigate({ to: '/account' });
+          await router.navigate({ to: result.user ? (target as never) : '/account' });
         }
       } else if (mode === 'register') {
         const result = await signUp({
@@ -85,11 +82,11 @@ export function AuthForm({
         });
         if (!result.ok) {
           setError(result.message);
-        } else if (result.session) {
+        } else if (result.requiresEmailVerification) {
+          setDone(t('register.checkYourEmail'));
+        } else {
           setDone(t('register.success'));
           await router.navigate({ to: '/account' });
-        } else {
-          setDone(t('register.checkYourEmail'));
         }
       } else if (mode === 'forgot') {
         const result = await requestPasswordReset({ data: { email } });

@@ -11,9 +11,13 @@ Status:
 ## Architecture
 
 - **Provider:** Supabase Auth, email + password only (no OAuth/MFA/phone yet).
-- **Sessions:** server-side, HttpOnly cookie (`quantora-auth-token`) holding the
-  access token. The browser never reads tokens from JavaScript and nothing is
-  stored in `localStorage`.
+- **Sessions:** renewable SSR session managed by `@supabase/ssr`
+  (`createServerClient`) through a server-side cookie adapter
+  (`src/domain/auth/ssr-cookies.ts`). Access and refresh tokens live in
+  separate HttpOnly cookies (`quantora-auth-token`, `quantora-refresh-token`);
+  the refresh token is never discarded, so sessions can actually renew with
+  Supabase's own expiry and rotation. The browser never reads tokens from
+  JavaScript and nothing is stored in browser storage.
 - **SSR:** sessions are verified server-side on every guarded request via
   `supabase.auth.getUser(token)` — the client is never trusted on its own.
 - **Separation:** the application depends on the `AuthService` contract in
@@ -75,7 +79,9 @@ until the identity mechanism is final.
 
 ## Security
 
-- Cookies: `HttpOnly`, `SameSite=Lax`, `Secure` in production, 7-day max-age.
+- Cookies: `HttpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/`,
+  with expiry driven by Supabase's session lifecycle (no fixed 7-day max-age
+  claimed). On sign-out every auth cookie is expired and removed.
 - Open redirects: `returnTo` is validated by `isSafeReturnTo()` (internal
   paths only) before any redirect.
 - `paid` orders, licenses, downloads: still impossible; all commercial

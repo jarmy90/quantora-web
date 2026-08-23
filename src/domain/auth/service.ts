@@ -1,37 +1,39 @@
 /**
- * QNT-0013 · Supabase auth service (server-side).
+ * QNT-0013C · Supabase auth service (server-side).
  *
- * The ONLY production AuthService. It runs inside TanStack server functions,
- * where `getRequest()` / `setResponseHeader()` are available, so sessions live
- * in an HttpOnly cookie (`quantora-auth-token`) that the browser never reads
- * from JavaScript.
+ * The ONLY production AuthService. Sessions use the official `@supabase/ssr`
+ * `createServerClient` wired to the TanStack request/response context through
+ * `createSsrCookieAdapter()`: BOTH the access token and the refresh token are
+ * persisted in HttpOnly cookies, so Supabase can rotate/renew the session
+ * (the refresh token is never discarded). The public results returned to the
+ * UI contain zero tokens.
  *
  * Security rules enforced here:
- *   - SUPABASE_SERVICE_ROLE_KEY is never imported; verification of the
- *     access token happens against the public client with `getUser(token)`.
- *   - Tokens are never logged, never returned to the client bundle.
- *   - Cookie flags: HttpOnly, SameSite=Lax, Secure in production.
- *   - When Supabase env is missing, every call returns `not_configured`
- *     instead of pretending auth works.
+ *   - SUPABASE_SERVICE_ROLE_KEY is never imported; user verification runs
+ *     with the public client (`getUser`), never with service-role privileges.
+ *   - Tokens are never logged, never returned to the client bundle, never
+ *     written to localStorage.
+ *   - Cookie flags: HttpOnly, SameSite=Lax, Secure in production, Path=/.
+ *   - Sign-out clears every session cookie.
+ *   - When Supabase env is missing, every call returns `not_configured`.
  */
-import { getRequest, setResponseHeader, setResponseStatus } from '@tanstack/react-start-server';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { setResponseStatus } from '@tanstack/react-start-server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseEnv } from '../../lib/supabase/env';
+import { createSsrCookieAdapter, clearAllSessionCookies } from './ssr-cookies';
 import { validateEmail, validatePassword, validateDisplayName } from './validation';
 import type {
-  AuthResult,
   AuthService,
   AuthUser,
   PasswordResetRequest,
   PasswordUpdate,
+  PublicAuthResult,
   SignInInput,
   SignUpInput,
 } from './contracts';
 
-const SESSION_COOKIE = 'quantora-auth-token';
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days, refreshed on activity
-
-function mapError(error: { status?: number; message?: string; code?: string }): AuthResult {
+function mapError(error: { status?: number; message?: string; code?: string }): PublicAuthResult {
   const code = error.code ?? String(error.status ?? '');
   const message = (error.message ?? '').toLowerCase();
   if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
@@ -55,69 +57,33 @@ function mapError(error: { status?: number; message?: string; code?: string }): 
   return { ok: false, error: 'unknown', message: 'Something went wrong. Please try again.' };
 }
 
-function cookieOptions(secure: boolean): string {
-  return [
-    `Max-Age=${MAX_AGE_SECONDS}`,
-    'Path=/',
-    'HttpOnly',
-    'SameSite=Lax',
-    secure ? 'Secure' : '',
-  ]
-    .filter(Boolean)
-    .join('; ');
+/** Server-side Supabase client with the SSR cookie adapter (no tokens in code). */
+function serverClient(url: string, key: string): SupabaseClient {
+  const adapter = createSsrCookieAdapter();
+  return createServerClient(url, key, {
+    cookies: {
+      getAll: () => adapter.getAll(),
+      setAll: (cookies) => adapter.setAll(cookies),
+    },
+  });
 }
 
-/** Public client for a server-side call. Never holds service-role secrets. */
-function publicClient(url: string, key: string): SupabaseClient {
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-}
-
-function currentAccessToken(): string | null {
-  const request = getRequest();
-  const header = request.headers.get('cookie') ?? '';
-  for (const part of header.split(';')) {
-    const trimmed = part.trim();
-    if (trimmed.startsWith(`${SESSION_COOKIE}=`)) {
-      const value = trimmed.slice(SESSION_COOKIE.length + 1);
-      return value.length > 0 ? decodeURIComponent(value) : null;
-    }
-  }
-  return null;
-}
-
-function persistSession(accessToken: string, refreshToken: string): void {
-  const secure = Boolean(import.meta.env.PROD) || Boolean((import.meta.env.VITE_SITE_URL as string | undefined)?.startsWith('https'));
-  setResponseHeader('set-cookie', `${SESSION_COOKIE}=${encodeURIComponent(accessToken)}; ${cookieOptions(secure)}`);
-  // The refresh token is kept only in memory for this request; the access
-  // token drives getUser() verification. Rotation is handled by Supabase on
-  // the next explicit refresh.
-  void refreshToken;
-}
-
-function clearSessionCookie(): void {
-  const secure = Boolean(import.meta.env.PROD) || Boolean((import.meta.env.VITE_SITE_URL as string | undefined)?.startsWith('https'));
-  setResponseHeader('set-cookie', `${SESSION_COOKIE}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`);
-}
-
-async function verifyUserFromToken(url: string, key: string, token: string): Promise<AuthUser | null> {
-  const client = publicClient(url, key);
-  const { data, error } = await client.auth.getUser(token);
-  if (error || !data.user) return null;
-  const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
-  const email = data.user.email ?? null;
+function toAuthUser(user: { id: string; email?: string | null; user_metadata?: Record<string, unknown>; email_confirmed_at?: string | null; confirmed_at?: string | null }): AuthUser {
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const email = user.email ?? null;
   return {
-    id: data.user.id,
+    id: user.id,
     email,
     displayName:
       typeof meta.display_name === 'string' && meta.display_name.trim() !== ''
         ? meta.display_name.trim()
         : email,
-    emailVerified: Boolean(data.user.email_confirmed_at) || Boolean(data.user.confirmed_at),
+    emailVerified: Boolean(user.email_confirmed_at) || Boolean(user.confirmed_at),
   };
 }
 
 export class SupabaseAuthService implements AuthService {
-  async signUp(input: SignUpInput): Promise<AuthResult> {
+  async signUp(input: SignUpInput): Promise<PublicAuthResult> {
     const env = getSupabaseEnv();
     if (env.state !== 'configured' || !env.url || !env.publishableKey) {
       return { ok: false, error: 'not_configured', message: 'Authentication is not configured yet.' };
@@ -129,7 +95,7 @@ export class SupabaseAuthService implements AuthService {
     const nameCheck = validateDisplayName(input.displayName ?? '');
     if (!nameCheck.ok) return { ok: false, error: 'invalid_form', message: nameCheck.message };
 
-    const client = publicClient(env.url, env.publishableKey);
+    const client = serverClient(env.url, env.publishableKey);
     const { data, error } = await client.auth.signUp({
       email: input.email.trim().toLowerCase(),
       password: input.password,
@@ -139,16 +105,16 @@ export class SupabaseAuthService implements AuthService {
       },
     });
     if (error) return mapError(error);
-    const session = data.session;
-    if (session) {
-      persistSession(session.access_token, session.refresh_token);
-      return { ok: true, session: { accessToken: session.access_token, refreshToken: session.refresh_token, user: await verifyUserFromToken(env.url, env.publishableKey, session.access_token) ?? { id: session.user.id, email: session.user.email ?? null, displayName: null, emailVerified: false } } };
+    if (data.session) {
+      // SignUp returned a session directly (rare; usually email confirmation
+      // is required). The createServerClient adapter already persisted it.
+      return { ok: true, user: data.user ? toAuthUser(data.user) : null, requiresEmailVerification: false };
     }
     // Email confirmation required — no session yet.
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: true };
   }
 
-  async signIn(input: SignInInput): Promise<AuthResult> {
+  async signIn(input: SignInInput): Promise<PublicAuthResult> {
     const env = getSupabaseEnv();
     if (env.state !== 'configured' || !env.url || !env.publishableKey) {
       return { ok: false, error: 'not_configured', message: 'Authentication is not configured yet.' };
@@ -158,92 +124,70 @@ export class SupabaseAuthService implements AuthService {
     const passCheck = validatePassword(input.password);
     if (!passCheck.ok) return { ok: false, error: 'invalid_form', message: passCheck.message };
 
-    const client = publicClient(env.url, env.publishableKey);
+    const client = serverClient(env.url, env.publishableKey);
     const { data, error } = await client.auth.signInWithPassword({
       email: input.email.trim().toLowerCase(),
       password: input.password,
     });
     if (error) return mapError(error);
     if (!data.session) return { ok: false, error: 'unknown', message: 'No session was returned. Please try again.' };
-    persistSession(data.session.access_token, data.session.refresh_token);
-    return {
-      ok: true,
-      session: {
-        accessToken: data.session.access_token,
-        refreshToken: data.session.refresh_token,
-        user: {
-          id: data.user.id,
-          email: data.user.email ?? null,
-          displayName:
-            typeof data.user.user_metadata?.display_name === 'string'
-              ? data.user.user_metadata.display_name
-              : (data.user.email ?? null),
-          emailVerified: Boolean(data.user.email_confirmed_at) || Boolean(data.user.confirmed_at),
-        },
-      },
-    };
+    return { ok: true, user: data.user ? toAuthUser(data.user) : null, requiresEmailVerification: false };
   }
 
-  async signOut(): Promise<AuthResult> {
+  async signOut(): Promise<PublicAuthResult> {
     const env = getSupabaseEnv();
-    if (env.state !== 'configured' || !env.url || !env.publishableKey) {
-      clearSessionCookie();
-      return { ok: true, session: null };
+    clearAllSessionCookies();
+    if (env.state === 'configured' && env.url && env.publishableKey) {
+      try {
+        await serverClient(env.url, env.publishableKey).auth.signOut();
+      } catch {
+        /* ignore — local cookies are already cleared */
+      }
     }
-    clearSessionCookie();
-    // Best-effort server-side sign-out; the cookie is already gone so the
-    // client session is invalid even if the network call fails.
-    try {
-      await publicClient(env.url, env.publishableKey).auth.signOut();
-    } catch {
-      /* ignore — local cookie is cleared regardless */
-    }
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: false };
   }
 
-  async requestPasswordReset(input: PasswordResetRequest): Promise<AuthResult> {
+  async requestPasswordReset(input: PasswordResetRequest): Promise<PublicAuthResult> {
     const env = getSupabaseEnv();
     if (env.state !== 'configured' || !env.url || !env.publishableKey) {
       return { ok: false, error: 'not_configured', message: 'Authentication is not configured yet.' };
     }
     const emailCheck = validateEmail(input.email);
     if (!emailCheck.ok) return { ok: false, error: 'invalid_form', message: emailCheck.message };
-    // Always resolve success for non-configured emails (never leak existence).
-    const { error } = await publicClient(env.url, env.publishableKey).auth.resetPasswordForEmail(
+    // Always resolve success (never leak whether the account exists).
+    const { error } = await serverClient(env.url, env.publishableKey).auth.resetPasswordForEmail(
       input.email.trim().toLowerCase(),
       { redirectTo: `${appOrigin()}/auth/callback?type=recovery` },
     );
     if (error && (error.status ?? 0) !== 400) return mapError(error);
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: false };
   }
 
-  async updatePassword(input: PasswordUpdate): Promise<AuthResult> {
+  async updatePassword(input: PasswordUpdate): Promise<PublicAuthResult> {
     const env = getSupabaseEnv();
     if (env.state !== 'configured' || !env.url || !env.publishableKey) {
       return { ok: false, error: 'not_configured', message: 'Authentication is not configured yet.' };
     }
     const passCheck = validatePassword(input.newPassword);
     if (!passCheck.ok) return { ok: false, error: 'invalid_form', message: passCheck.message };
-    const token = currentAccessToken();
-    if (!token) {
-      return { ok: false, error: 'expired_link', message: 'Your session expired. Request a new reset link.' };
-    }
-    // The password change runs with the caller's own access token (the reset
-    // flow exchanges a recovery code for a session in /auth/callback, which
-    // sets this cookie) — never with service-role privileges.
-    const client = publicClient(env.url, env.publishableKey);
-    await client.auth.setSession({ access_token: token, refresh_token: '' });
-    const { error } = await client.auth.updateUser({ password: input.newPassword });
+    const client = serverClient(env.url, env.publishableKey);
+    const { data, error } = await client.auth.updateUser({ password: input.newPassword });
     if (error) return mapError(error);
-    return { ok: true, session: null };
+    return { ok: true, user: data.user ? toAuthUser(data.user) : null, requiresEmailVerification: false };
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
     const env = getSupabaseEnv();
     if (env.state !== 'configured' || !env.url || !env.publishableKey) return null;
-    const token = currentAccessToken();
-    if (!token) return null;
-    return verifyUserFromToken(env.url, env.publishableKey, token);
+    const adapter = createSsrCookieAdapter();
+    const client = createServerClient(env.url, env.publishableKey, {
+      cookies: { getAll: () => adapter.getAll(), setAll: (cookies) => adapter.setAll(cookies) },
+    });
+    // getUser() verifies the access token server-side and triggers a refresh
+    // when it is expired (the new tokens are written through the adapter).
+    const { data, error } = await client.auth.getUser();
+    if (error || !data.user) return null;
+    return toAuthUser(data.user);
   }
 }
 
@@ -260,3 +204,5 @@ export function getAuthService(): AuthService {
 export function setCallbackFailure(): void {
   setResponseStatus(400);
 }
+
+export type { CookieOptions };

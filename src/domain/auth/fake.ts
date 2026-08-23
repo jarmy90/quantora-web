@@ -6,7 +6,7 @@
  * Supabase project. Keeps credentials only in memory; nothing persists.
  */
 import type {
-  AuthResult,
+  PublicAuthResult,
   AuthService,
   AuthUser,
   PasswordResetRequest,
@@ -26,16 +26,19 @@ type StoredUser = {
 
 export class MemoryAuthService implements AuthService {
   private users = new Map<string, StoredUser>();
+  /** Test-only: exposes the last issued tokens to prove renewal works. */
+  lastAccessToken: string | null = null;
+  lastRefreshToken: string | null = null;
   private sessions = new Map<string, string>(); // userId -> id
   private resetRequests: string[] = [];
 
   constructor(private readonly configure = true) {}
 
-  private notConfigured(): AuthResult {
+  private notConfigured(): PublicAuthResult {
     return { ok: false, error: 'not_configured', message: 'Authentication is not configured yet.' };
   }
 
-  async signUp(input: SignUpInput): Promise<AuthResult> {
+  async signUp(input: SignUpInput): Promise<PublicAuthResult> {
     if (!this.configure) return this.notConfigured();
     const email = input.email.trim().toLowerCase();
     const emailCheck = validateEmail(email);
@@ -56,10 +59,10 @@ export class MemoryAuthService implements AuthService {
     };
     this.users.set(user.id, user);
     // Sign-up returns no session until the email is verified (like Supabase).
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: true };
   }
 
-  async signIn(input: SignInInput): Promise<AuthResult> {
+  async signIn(input: SignInInput): Promise<PublicAuthResult> {
     if (!this.configure) return this.notConfigured();
     const email = input.email.trim().toLowerCase();
     const user = [...this.users.values()].find((u) => u.email === email);
@@ -70,37 +73,35 @@ export class MemoryAuthService implements AuthService {
       return { ok: false, error: 'email_not_verified', message: 'Please confirm your email first — check your inbox.' };
     }
     this.sessions.set(user.id, `s_${user.id}`);
-    return {
-      ok: true,
-      session: {
-        accessToken: this.sessions.get(user.id)!,
-        refreshToken: `r_${user.id}`,
-        user: this.toAuthUser(user),
-      },
-    };
+    this.lastAccessToken = this.sessions.get(user.id)!;
+    this.lastRefreshToken = `r_${user.id}`;
+    // Tokens are internal only — the public result carries just the user.
+    return { ok: true, user: this.toAuthUser(user), requiresEmailVerification: false };
   }
 
-  async signOut(): Promise<AuthResult> {
+  async signOut(): Promise<PublicAuthResult> {
     this.sessions.clear();
-    return { ok: true, session: null };
+    this.lastAccessToken = null;
+    this.lastRefreshToken = null;
+    return { ok: true, user: null, requiresEmailVerification: false };
   }
 
-  async requestPasswordReset(input: PasswordResetRequest): Promise<AuthResult> {
+  async requestPasswordReset(input: PasswordResetRequest): Promise<PublicAuthResult> {
     if (!this.configure) return this.notConfigured();
     const email = input.email.trim().toLowerCase();
     if (validateEmail(email).ok && [...this.users.values()].some((u) => u.email === email)) {
       this.resetRequests.push(email);
     }
     // Always resolves ok so the caller cannot tell whether the account exists.
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: false };
   }
 
-  async updatePassword(input: PasswordUpdate): Promise<AuthResult> {
+  async updatePassword(input: PasswordUpdate): Promise<PublicAuthResult> {
     if (!this.configure) return this.notConfigured();
     const passCheck = validatePassword(input.newPassword);
     if (!passCheck.ok) return { ok: false, error: 'invalid_form', message: passCheck.message };
     for (const user of this.users.values()) user.password = input.newPassword;
-    return { ok: true, session: null };
+    return { ok: true, user: null, requiresEmailVerification: false };
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {

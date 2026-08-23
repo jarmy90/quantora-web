@@ -1,4 +1,4 @@
-ARCHIVOS AÑADIDOS (13)
+ARCHIVOS AÑADIDOS (14)
 ----------------------
 db/migrations/0002_customers_auth_user.sql
 docs/AUTHENTICATION.md
@@ -7,7 +7,7 @@ src/components/AuthCard.tsx
 src/components/AuthForm.tsx
 src/components/AuthNotConfigured.tsx
 src/domain/auth/ (contracts.ts, validation.ts, service.ts, server.ts,
-  fake.ts)
+  fake.ts, ssr-cookies.ts)
 src/lib/supabase/env.ts
 src/routes/login.tsx
 src/routes/register.tsx

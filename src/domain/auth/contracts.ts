@@ -6,7 +6,7 @@
  * (`SupabaseAuthService`) plus an in-memory TEST-ONLY fake live in
  * `./service.ts` / `./fake.ts`; the UI only ever sees the public shapes
  * below. Sessions are managed with HttpOnly cookies by the server layer —
- * nothing sensitive is stored in localStorage.
+ * nothing sensitive is stored in the browser.
  */
 export type AuthUser = {
   id: string;
@@ -15,14 +15,24 @@ export type AuthUser = {
   emailVerified: boolean;
 };
 
+/**
+ * Internal provider session — NEVER crosses the server boundary. Tokens stay
+ * inside the service layer and the SSR cookie mechanism; the UI never sees
+ * them.
+ */
 export type AuthSession = {
   accessToken: string;
   refreshToken: string;
   user: AuthUser;
 };
 
-export type AuthResult =
-  | { ok: true; session: AuthSession | null }
+/**
+ * Public result returned to the UI. Contains no tokens — only safe user
+ * metadata and flags. `requiresEmailVerification` tells the form to show the
+ * "check your inbox" state instead of navigating to /account.
+ */
+export type PublicAuthResult =
+  | { ok: true; user: AuthUser | null; requiresEmailVerification: boolean }
   | { ok: false; error: AuthErrorCode; message: string };
 
 export type AuthErrorCode =
@@ -65,11 +75,11 @@ export type PasswordUpdate = {
  * holds tokens.
  */
 export interface AuthService {
-  signUp(input: SignUpInput): Promise<AuthResult>;
-  signIn(input: SignInInput): Promise<AuthResult>;
-  signOut(): Promise<AuthResult>;
-  requestPasswordReset(input: PasswordResetRequest): Promise<AuthResult>;
-  updatePassword(input: PasswordUpdate): Promise<AuthResult>;
+  signUp(input: SignUpInput): Promise<PublicAuthResult>;
+  signIn(input: SignInInput): Promise<PublicAuthResult>;
+  signOut(): Promise<PublicAuthResult>;
+  requestPasswordReset(input: PasswordResetRequest): Promise<PublicAuthResult>;
+  updatePassword(input: PasswordUpdate): Promise<PublicAuthResult>;
   /** Verified current user from the request cookie, or null. */
   getCurrentUser(): Promise<AuthUser | null>;
 }

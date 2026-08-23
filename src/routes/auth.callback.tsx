@@ -2,13 +2,17 @@ import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start';
 import { useEffect, useRef } from 'react';
 import { getSupabaseEnv } from '../lib/supabase/env';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { sanitizeReturnTo } from '../domain/auth/contracts';
-import { setResponseHeader } from '@tanstack/react-start-server';
+import { createSsrCookieAdapter } from '../domain/auth/ssr-cookies';
 import { t } from '../i18n';
 import '../styles/app.css';
 
-/** Server-side PKCE exchange: swaps the `code` for a session and sets the cookie. */
+/**
+ * Server-side PKCE exchange: swaps the `code` for a session through
+ * createServerClient, which persists BOTH tokens via the SSR cookie adapter
+ * (renewable session). The verifier is read from its HttpOnly cookie.
+ */
 const exchangeCode = createServerFn({ method: 'POST' })
   .validator({ parse: (input: unknown) => input as { code: string; type?: string; returnTo?: string } })
   .handler(async ({ data }) => {
@@ -17,33 +21,21 @@ const exchangeCode = createServerFn({ method: 'POST' })
     if (env.state !== 'configured' || !env.url || !env.publishableKey) {
       return { ok: false as const, redirect: null as string | null };
     }
-    const client = createClient(env.url, env.publishableKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
+    const adapter = createSsrCookieAdapter();
+    const client = createServerClient(env.url, env.publishableKey, {
+      cookies: { getAll: () => adapter.getAll(), setAll: (cookies) => adapter.setAll(cookies) },
     });
     const { data: sessionData, error } = await client.auth.exchangeCodeForSession(data.code);
     if (error || !sessionData.session) {
       return { ok: false as const, redirect: null as string | null };
     }
-    const secure = Boolean(import.meta.env.PROD) || Boolean((import.meta.env.VITE_SITE_URL as string | undefined)?.startsWith('https'));
-    const cookie = [
-      `quantora-auth-token=${encodeURIComponent(sessionData.session.access_token)}`,
-      'Max-Age=604800',
-      'Path=/',
-      'HttpOnly',
-      'SameSite=Lax',
-      secure ? 'Secure' : '',
-    ]
-      .filter(Boolean)
-      .join('; ');
-    setResponseHeader('set-cookie', cookie);
     const safe = sanitizeReturnTo(data.returnTo);
     if (safe && safe !== '/') return { ok: true as const, redirect: safe };
     // A password-recovery exchange lands on the new-password page; anything
     // else goes to the account area.
     const redirect = data.type === 'recovery' ? '/reset-password' : '/account';
     return { ok: true as const, redirect };
-  },
-);
+  });
 
 export const Route = createFileRoute('/auth/callback')({
   head: () => ({

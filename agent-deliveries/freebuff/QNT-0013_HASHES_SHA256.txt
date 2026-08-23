@@ -1,1 +1,44 @@
-(contenido dentro del ZIP; ver INVENTARIO)
+QNT-0013 · SHA-256 de archivos incluidos en QNT-0013_Cambios.zip.txt
+========================================================================
+be46871d31c3b7c74b23a4cb1b450cfea3c7937ae188f5c2d41cdab5cc46510a  .env.example
+f12adf9dcb8f5e129e2ba33658433e07dd29fcab8cbb41c1d2fd79d05f900852  .github/workflows/quantora-ci.yml
+792742fee6b9d7d69c37912ec1ed7880c8e5e1236243f119741959843cff1b2e  agent-deliveries/freebuff/INVENTARIO_PAQUETE.txt
+952c696ab36a5e8d67ff5cee17587ba77448009f2fc15c09aa38c5def7a702ea  agent-deliveries/freebuff/QNT-0013_ARCHIVOS_MODIFICADOS.txt
+e5af43599f940e62e9d7c1a359e43d3ec5b809872e1c7a1bb80ccf07c17e1685  agent-deliveries/freebuff/QNT-0013_CAMBIOS.txt
+d870d622ae659fd4ea74d08b5e617aed3d9dc1c8474b329d49e6608cec6a90dd  agent-deliveries/freebuff/QNT-0013_COMANDOS_Y_RESULTADOS.txt
+6e2145a5cf0c29169c0d87280f5219231fee2c529d89d3ca758755548ff99eea  agent-deliveries/freebuff/QNT-0013_HASHES_SHA256.txt
+8c297080af283e7fc9f04bcd0a2c3ffe8346f81b54a104740346c2c7a609f6bb  agent-deliveries/freebuff/QNT-0013_PACKAGE_INTEGRITY.txt
+40961fcaadb61c1a4ae6b5f11b9bf60d65e52432fa66db2b4695c4904a70f547  agent-deliveries/freebuff/capturas-qnt-0013/account-redirect-mobile-390.png
+acef0889a05c634832f93247a7b5a9de0c1eeef4ec4f8839fa13b3069d42eb8b  agent-deliveries/freebuff/capturas-qnt-0013/forgot-desktop-1440.png
+294105aadb42087896dd986df8e0fe19da230dd645c6c8068b994b056c174ebf  agent-deliveries/freebuff/capturas-qnt-0013/forgot-mobile-390.png
+757912700e3df06b308696cebbc58988f665ac5d63ebbe7e9679b6145970f66b  agent-deliveries/freebuff/capturas-qnt-0013/login-desktop-1440.png
+40961fcaadb61c1a4ae6b5f11b9bf60d65e52432fa66db2b4695c4904a70f547  agent-deliveries/freebuff/capturas-qnt-0013/login-mobile-390.png
+f2b6a7b7c18efc4da328f80258f1150508599c375b9ac59ffa9f2a315f824483  agent-deliveries/freebuff/capturas-qnt-0013/register-desktop-1440.png
+4e3f1cbdf6d3da4f09092ceecce5f43789b941729a446573bd39481a98e4fe71  agent-deliveries/freebuff/capturas-qnt-0013/register-mobile-390.png
+7f8853c4a5e7fbf05fe0cda669756ad60000f538b0765f106d745f5e2106b8de  bun.lock
+db1911fefa051e64747ad7a7a81282753da5d2bde8b21b54c94fccf8b9984473  db/migrations/0002_customers_auth_user.sql
+f7e685a1eddd7fe08c33394deeaa95aad921e071574d4dc762e48ad4c21a1c81  docs/AUTHENTICATION.md
+2049fd01a00e91b6077eef22f322d274336feb43f7fe4302c42c39816edc1562  docs/COMMERCIAL_ROADMAP.md
+59df746b85b52bf8a7bbd3c1598e5b4f6a4c533d1cfc99470e48c784b2b220d9  package.json
+71334a859ff332611c2d1041c1ed81ae627b825e7d79163a7531a8e18f981ca5  scripts/test-qnt-0013.ts
+e238d89bd1b24a9f7e1fe724088cc7587fefd44232d7ebb79bfb285ee6583507  src/components/AuthCard.tsx
+5e2790813fc5fe855228d844845d876929127db253367ee5147ec96734416cac  src/components/AuthForm.tsx
+b4e9c75ae76ee212eb6c5436c3372dfd592503cdf0737259a4f161dfe8509606  src/components/AuthNotConfigured.tsx
+c73b2856fde75f2579694b5968c1e30c4614bf2d13150967d2fb5f5e2146d39d  src/components/Nav.tsx
+7230bcca3fc6ae61128dfb34daaf186e2d72a5e276c9214b623a47185dc8da8f  src/domain/auth/contracts.ts
+78a55c235445d847bcb4368ebc6ff237be729d8a710232a322de287df62f5a5b  src/domain/auth/fake.ts
+e0f9e0e45b1b9c20c7f24616534dfa3ccf198d49fc059047b3a7670fa271d841  src/domain/auth/server.ts
+10c71b4e877aa6c9c1a3acdb3f8f91c203e17f4355675e93c0203d37e16981f7  src/domain/auth/service.ts
+af41be76b3115056a7187f29bdf778559d0238c5b48834b0d6fcf21cfe4e01b8  src/domain/auth/ssr-cookies.ts
+99ed3b554cb8f8a5698a96f70daeccb2a56d2fad1874d5a61133b0072bd2c33f  src/domain/auth/validation.ts
+92a555c18abab47d817dbc36eb80c3a1d0e7747bb06c13ced62ec2cc8e31b1ad  src/i18n/index.ts
+64285f85fc54c937be723c0d08cebf9704b25d5ce7daf8d32606ad3a58b45ef3  src/lib/supabase/env.ts
+e7bcaa3d12a04aafeabe432dfc28a82959c33feae3daf5e679878c107fe652d8  src/routes/account.tsx
+5a3815a585aa5eccdeed36f9da0f82e285df45bba530c95c5e2c700a89fcdd3b  src/routes/auth.callback.tsx
+cb85dbe59455a36586dd75fc9ed96caae4f3ff458a4ec08caaeedc13d93edbb5  src/routes/forgot-password.tsx
+019599108f0c182dbc329a9daa7fabad6547903f5b282e50cc30c1b0392a7aa5  src/routes/login.tsx
+b65a1e0e8e2b0696e29b55226899534bce3f173c309898122526accba497dd33  src/routes/register.tsx
+4a061a07a1efb8304db9b7aa82bd06fd10bfa5d233b656d9c8c0b8df8caae119  src/routes/reset-password.tsx
+754714ec83706aafe1b0ee9fea681e91eb74d627a84f0e294745e67d0a0d3975  src/routes/strategies.$id.tsx
+608ddcfdca4cf3e66ea6892a45dec18957e2ebf3984665eb92e344ffb1209b49  src/styles/app.css
+d1f496026e67cff89735696e4dbd0ea9ff0f84660606ae9ff56eea3b838ddb9f  vite.config.ts
