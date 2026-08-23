@@ -1,0 +1,18 @@
+ARCHIVOS AÑADIDOS (9)
+---------------------
+agent-deliveries/freebuff/capturas-qnt-0014/ (5 PNG)
+docs/EASY_START_ARCHITECTURE.md
+scripts/test-qnt-0014.ts
+src/components/EasyStartSteps.tsx
+src/routes/how-to-install.tsx
+
+ARCHIVOS MODIFICADOS (8)
+-------------------------
+.github/workflows/quantora-ci.yml (paso QNT-0014 Easy Start tests)
+docs/COMMERCIAL_ROADMAP.md (reorden QNT-0014..QNT-0018)
+package.json (test:qnt-0014)
+src/i18n/index.ts (claves easy.*)
+src/routes/account.tsx (INSTALLATION GUIDE)
+src/routes/index.tsx (sección FROM STRATEGY TO MT5)
+src/routes/strategies.$id.tsx (bloque EASY INSTALLATION)
+src/styles/app.css (estilos Easy Start)

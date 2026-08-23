@@ -8,6 +8,7 @@ import { fmtDate, fmtNum, fmtNumDec, fmtPct, fmtPeriod, fmtPoints, fmtSignedPoin
 import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
+import { EasyStartSteps } from '../components/EasyStartSteps';
 import '../styles/app.css';
 
 const CYAN = '#72d9ff';
@@ -301,6 +302,12 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           <p className="mono research-note" style={{ color: 'var(--amber)' }}>
             {t('detail.monitorLegend')}
           </p>
+        </section>
+
+        <section className="card" style={{ marginTop: 15 }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>{t('easy.installBlockEyebrow')}</div>
+          <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>{t('easy.installBlockTitle')}</h2>
+          <EasyStartSteps mode="compact" asLinkTo="/how-to-install" />
         </section>
 
         <section id="how-it-works" className="card" style={{ marginTop: 15 }}>

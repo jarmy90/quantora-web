@@ -94,6 +94,35 @@ function Home() {
           </section>
         )}
 
+        <section className="section wrap easy-home">
+          <div className="eyebrow">{t('easy.homeEyebrow')}</div>
+          <h2>{t('easy.homeTitle')}</h2>
+          <p className="section-intro">{t('easy.homeBody')}</p>
+          <div className="steps" style={{ marginTop: 28 }}>
+            {[
+              ['01', 'easy.homeStep1', 'easy.downloadTitle'],
+              ['02', 'easy.homeStep2', 'easy.installTitle'],
+              ['03', 'easy.homeStep3', 'easy.testTitle'],
+            ].map(([n, title, body]) => (
+              <div className="card easy-step-card" key={n}>
+                <div className="step-num mono">{n}</div>
+                <h3 style={{ fontSize: 17, margin: '10px 0 4px' }}>{t(title as Parameters<typeof t>[0])}</h3>
+                <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.6 }}>
+                  {t(body as Parameters<typeof t>[0])}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 22 }}>
+            <Link className="btn primary" to="/how-to-install">
+              {t('easy.homeCta')} →
+            </Link>
+          </div>
+          <p className="mono" style={{ fontSize: 11, marginTop: 18, color: 'var(--amber)' }}>
+            {t('easy.previewNote')}
+          </p>
+        </section>
+
         <section className="section wrap demo-home">
           <div className="eyebrow">{t('home.demoEnvironment')}</div>
           <h2>{t('home.signals')}</h2>

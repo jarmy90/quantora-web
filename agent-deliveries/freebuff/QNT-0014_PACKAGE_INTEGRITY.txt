@@ -1,0 +1,12 @@
+QNT-0014 · PACKAGE INTEGRITY
+============================
+Archivo: QNT-0014_Cambios.zip.txt
+Tamaño: 22282027 bytes
+SHA-256: 62a3444e1ddb949386e801728065b69e3f7dd5f8c5161a5990cac42010358e85
+Entradas: 23
+
+Este documento es un artefacto EXTERNO al ZIP: se calcula después de cerrar
+el paquete y no se incluye dentro de él (evita autorreferencia). El ZIP
+contiene todos los archivos fuente, documentación interna, capturas,
+GIT_DIFF.patch e INVENTARIO_PAQUETE.txt; PACKAGE_INTEGRITY queda fuera de
+forma deliberada. No existe discrepancia documental.

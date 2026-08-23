@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -94,6 +94,15 @@ function AccountPage() {
         <div className="auth-box">
           <h2>{t('account.billing')}</h2>
           <p>{t('account.billingEmpty')}</p>
+        </div>
+
+        <div className="auth-box">
+          <div className="eyebrow" style={{ marginBottom: 8 }}>{t('easy.accountEyebrow')}</div>
+          <h2>{t('easy.homeTitle')}</h2>
+          <p>{t('easy.accountBody')}</p>
+          <Link className="btn" to="/how-to-install" style={{ marginTop: 12 }}>
+            {t('easy.accountCta')} →
+          </Link>
         </div>
 
         <p className="muted" style={{ fontSize: 12, margin: 0 }}>
