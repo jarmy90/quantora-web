@@ -11,6 +11,9 @@
   "reviewLabel": "Owner supplied",
   "independentReproduction": false,
   "costsApplied": false,
+  "productId": "stochextreme-ustec",
+  "productStatus": "coming_soon",
+  "commercialDownloadEnabled": false,
   "rules": [
     "Entry: stochastic-extreme arming (Q_PINE_INTRABAR_ORIGIN) on PERIOD_M30, confirmed on PERIOD_M3 (60s)",
     "Rearm: opposite_extreme_required",

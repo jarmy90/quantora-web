@@ -58,3 +58,44 @@
 .dash-table{min-width:560px}
 
 @media(max-width:760px){.nav-actions .btn{display:none}.footer-grid{grid-template-columns:1fr;gap:22px;padding-block:30px 20px}.footer-bar{padding-block:14px}.license-picker{grid-template-columns:1fr}}
+
+/* ---- QNT-0011: mobile navigation ---- */
+.site-header{position:relative}.nav{position:relative}
+.nav-toggle{display:none;flex-direction:column;gap:4px;background:none;border:1px solid var(--line);border-radius:6px;padding:9px 10px;cursor:pointer;min-width:40px;min-height:40px;align-items:center;justify-content:center}
+.nav-toggle-bar{width:18px;height:2px;background:var(--text);border-radius:2px}
+.mobile-menu{display:none}
+@media(max-width:760px){
+  .nav-toggle{display:inline-flex}
+  .mobile-menu{display:flex;flex-direction:column;gap:4px;position:absolute;left:0;right:0;top:76px;background:#10151d;border:1px solid var(--line);border-radius:0 0 10px 10px;padding:12px 16px 16px;z-index:60;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+  .mobile-menu a{color:var(--text);font-size:15px;font-weight:600;padding:12px 8px;border-radius:6px}
+  .mobile-menu a:hover{background:#ffffff0a}
+}
+
+/* ---- QNT-0011: status + cost chips on real cards ---- */
+.card-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.status-chip{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:99px;white-space:nowrap}
+.status-chip.coming-soon{color:var(--amber);border:1px solid #8a6a3a;background:#171208}
+.status-chip.not-connected{color:#7d8b99;border:1px solid #3a4652;background:#0d1219}
+.cost-chip{font-size:10px;font-weight:600;padding:4px 8px;border-radius:99px;white-space:nowrap}
+.cost-chip.applied{color:var(--cyan);border:1px solid #2c5a6e;background:#0b1418}
+.cost-chip.not-applied{color:var(--amber);border:1px solid #8a6a3a;background:#171208}
+.cost-chip.unknown{color:#7d8b99;border:1px solid #3a4652;background:#0d1219}
+.score-beta{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#7d8b99;border:1px solid #3a4652;border-radius:99px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+.metric-note{color:#65717d;font-size:10px;margin-top:6px}
+.card-cta{margin-top:16px;width:100%;text-align:center}
+
+/* ---- QNT-0011: demo content is visually secondary ---- */
+.demo-home .eyebrow{color:#5d6b7a}
+.demo-home .card,.demo-card{border-color:#1b242e;background:linear-gradient(145deg,#0e1319,#0a0e13)}
+.demo-card:hover{border-color:#33404c}
+.demo-filters{border:1px dashed #1b242e;border-radius:8px;padding:10px 12px}
+
+/* ---- QNT-0011: detail product + monitoring ---- */
+.product-card{border-color:#3a4652;background:linear-gradient(145deg,#121923,#0d1219)}
+.monitor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.monitor-cell{background:#0b1016;border:1px solid var(--line);border-radius:8px;padding:12px}
+.monitor-cell small{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
+.monitor-cell strong{font-size:13px;font-weight:600}
+.dialog-backdrop{position:fixed;inset:0;background:rgba(5,8,12,.72);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.dialog{background:#10151d;border:1px solid var(--line);border-radius:12px;padding:24px;max-width:420px;width:100%}
+@media(max-width:760px){.monitor-grid{grid-template-columns:repeat(2,1fr)}}

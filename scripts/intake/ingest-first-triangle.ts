@@ -168,6 +168,10 @@ export function buildFirstTriangleManifest(evidenceDir: string = EVIDENCE_DIR): 
     reviewLabel: 'Owner supplied',
     independentReproduction: false,
     costsApplied: true,
+    // QNT-0011 public product state (commercially safe).
+    productId: 'first-triangle-ustec-m30',
+    productStatus: 'coming_soon',
+    commercialDownloadEnabled: false,
     rules: [
       'Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)',
       'Stop: FIXED_200PTS (fixed 200-point stop)',

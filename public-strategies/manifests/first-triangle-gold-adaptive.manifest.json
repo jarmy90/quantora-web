@@ -13,6 +13,9 @@
   "reviewLabel": "Owner supplied",
   "independentReproduction": false,
   "costsApplied": false,
+  "productId": "first-triangle-gold-m15",
+  "productStatus": "coming_soon",
+  "commercialDownloadEnabled": false,
   "sourceTimezone": null,
   "timestampNormalization": "not_normalized",
   "rules": [

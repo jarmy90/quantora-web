@@ -376,6 +376,10 @@ export function buildFirstTriangleGoldManifest(evidenceDir: string = EVIDENCE_DI
     reviewLabel: 'Owner supplied',
     independentReproduction: false,
     costsApplied: false,
+    // QNT-0011 public product state (commercially safe).
+    productId: 'first-triangle-gold-m15',
+    productStatus: 'coming_soon',
+    commercialDownloadEnabled: false,
     sourceTimezone: null,
     timestampNormalization: 'not_normalized',
     rules,

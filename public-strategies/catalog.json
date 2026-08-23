@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T10:53:23.323Z",
+  "generatedAt": "2026-08-23T08:57:11.929Z",
   "strategies": [
     {
       "id": "first-triangle-adaptive",
@@ -851,7 +851,10 @@
       "scoreVersion": "beta-1",
       "filterVersion": "beta-1",
       "publicationMode": "results",
-      "performanceUnit": "usd"
+      "performanceUnit": "usd",
+      "productId": "first-triangle-ustec-m30",
+      "productStatus": "coming_soon",
+      "commercialDownloadEnabled": false
     },
     {
       "id": "first-triangle-gold-adaptive",
@@ -1997,7 +2000,10 @@
       "scoreVersion": "beta-1",
       "filterVersion": "beta-1",
       "publicationMode": "results",
-      "performanceUnit": "points"
+      "performanceUnit": "points",
+      "productId": "first-triangle-gold-m15",
+      "productStatus": "coming_soon",
+      "commercialDownloadEnabled": false
     },
     {
       "id": "stochextreme-adaptive",
@@ -3897,7 +3903,10 @@
       "scoreVersion": "beta-1",
       "filterVersion": "beta-1",
       "publicationMode": "results",
-      "performanceUnit": "usd"
+      "performanceUnit": "usd",
+      "productId": "stochextreme-ustec",
+      "productStatus": "coming_soon",
+      "commercialDownloadEnabled": false
     },
     {
       "id": "tm-bandas-s3",
@@ -7139,7 +7148,10 @@
       "scoreVersion": "beta-1",
       "filterVersion": "beta-1",
       "publicationMode": "results",
-      "performanceUnit": "usd"
+      "performanceUnit": "usd",
+      "productId": "tm-bandas-s3-keeper",
+      "productStatus": "coming_soon",
+      "commercialDownloadEnabled": false
     }
   ]
 }

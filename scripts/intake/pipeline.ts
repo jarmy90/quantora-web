@@ -63,6 +63,12 @@ export type CatalogEntry = {
   publicationMode?: 'documentary' | 'results';
   /** Unit of results metrics/equity ("points" or "usd", default "usd"). */
   performanceUnit?: 'points' | 'usd';
+  /** Public product identity (commercially safe). */
+  productId?: string;
+  /** Public commercial availability state (internal availability stays private). */
+  productStatus?: 'not_listed' | 'coming_soon' | 'available' | 'paused' | 'deprecated';
+  /** Whether commercial EA download is enabled for this product. */
+  commercialDownloadEnabled?: boolean;
   /** Publication filter outcome (internal — never part of the public catalog). */
   published?: boolean;
   filterReasons?: string[];
@@ -228,6 +234,10 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     filterVersion: manifest.filterVersion,
     scoreVersion: manifest.scoreVersion,
     performanceUnit: manifest.performanceUnit ?? 'usd',
+    // QNT-0011 public product state (commercially safe).
+    productId: manifest.productId,
+    productStatus: manifest.productStatus,
+    commercialDownloadEnabled: manifest.commercialDownloadEnabled === true,
   };
 
   // Faithful `results` (real owner deliveries) take precedence over the strict
@@ -361,6 +371,10 @@ export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
     filterVersion: entry.filterVersion,
     publicationMode: entry.publicationMode,
     performanceUnit: entry.performanceUnit,
+    // QNT-0011 public product state (commercially safe).
+    productId: entry.productId,
+    productStatus: entry.productStatus,
+    commercialDownloadEnabled: entry.commercialDownloadEnabled === true,
   };
 }
 

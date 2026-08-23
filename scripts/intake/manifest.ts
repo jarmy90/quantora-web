@@ -81,6 +81,12 @@ export type Manifest = {
   filterVersion?: string;
   /** Version of the score formula ("beta-1"). */
   scoreVersion?: string;
+  /** Public product identity (commercially safe, e.g. "first-triangle-ustec-m30"). */
+  productId?: string;
+  /** Public commercial availability state. Internal availability stays private. */
+  productStatus?: 'not_listed' | 'coming_soon' | 'available' | 'paused' | 'deprecated';
+  /** Whether commercial EA download is enabled for this product (false while demo-only). */
+  commercialDownloadEnabled?: boolean;
 };
 
 export type ManifestIssue = {
@@ -230,6 +236,22 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   }
   if (value.scoreVersion !== undefined && !isText(value.scoreVersion)) {
     issues.push(error('scoreVersion', 'Must be a non-empty string.'));
+  }
+  // QNT-0011 public product state.
+  if (value.productId !== undefined && !isText(value.productId)) {
+    issues.push(error('productId', 'Must be a non-empty string.'));
+  }
+  const PRODUCT_STATUSES = ['not_listed', 'coming_soon', 'available', 'paused', 'deprecated'] as const;
+  if (
+    value.productStatus !== undefined &&
+    !(PRODUCT_STATUSES as readonly string[]).includes(value.productStatus as string)
+  ) {
+    issues.push(
+      error('productStatus', 'Must be one of: not_listed, coming_soon, available, paused, deprecated.'),
+    );
+  }
+  if (value.commercialDownloadEnabled !== undefined && typeof value.commercialDownloadEnabled !== 'boolean') {
+    issues.push(error('commercialDownloadEnabled', 'Must be a boolean.'));
   }
 
   if (value.evidence !== undefined) {

@@ -39,6 +39,14 @@ export type QuantoraScore = {
 
 export type PublicationMode = 'documentary' | 'results';
 
+/** Public commercial availability state (internal availability stays private). */
+export type ProductStatus =
+  | 'not_listed'
+  | 'coming_soon'
+  | 'available'
+  | 'paused'
+  | 'deprecated';
+
 export type PublicStrategy = {
   id: string;
   name: string;
@@ -75,6 +83,13 @@ export type PublicStrategy = {
   publicationMode?: PublicationMode;
   /** Unit of results metrics/equity: "points" or "usd" (default "usd"). */
   performanceUnit?: 'points' | 'usd';
+  // QNT-0011 public product state (commercially safe):
+  /** Public product identity, e.g. "first-triangle-ustec-m30". */
+  productId?: string;
+  /** Public commercial availability state. */
+  productStatus?: ProductStatus;
+  /** Whether commercial EA download is enabled for this product (false while demo-only). */
+  commercialDownloadEnabled?: boolean;
 };
 
 export type PublicPeriod = {

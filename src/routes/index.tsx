@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { strategies } from '../data';
+import { publicStrategies } from '../catalog';
+import { PublicStrategyCard } from '../components/PublicStrategyCard';
 import { t } from '../i18n';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import '../styles/app.css';
 
 const Spark = ({ points, color }: { points: number[]; color: string }) => (
-  <svg className="curve" viewBox="0 0 300 65" preserveAspectRatio="none">
+  <svg className="curve" viewBox="0 0 300 65" preserveAspectRatio="none" aria-hidden="true">
     <polyline
       fill="none"
       stroke={color}
@@ -16,16 +18,16 @@ const Spark = ({ points, color }: { points: number[]; color: string }) => (
   </svg>
 );
 
-function StrategyCard({ s }: { s: (typeof strategies)[number] }) {
+function DemoStrategyCard({ s }: { s: (typeof strategies)[number] }) {
   return (
-    <Link to="/strategies/$id" params={{ id: s.id }} className="card">
+    <Link to="/strategies/$id" params={{ id: s.id }} className="card demo-card">
       <div className="strategy-top">
         <div>
           <span className="badge">{s.type}</span>
           <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
           <div className="tag">{s.tagline}</div>
         </div>
-        <span style={{ color: s.color, fontSize: 20 }}>↗</span>
+        <span style={{ color: s.color, fontSize: 20 }} aria-hidden="true">↗</span>
       </div>
       <Spark points={s.curve} color={s.color} />
       <div className="stats">
@@ -79,14 +81,26 @@ function Home() {
           </p>
         </section>
 
-        <section className="section wrap">
-          <div className="eyebrow">{t('home.curated')}</div>
+        {publicStrategies.length > 0 && (
+          <section id="real" className="section wrap">
+            <div className="eyebrow">{t('home.realStrategies')}</div>
+            <h2>{t('catalog.title')}</h2>
+            <p className="section-intro">{t('home.realStrategiesBody')}</p>
+            <div className="grid" style={{ marginTop: 25 }}>
+              {publicStrategies.map((s) => (
+                <PublicStrategyCard key={s.id} s={s} cta />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="section wrap demo-home">
+          <div className="eyebrow">{t('home.demoEnvironment')}</div>
           <h2>{t('home.signals')}</h2>
-          <p className="muted">{t('home.startingPoint')}</p>
-          <p className="mono demo-note">{t('home.demoNote')}</p>
+          <p className="muted">{t('home.demoEnvironmentBody')}</p>
           <div className="grid" style={{ marginTop: 25 }}>
             {strategies.slice(0, 3).map((s) => (
-              <StrategyCard key={s.id} s={s} />
+              <DemoStrategyCard key={s.id} s={s} />
             ))}
           </div>
         </section>
@@ -130,4 +144,14 @@ function Home() {
   );
 }
 
-export const Route = createFileRoute('/')({ component: Home });
+export const Route = createFileRoute('/')({
+  head: () => ({
+    meta: [
+      { title: 'Quantora — Strategies you can understand' },
+      { name: 'description', content: t('seo.homeDescription') },
+      { property: 'og:title', content: 'Quantora — Strategies you can understand' },
+      { property: 'og:description', content: t('seo.homeDescription') },
+    ],
+  }),
+  component: Home,
+});
