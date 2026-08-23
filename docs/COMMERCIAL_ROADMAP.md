@@ -44,7 +44,26 @@ the previous one; nothing is merged or deployed automatically.
   migrations 0001+0002 with authorization.
 - **Remains disabled:** purchases, payments, downloads, demo monitoring.
 
-## QNT-0014 · Demo monitoring pilot
+## QNT-0014 · Easy Start installation onboarding
+
+- **Rationale:** installation onboarding ships BEFORE payments because it
+  reduces fear and abandonment before the conversion moment — a beginner
+  who understands “I can install this bot myself” is far more likely to
+  buy or rent later.
+- **Prerequisites:** QNT-0013 auth + live Supabase; four public strategies;
+  `coming_soon` products.
+- **Data involved:** none new; purely visual/educational (public route
+  `/how-to-install`, reusable `EasyStartSteps` component).
+- **Security boundary:** informational only — no downloads, no license
+  fiction, no MT5 credentials, no real EA files, no private source.
+- **Definition of done:** three-step public guide (Download → Install in
+  MT5 → Test in demo), compact block on strategy details, home section,
+  `/account` guide entry; demo-first messaging; responsive visuals;
+  accessibility and SEO.
+- **Remains disabled:** products, plans, payments, downloads, licenses,
+  demo monitoring.
+
+## QNT-0015 · Demo monitoring pilot
 
 - **Prerequisites:** server functions infrastructure; safe product linkage.
 - **Data involved:** demo-account monitoring records per strategy.
@@ -55,7 +74,7 @@ the previous one; nothing is merged or deployed automatically.
   (`not_connected`, `connecting`, `live_demo`, `stale`, `offline`).
 - **Remains disabled:** checkout, payments, downloads.
 
-## QNT-0015 · Plans, purchase and rental
+## QNT-0016 · Plans, purchase and rental
 
 - **Prerequisites:** QNT-0013; plans table; pricing decisions.
 - **Data involved:** plans (rental/purchase), orders (draft/pending_payment).
@@ -65,9 +84,9 @@ the previous one; nothing is merged or deployed automatically.
   readiness gated by `canStartCheckout`, customer order history.
 - **Remains disabled:** actual payment capture, downloads, licenses.
 
-## QNT-0016 · Payment provider and webhooks
+## QNT-0017 · Payment provider and webhooks
 
-- **Prerequisites:** QNT-0015; provider decision (none chosen yet).
+- **Prerequisites:** QNT-0016; provider decision (none chosen yet).
 - **Data involved:** payments, provider webhooks.
 - **Security boundary:** secret keys server-only; webhook signature
   verification; `providerReference` never exposed publicly.
@@ -75,9 +94,9 @@ the previous one; nothing is merged or deployed automatically.
   transitions server-side, refund/cancel handling.
 - **Remains disabled:** downloads, license activation (next phase).
 
-## QNT-0017 · Licensing and protected delivery
+## QNT-0018 · Licensing and protected delivery
 
-- **Prerequisites:** QNT-0016; licenses + entitlements tables.
+- **Prerequisites:** QNT-0017; licenses + entitlements tables.
 - **Data involved:** licenses, entitlements, protected files.
 - **Security boundary:** download requires product `available` +
   `commercialDownloadEnabled` + license `active` + entitlement `granted`;

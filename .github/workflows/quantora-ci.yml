@@ -88,3 +88,6 @@ jobs:
 
       - name: QNT-0013D live Supabase setup tests
         run: bun run scripts/test-qnt-0013d.ts
+
+      - name: QNT-0014 Easy Start tests
+        run: bun run scripts/test-qnt-0014.ts

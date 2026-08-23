@@ -22,7 +22,8 @@
     "test:qnt-0011": "bun run scripts/test-qnt-0011.ts",
     "test:qnt-0012": "bun run scripts/test-qnt-0012.ts",
     "test:qnt-0013": "bun run scripts/test-qnt-0013.ts",
-    "test:qnt-0013d": "bun run scripts/test-qnt-0013d.ts"
+    "test:qnt-0013d": "bun run scripts/test-qnt-0013d.ts",
+    "test:qnt-0014": "bun run scripts/test-qnt-0014.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

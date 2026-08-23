@@ -1,0 +1,69 @@
+QNT-0014 · QUANTORA EASY START
+================================
+Rama: feat/QNT-0014-easy-start
+Base: main (b450d17 · incluye QNT-0013F/PR #14 fusionado)
+
+OBJETIVO
+--------
+Onboarding visual para que un principiante entienda que puede instalar una
+estrategia de Quantora en MetaTrader 5 sin programar:
+
+  “Install your strategy in MetaTrader 5 in 3 simple steps.”
+  “No programming required.” · “Start safely with a demo account.”
+
+Educativo y visual. NO activa compras, alquileres, pagos, licencias ni
+descargas; nada cambia en estrategias, métricas, scoring o autenticación.
+
+ENTREGA
+-------
+1. Ruta pública /how-to-install (src/routes/how-to-install.tsx):
+   eyebrow EASY START, título (3 pasos sencillos), body, CTA “See the 3
+   steps”, trust points (no coding / visual guide / demo / MT5 compatible),
+   advertencia sin promesa de rendimiento. Paso 1 Download (paquete
+   conceptual .ex5 + .set “when provided” + quick-start-guide, sin descarga
+   real). Paso 2 Install in MT5 (8 sub-pasos + ruta File→Open Data Folder→
+   MQL5→Experts + solución rápida). Paso 3 Test in demo (8 sub-pasos +
+   checklist + advertencia demo-first). Visuales conceptuales SVG propios,
+   distintos por paso, con “Your Strategy” y “Demo account”.
+2. Componente reutilizable src/components/EasyStartSteps.tsx con modos
+   full / compact / preview y enlace configurable; no es frontera de
+   seguridad. Usado en fichas (compact), /how-to-install (full).
+3. Home (src/routes/index.tsx): sección “FROM STRATEGY TO MT5” con
+   Download / Install / Start in demo y CTA → /how-to-install.
+4. Fichas de las 4 estrategias reales (src/routes/strategies.$id.tsx):
+   bloque compacto EASY INSTALLATION → /how-to-install.
+5. /account (src/routes/account.tsx): sección INSTALLATION GUIDE con CTA
+   “Open Easy Start”. (Solo booleano; sin UI autenticada nueva.)
+6. docs/EASY_START_ARCHITECTURE.md: objetivo principiantes, EX5 vs MQ5,
+   límites de propiedad intelectual, demo-first, público vs cliente,
+   integración futura con licencias/descargas y demo monitoring, problemas
+   frecuentes, accesibilidad.
+7. docs/COMMERCIAL_ROADMAP.md reordenado: QNT-0014 Easy Start → QNT-0015
+   demo monitoring → QNT-0016 planes/compra → QNT-0017 pasarela →
+   QNT-0018 licencias/entrega protegida. Easy Start antes de pagos para
+   reducir miedo/abandono antes de la conversión.
+8. scripts/test-qnt-0014.ts (12 tests) + paso CI “QNT-0014 Easy Start
+   tests” + script package.json test:qnt-0014.
+
+SEGURIDAD
+---------
+- Sin MQ5/EX5/SET/DLL reales; sin rutas privadas, vault, hashes ni nombres
+  privados de archivos; sin cuentas/brokers MT5 reales; sin credenciales;
+  sin balances inventados.
+- Sin botones Buy/Rent/Checkout/Pay/Download activos.
+- .env.local no versionado y no incluido en el paquete.
+- La captura de /account autenticada NO se incluye para no exponer el email
+  real de prueba; /account con INSTALLATION GUIDE se verificó en vivo.
+
+PREVIEW
+-------
+vite dev estable. HTTP 200 en /, /how-to-install, /strategies, las 4 fichas,
+/login. /account -> 307 sin sesión. /account autenticado muestra
+INSTALLATION GUIDE. Capturas nuevas: how-to-install desktop+móvil, home,
+ficha desktop+móvil.
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+Sin cambios en estrategias, métricas, scoring, manifests ni datos.
+Sin pagos, precios, licencias, descargas ni despliegue.
+Sin merge. Sin deploy.

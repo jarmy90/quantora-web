@@ -133,3 +133,26 @@
 .auth-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--lime)}
 .auth-badge .dot.amber{background:var(--amber)}
 @media(max-width:760px){.auth-main{padding-block:40px 56px}.auth-card{padding:26px 20px;border-radius:12px}}
+
+/* === QNT-0014 · Easy Start === */
+.easy-home .eyebrow{color:var(--lime)}
+.easy-step-card h3{letter-spacing:-.02em}
+.easy-card{display:flex;flex-direction:column;gap:6px}
+.easy-card svg{display:block;margin:4px 0}
+.easy-compact{display:block}
+.easy-compact .btn{margin-top:14px}
+.easy-block strong{color:var(--text)}
+.easy-trust{display:flex;gap:10px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
+.easy-hero h1{margin-top:10px}
+.guide-step{padding:24px}
+.guide-step h2{letter-spacing:-.03em}
+.easy-ol{list-style:none;counter-reset:ez;padding:0;margin:0;max-width:760px}
+.easy-ol li{counter-increment:ez;display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid #ffffff0d;font-size:14px;line-height:1.55;color:#cdd7df}
+.easy-ol li::before{content:counter(ez);color:var(--lime);font-family:'DM Mono',monospace;font-size:12px;min-width:18px}
+.easy-check{list-style:none;padding:0;margin:0;max-width:760px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px}
+.easy-check li{font-size:13px;color:#d3e6b8}
+.path-chip{display:inline-block;border:1px solid var(--line);background:#0f151c;padding:8px 12px;border-radius:7px;font-size:12px;color:#b7c3ce;margin-top:12px}
+.package-card{border:1px dashed #3a4c60;border-radius:10px;padding:14px}
+.file-row{font-family:'DM Mono',monospace;font-size:12.5px;color:#cdd7df;padding:8px 10px;border-bottom:1px solid #ffffff0d}
+.file-row:last-child{border-bottom:0}
+@media(max-width:760px){.easy-check{grid-template-columns:1fr}.guide-step{padding:18px}.easy-hero h1{font-size:30px}}

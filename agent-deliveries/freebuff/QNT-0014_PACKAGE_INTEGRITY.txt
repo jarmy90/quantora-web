@@ -1,0 +1,5 @@
+QNT-0014 · PACKAGE INTEGRITY
+============================
+Archivo: QNT-0014_Cambios.zip.txt
+Tamaño: 4224576 bytes
+SHA-256: f39217104b27732b2a69c21afd1abc5a30dfde94805658833b59dc0ede8b0052
