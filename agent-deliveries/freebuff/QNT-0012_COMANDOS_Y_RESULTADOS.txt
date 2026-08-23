@@ -1,8 +1,8 @@
-COMANDOS EJECUTADOS Y RESULTADOS (QNT-0012)
-=================================================
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0012 + QNT-0012C)
+====================================================
 
 [1] PREPARACIÓN
-    git rev-parse --show-toplevel -> C:/quantora/quantora-web/quantora-web
+    git rev-parse --show-toplevel -> C:/Quantora/quantora-web/quantora-web
     git status --short            -> 0 líneas (limpio)
     git fetch origin && git checkout main && git pull --ff-only origin main
         -> main cad1f7b (PR #10/QNT-0011 fusionado)
@@ -21,30 +21,40 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0012)
     repositorios (+ TEST-ONLY in-memory), docs de arquitectura/roadmap,
     sección ACCOUNT ACCESS en dashboard, tests y paso CI.
 
-[4] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp, caché en /tmp)
+[4] CORRECCIÓN QNT-0012C
+    - Migración: id uuid PK, product_id text UNIQUE, sin product_key,
+      product_ref FKs, CHECK plans_billing_combination, seed por product_id.
+    - Customer: email/displayName string | null.
+    - plan.ts: isBillingCombinationValid; rules.ts: canSelectPlan la exige.
+    - Repos: ProductRepository.findByProductId.
+    - Tests 18 -> 26; docs actualizadas.
+
+[5] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp, caché en /tmp)
     bun install --frozen-lockfile    -> Checked 139 installs (no changes)
     bun run scripts/test-validation.ts      -> 58 passed / 0 failed
     bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
     bun run scripts/test-qnt-0011.ts        -> 12 passed / 0 failed
-    bun run scripts/test-qnt-0012.ts        -> 18 passed / 0 failed
+    bun run scripts/test-qnt-0012.ts        -> 26 passed / 0 failed
     bun run strategies:validate             -> 4 accepted | 0 errors
     bun run strategies:build + report       -> 0 errores bloqueantes
     bun run build                           -> client + SSR OK (server fn)
     bun x tsc --noEmit                      -> exit 0 (0 errores)
     git diff --check                        -> OK
     bash .github/scripts/check-private-files.sh -> OK
-    git checkout -- public-strategies/catalog.json (restaurar timestamp)
+    public-strategies/catalog.json          -> sin cambios (métricas intactas)
 
-[5] PREVIEW LOCAL (vite dev, puerto 3000)
+[6] PREVIEW LOCAL (vite dev, puerto 3000) — fase QNT-0012
     HTTP 200 en /, /strategies, /strategies/{4 fichas}, /dashboard
     Consola del navegador: limpia (solo vite/React DevTools)
     Dashboard: ACCOUNT ACCESS -> Not enabled yet (texto correcto),
       sin precios, sin botones transaccionales, menú móvil operativo.
 
-[6] CAPTURAS
+[7] CAPTURAS
     dashboard-desktop-1440.png + dashboard-mobile-390.png (Chrome
     headless) en agent-deliveries/freebuff/capturas-qnt-0012/.
 
-[7] GIT
-    Commit único local (tras validaciones) + push + PR contra main.
-    Sin merge · Sin deploy · Sin rama eliminada.
+[8] GIT
+    Commit único local (tras validaciones) + push + PR #11 contra main.
+    QNT-0012C: commit correctivo en la misma rama, push, PR #11 actualizado,
+    Quantora CI en verde.
+    Sin merge · Sin deploy · Sin rama eliminada · Sin PR nuevo.

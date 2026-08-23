@@ -1,7 +1,8 @@
-QNT-0012 · FUNDACIÓN COMERCIAL Y DE USUARIO
-============================================
+QNT-0012 · FUNDACIÓN COMERCIAL Y DE USUARIO (incluye corrección QNT-0012C)
+=============================================================================
 Rama: feat/QNT-0012-commercial-user-foundation
 Base: main (cad1f7b · incluye QNT-0011 fusionado vía PR #10)
+PR: #11 (actualizado en la misma rama, sin PR nuevo)
 
 OBJETIVO ALCANZADO
 ------------------
@@ -11,6 +12,35 @@ comercial permanece deshabilitado por contrato, por reglas de estado y por
 feature flags server-side (todos false por defecto). Nada se construye
 directamente en componentes React sin contratos.
 
+CORRECCIÓN QNT-0012C (coherencia de identificadores y contratos)
+----------------------------------------------------------------
+1. IDENTIDAD DE PRODUCTO (db/migrations/0001_commercial_foundation.sql)
+   - products.id = uuid interno PRIMARY KEY (gen_random_uuid()).
+   - products.product_id = text NOT NULL UNIQUE (identificador comercial
+     estable: first-triangle-ustec-m30, first-triangle-gold-m15,
+     stochextreme-ustec, tm-bandas-s3-keeper).
+   - products.strategy_id = text NOT NULL UNIQUE (estrategia pública).
+   - ELIMINADO product_key (la ambigüedad product_id uuid + product_key text
+     desaparece). Seed inserta product_id/strategy_id/display_name/status/
+     delivery_format/commercial_download_enabled, idempotente ON CONFLICT
+     (product_id).
+   - FKs internas renombradas a product_ref uuid NOT NULL REFERENCES
+     products(id) en plans, orders, licenses y entitlements; índices
+     actualizados. product_id NUNCA es FK.
+   - Documentado en docs/COMMERCIAL_ARCHITECTURE.md (contrato id /
+     product_id / strategy_id).
+2. NULABILIDAD DE CUSTOMER (src/domain/commercial/customer.ts)
+   - email: string | null y displayName: string | null (coherentes con SQL
+     nullable). QNT-0013 decidirá qué campos son obligatorios tras elegir el
+     mecanismo de identidad. Sin usuarios creados.
+3. COMBINACIONES DE FACTURACIÓN (src/domain/commercial/plan.ts + rules.ts +
+   migración)
+   - isBillingCombinationValid(plan): rental -> monthly|quarterly|annual;
+     purchase -> one_time. Prohibido rental+one_time, purchase+monthly/
+     quarterly/annual.
+   - canSelectPlan exige ahora: active + combinación válida + precio real.
+   - Migración: CONSTRAINT plans_billing_combination CHECK en la tabla plans.
+
 CONTRATOS DE DOMINIO (src/domain/commercial/)
 ---------------------------------------------
 product.ts     - Product (productId, strategyId, displayName, status,
@@ -19,10 +49,12 @@ product.ts     - Product (productId, strategyId, displayName, status,
 plan.ts        - Plan (billingModel rental|purchase, billingInterval
                  monthly|quarterly|annual|one_time, status draft|inactive|
                  active|retired, priceAmountMinor=null, currency=null
-                 mientras draft; null nunca es cero; hasUsablePrice).
+                 mientras draft; null nunca es cero; hasUsablePrice;
+                 isBillingCombinationValid).
 customer.ts    - Customer futuro (customer|creator|admin; pending|active|
-                 suspended|closed). Sin credenciales, sin contraseñas, sin
-                 decidir hashing ni proveedor de identidad.
+                 suspended|closed; email/displayName string | null). Sin
+                 credenciales, sin contraseñas, sin decidir hashing ni
+                 proveedor de identidad.
 order.ts       - Order (draft|pending_payment|paid|cancelled|expired|
                  refunded|failed). paid solo puede fijarse en servidor.
 payment.ts     - Payment (provider null; providerReference server-only,
@@ -33,12 +65,15 @@ license.ts     - License (pending|active|grace_period|expired|revoked;
 entitlement.ts - Entitlement (pending|granted|suspended|expired|revoked;
                  canDownload=false inicial; la UI nunca decide seguridad).
 rules.ts       - Máquinas de estado puras: canPurchaseProduct (solo
-                 available), canSelectPlan (solo active + precio real),
-                 canStartCheckout, canMarkOrderPaidFromClient (siempre
-                 false), canActivateLicense (pending + order paid),
+                 available), canSelectPlan (solo active + combinación
+                 billing válida + precio real), canStartCheckout,
+                 canMarkOrderPaidFromClient (siempre false),
+                 canActivateLicense (pending + order paid),
                  canGrantDownload (todas las condiciones),
                  getProductAvailability (nunca frontera de seguridad).
 repositories.ts      - Interfaces desacopladas (7 repos).
+                 ProductRepository.findByProductId(productId: string) —
+                 sin findById ambiguo.
 memory-repositories.ts - Implementación in-memory claramente marcada
                  TEST-ONLY; nunca usada como demo pública.
 
@@ -70,12 +105,15 @@ devuelve catálogo seguro + flags públicos. Sin endpoints de escritura.
 
 BASE DE DATOS (db/migrations/0001_commercial_foundation.sql)
 ------------------------------------------------------------
-Esquema preparatorio (NO aplicado a ninguna base): products, plans,
-customers, orders, payments, licenses, entitlements con UUID,
-timestamptz, FKs, CHECK de estados, índices, precios en unidades menores
-enteras, currency nullable. Seed declarativo ÚNICAMENTE de los 4 productos
-(coming_soon, download false, sin precio). Sin usuarios/pedidos/pagos/
-licencias/entitlements insertados, sin contraseñas, sin datos personales.
+Esquema preparatorio (NO aplicado a ninguna base): products (id uuid PK,
+product_id text UNIQUE, strategy_id text UNIQUE), plans (product_ref,
+CHECK plans_billing_combination + plans_price_pair), customers, orders
+(product_ref), payments, licenses (product_ref), entitlements
+(product_ref) con UUID, timestamptz, FKs, CHECK de estados, índices,
+precios en unidades menores enteras, currency nullable. Seed declarativo
+ÚNICAMENTE de los 4 productos (coming_soon, download false, sin precio).
+Sin usuarios/pedidos/pagos/licencias/entitlements insertados, sin
+contraseñas, sin datos personales.
 
 UI (dashboard preview)
 ----------------------
@@ -85,28 +123,36 @@ Sin botones que parezcan funcionales. QNT-0011 visualmente intacto.
 
 DOCUMENTACIÓN
 -------------
-docs/COMMERCIAL_ARCHITECTURE.md (entidades, estados, público/privado,
-fronteras de seguridad, decisiones definitivas y pendientes).
+docs/COMMERCIAL_ARCHITECTURE.md (identidad id/product_id/strategy_id,
+entidades, estados, billing, público/privado, fronteras de seguridad,
+decisiones definitivas y pendientes).
 docs/COMMERCIAL_ROADMAP.md (QNT-0013..QNT-0017 con prerequisitos, datos,
-frontera de seguridad y definition of done).
+frontera de seguridad y definition of done; nota del contrato de identidad
+y de la regla de facturación).
 
 TESTS
 -----
-scripts/test-qnt-0012.ts (18 tests): 4 productos derivados; productId !=
+scripts/test-qnt-0012.ts (26 tests): 4 productos derivados; productId !=
 strategyId; coming_soon; download false; checkout/download false; sin
 precios/planes/pedidos/pagos/licencias/entitlements; reglas de estado
 (coming_soon no comprable, draft no seleccionable, paid nunca del cliente,
 licencia sin pedido paid, descarga con todas las condiciones); flags
 false; secretos no expuestos; .env.example sin valores; catálogo seguro
-sin paths/vault/hashes; migración con 7 tablas y seed solo de productos;
-4 estrategias y métricas intactas; UI sin Buy/Rent/Checkout/Pay/Download;
-dashboard preview. Añadido al CI como "QNT-0012 commercial foundation
-tests" y a package.json (test:qnt-0012).
+sin paths/vault/hashes; migración con 7 tablas, seed solo de productos,
+id uuid PK / product_id TEXT UNIQUE / sin product_key / product_ref FKs /
+CHECK billing; ProductRepository.findByProductId; Customer email/
+displayName null; combinaciones billing (rental monthly/quarterly/annual
+válidas, rental one_time inválida, purchase one_time válida, purchase
+monthly/quarterly/annual inválidas); canSelectPlan rechaza combinaciones
+inválidas; 4 estrategias y métricas intactas; UI sin
+Buy/Rent/Checkout/Pay/Download; dashboard preview. Añadido al CI como
+"QNT-0012 commercial foundation tests" y a package.json (test:qnt-0012).
 
 CAPTURAS
 --------
-2 capturas nuevas (dashboard desktop 1440 y móvil 390) en
-agent-deliveries/freebuff/capturas-qnt-0012/.
+2 capturas (dashboard desktop 1440 y móvil 390) en
+agent-deliveries/freebuff/capturas-qnt-0012/. Sin cambios de UI en
+QNT-0012C (sin capturas nuevas).
 
 SIN CAMBIOS DE NEGOCIO
 ----------------------

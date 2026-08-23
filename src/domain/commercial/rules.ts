@@ -8,7 +8,7 @@
 import type { Entitlement } from './entitlement';
 import type { License } from './license';
 import type { Order } from './order';
-import { hasUsablePrice, type Plan } from './plan';
+import { hasUsablePrice, isBillingCombinationValid, type Plan } from './plan';
 import type { Product, ProductStatus } from './product';
 
 export type PurchaseEligibility = {
@@ -42,15 +42,23 @@ export function purchaseBlockedReason(
   return null;
 }
 
-/** Only an active plan with a real price can be selected. */
-export function canSelectPlan(plan: Pick<Plan, 'status' | 'priceAmountMinor' | 'currency'>): boolean {
-  return plan.status === 'active' && hasUsablePrice(plan);
+/**
+ * Only an active plan with a real price AND a coherent billing model/interval
+ * combination can be selected.
+ */
+export function canSelectPlan(
+  plan: Pick<Plan, 'status' | 'billingModel' | 'billingInterval' | 'priceAmountMinor' | 'currency'>,
+): boolean {
+  return plan.status === 'active' && isBillingCombinationValid(plan) && hasUsablePrice(plan);
 }
 
 export function planBlockedReason(
-  plan: Pick<Plan, 'status' | 'priceAmountMinor' | 'currency'>,
+  plan: Pick<Plan, 'status' | 'billingModel' | 'billingInterval' | 'priceAmountMinor' | 'currency'>,
 ): string | null {
   if (plan.status !== 'active') return `plan status "${plan.status}" is not selectable`;
+  if (!isBillingCombinationValid(plan)) {
+    return `billing combination "${plan.billingModel} + ${plan.billingInterval}" is invalid`;
+  }
   if (!hasUsablePrice(plan)) return 'plan has no usable price';
   return null;
 }
@@ -62,7 +70,7 @@ export function planBlockedReason(
  */
 export function canStartCheckout(
   product: Pick<Product, 'status'>,
-  plans: Pick<Plan, 'status' | 'priceAmountMinor' | 'currency'>[],
+  plans: Pick<Plan, 'status' | 'billingModel' | 'billingInterval' | 'priceAmountMinor' | 'currency'>[],
 ): boolean {
   return canPurchaseProduct(product) && plans.some(canSelectPlan);
 }
@@ -132,7 +140,7 @@ export function downloadBlockedReason(input: {
  */
 export function getProductAvailability(
   product: Pick<Product, 'status' | 'commercialDownloadEnabled'>,
-  plans: Pick<Plan, 'status' | 'priceAmountMinor' | 'currency'>[],
+  plans: Pick<Plan, 'status' | 'billingModel' | 'billingInterval' | 'priceAmountMinor' | 'currency'>[],
 ): PurchaseEligibility {
   const checkout = canStartCheckout(product, plans);
   const download = canGrantDownload({
@@ -159,7 +167,7 @@ export function getProductAvailability(
 }
 
 function planBlockedReasonIfAny(
-  plans: Pick<Plan, 'status' | 'priceAmountMinor' | 'currency'>[],
+  plans: Pick<Plan, 'status' | 'billingModel' | 'billingInterval' | 'priceAmountMinor' | 'currency'>[],
 ): string | null {
   if (plans.length === 0) return 'no plan exists';
   if (!plans.some(canSelectPlan)) return 'no selectable plan';

@@ -44,6 +44,27 @@ export function isPlanStatus(value: unknown): value is PlanStatus {
   return typeof value === 'string' && (PLAN_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * A billing model/interval combination is valid only when it is coherent:
+ * rental plans recur on a calendar interval (monthly, quarterly, annual),
+ * purchase plans are a one-time transaction (one_time).
+ */
+export function isBillingCombinationValid(
+  plan: Pick<Plan, 'billingModel' | 'billingInterval'>,
+): boolean {
+  if (plan.billingModel === 'rental') {
+    return (
+      plan.billingInterval === 'monthly' ||
+      plan.billingInterval === 'quarterly' ||
+      plan.billingInterval === 'annual'
+    );
+  }
+  if (plan.billingModel === 'purchase') {
+    return plan.billingInterval === 'one_time';
+  }
+  return false;
+}
+
 /** True only when a plan is selectable: active AND carries a real price. */
 export function hasUsablePrice(plan: Pick<Plan, 'priceAmountMinor' | 'currency'>): boolean {
   return (

@@ -25,7 +25,7 @@ import type {
 
 export class MemoryProductRepository implements ProductRepository {
   constructor(private readonly products: Map<string, Product>) {}
-  findById(productId: string): Product | undefined {
+  findByProductId(productId: string): Product | undefined {
     return this.products.get(productId);
   }
   list(): Product[] {

@@ -33,9 +33,32 @@ React components.
    attached to it (`productId`, e.g. `first-triangle-ustec-m30`). They are
    different identities; the mapping lives in the public catalog and the
    migration seed.
+
+### Identity contract (id / product_id / strategy_id)
+
+Three identifiers are deliberately distinct and never interchangeable:
+
+- **`id`** — internal database identifier (`uuid`, `gen_random_uuid()`).
+  Used only as the primary key and as `product_ref` foreign keys in
+  `plans`, `orders`, `licenses` and `entitlements`. Never exposed as a
+  product identity.
+- **`productId` / `product_id`** — stable, public, commercial identifier
+  (text, e.g. `first-triangle-ustec-m30`). `UNIQUE` in SQL; never a foreign
+  key.
+- **`strategyId` / `strategy_id`** — public strategy identifier (e.g.
+  `first-triangle-adaptive`). `UNIQUE` in SQL.
+
+The old ambiguous naming (`product_id uuid` + `product_key text`) is
+removed. The repository layer looks products up by the stable identifier:
+`ProductRepository.findByProductId(productId: string)` — there is no
+`findById` whose meaning could be confused with the internal uuid.
 2. **Product ≠ Plan.** A product exists regardless of any commercial
    modality. A plan (rental/purchase × monthly/quarterly/annual/one-time) is
    a pricing modality *of* a product. Plans start `draft` with null prices.
+   Billing combinations are constrained: `rental` only admits
+   `monthly`/`quarterly`/`annual`; `purchase` only admits `one_time`
+   (`isBillingCombinationValid` in `plan.ts`, enforced by
+   `plans_billing_combination` CHECK in SQL and required by `canSelectPlan`).
 3. **Order ≠ Payment ≠ License.** An order is purchase intent; a payment is
    the provider transaction; a license is the granted right. `paid` on an
    order can only be set server-side. A license cannot be `active` without a
@@ -48,7 +71,8 @@ React components.
 ## 3. State machines (implemented in `src/domain/commercial/rules.ts`)
 
 - `canPurchaseProduct(product)` — only `available`.
-- `canSelectPlan(plan)` — only `active` **and** carrying a real price
+- `canSelectPlan(plan)` — only `active` **and** a valid billing
+  model/interval combination **and** carrying a real price
   (`priceAmountMinor > 0`, `currency` set). `draft`/`inactive` are never
   selectable; null price is never zero.
 - `canStartCheckout(product, plans)` — purchasable product **and** a

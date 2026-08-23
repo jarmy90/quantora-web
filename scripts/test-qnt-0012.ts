@@ -17,6 +17,7 @@ import {
   getPublicFeatureFlags,
   resolveAppEnv,
 } from '../src/config.ts';
+import { isBillingCombinationValid } from '../src/domain/commercial/plan.ts';
 import {
   canActivateLicense,
   canGrantDownload,
@@ -97,16 +98,41 @@ test('coming_soon / paused / deprecated / not_listed products cannot be purchase
 });
 
 test('draft and inactive plans cannot be selected; null price is never usable', () => {
-  const draft = { status: 'draft' as const, priceAmountMinor: null as number | null, currency: null as string | null };
+  const draft = { status: 'draft' as const, billingModel: 'rental' as const, billingInterval: 'monthly' as const, priceAmountMinor: null as number | null, currency: null as string | null };
   const inactive = { ...draft, status: 'inactive' as const };
   const activeNoPrice = { ...draft, status: 'active' as const };
-  const activeZero = { status: 'active' as const, priceAmountMinor: 0, currency: 'EUR' };
-  const activePriced = { status: 'active' as const, priceAmountMinor: 4900, currency: 'EUR' };
+  const activeZero = { status: 'active' as const, billingModel: 'rental' as const, billingInterval: 'monthly' as const, priceAmountMinor: 0, currency: 'EUR' };
+  const activePriced = { status: 'active' as const, billingModel: 'rental' as const, billingInterval: 'monthly' as const, priceAmountMinor: 4900, currency: 'EUR' };
   assert(!canSelectPlan(draft), 'draft must not be selectable');
   assert(!canSelectPlan(inactive), 'inactive must not be selectable');
   assert(!canSelectPlan(activeNoPrice), 'active without price must not be selectable');
   assert(!canSelectPlan(activeZero), 'zero price must not be usable');
   assert(canSelectPlan(activePriced), 'active priced plan must be selectable');
+});
+
+test('billing model/interval combinations are validated (rental ≠ one_time, purchase ≠ recurring)', () => {
+  const rental = (interval: 'monthly' | 'quarterly' | 'annual' | 'one_time') => ({ billingModel: 'rental' as const, billingInterval: interval });
+  const purchase = (interval: 'monthly' | 'quarterly' | 'annual' | 'one_time') => ({ billingModel: 'purchase' as const, billingInterval: interval });
+  assert(isBillingCombinationValid(rental('monthly')), 'rental + monthly must be valid');
+  assert(isBillingCombinationValid(rental('quarterly')), 'rental + quarterly must be valid');
+  assert(isBillingCombinationValid(rental('annual')), 'rental + annual must be valid');
+  assert(!isBillingCombinationValid(rental('one_time')), 'rental + one_time must be invalid');
+  assert(isBillingCombinationValid(purchase('one_time')), 'purchase + one_time must be valid');
+  assert(!isBillingCombinationValid(purchase('monthly')), 'purchase + monthly must be invalid');
+  assert(!isBillingCombinationValid(purchase('quarterly')), 'purchase + quarterly must be invalid');
+  assert(!isBillingCombinationValid(purchase('annual')), 'purchase + annual must be invalid');
+});
+
+test('canSelectPlan rejects invalid billing combinations even when active and priced', () => {
+  const activePriced = (billingModel: 'rental' | 'purchase', billingInterval: 'monthly' | 'quarterly' | 'annual' | 'one_time') => ({
+    status: 'active' as const, billingModel, billingInterval, priceAmountMinor: 4900, currency: 'EUR',
+  });
+  assert(canSelectPlan(activePriced('rental', 'monthly')), 'rental monthly must be selectable');
+  assert(canSelectPlan(activePriced('purchase', 'one_time')), 'purchase one_time must be selectable');
+  assert(!canSelectPlan(activePriced('rental', 'one_time')), 'rental one_time must be rejected');
+  assert(!canSelectPlan(activePriced('purchase', 'monthly')), 'purchase monthly must be rejected');
+  assert(!canSelectPlan(activePriced('purchase', 'quarterly')), 'purchase quarterly must be rejected');
+  assert(!canSelectPlan(activePriced('purchase', 'annual')), 'purchase annual must be rejected');
 });
 
 test('checkout cannot start with current data (no available product, no plans)', () => {
@@ -213,6 +239,61 @@ test('migration creates the seven tables and seeds only the four products', () =
     .filter((line) => !line.trim().startsWith('--'))
     .join('\n');
   assert(!/\bpassword\b/.test(sqlWithoutComments), 'no password columns');
+});
+
+test('products table: id uuid PK, product_id TEXT UNIQUE, no product_key', () => {
+  const sql = read('db/migrations/0001_commercial_foundation.sql');
+  const table = sql.slice(sql.indexOf('CREATE TABLE IF NOT EXISTS products'), sql.indexOf('CREATE TABLE IF NOT EXISTS plans'));
+  assert(/id\s+uuid\s+PRIMARY KEY\s+DEFAULT\s+gen_random_uuid\(\)/i.test(table), 'products must use id uuid primary key');
+  assert(/product_id\s+text\s+NOT\s+NULL\s+UNIQUE/i.test(table), 'product_id must be text NOT NULL UNIQUE');
+  assert(!/product_key/i.test(table), 'product_key must not exist');
+  assert(/strategy_id\s+text\s+NOT\s+NULL\s+UNIQUE/i.test(table), 'strategy_id must be text NOT NULL UNIQUE');
+});
+
+test('seed uses the stable product_id and all four known ids', () => {
+  const sql = read('db/migrations/0001_commercial_foundation.sql');
+  assert(/insert\s+into\s+products\s*\(\s*product_id\s*,/i.test(sql), 'seed must insert product_id');
+  assert(!/product_key/i.test(sql), 'seed must not reference product_key');
+  for (const id of ['first-triangle-ustec-m30', 'first-triangle-gold-m15', 'stochextreme-ustec', 'tm-bandas-s3-keeper']) {
+    assert(sql.includes(id), `seed must include ${id}`);
+  }
+});
+
+test('commercial foreign keys use product_ref referencing products(id)', () => {
+  const sql = read('db/migrations/0001_commercial_foundation.sql');
+  for (const table of ['plans', 'orders', 'licenses', 'entitlements']) {
+    const start = sql.indexOf(`CREATE TABLE IF NOT EXISTS ${table}`);
+    const end = sql.indexOf('CREATE TABLE IF NOT EXISTS', start + 1);
+    const section = sql.slice(start, end === -1 ? sql.length : end);
+    assert(/product_ref\s+uuid\s+NOT\s+NULL\s+REFERENCES\s+products\s*\(\s*id\s*\)/i.test(section), `${table} must use product_ref uuid references products(id)`);
+    assert(!/product_id\s+uuid/i.test(section), `${table} must not use product_id as uuid FK`);
+  }
+});
+
+test('migration enforces the billing model/interval CHECK', () => {
+  const sql = read('db/migrations/0001_commercial_foundation.sql');
+  const plansSection = sql.slice(sql.indexOf('CREATE TABLE IF NOT EXISTS plans'), sql.indexOf('CREATE TABLE IF NOT EXISTS customers'));
+  assert(/plans_billing_combination/i.test(plansSection), 'plans table must define plans_billing_combination CHECK');
+  assert(/billing_model\s*=\s*'rental'[^)]*monthly[^)]*quarterly[^)]*annual/i.test(plansSection), 'rental must admit monthly/quarterly/annual');
+  assert(/billing_model\s*=\s*'purchase'[^)]*one_time/i.test(plansSection), 'purchase must admit only one_time');
+});
+
+test('ProductRepository looks up by stable findByProductId, not ambiguous findById', () => {
+  const repo = read('src/domain/commercial/repositories.ts');
+  assert(/findByProductId\s*\(\s*productId\s*:\s*string\s*\)/.test(repo), 'ProductRepository must expose findByProductId(productId: string)');
+  const productInterface = repo.slice(repo.indexOf('export interface ProductRepository'), repo.indexOf('export interface PlanRepository'));
+  assert(!/findById/.test(productInterface), 'ProductRepository must not expose findById');
+  const memory = read('src/domain/commercial/memory-repositories.ts');
+  assert(/findByProductId\s*\(\s*productId\s*:\s*string\s*\)/.test(memory), 'memory repo must implement findByProductId');
+  assert(!/findById\(\s*productId/.test(memory), 'memory repo must not keep an ambiguous findById');
+});
+
+test('Customer email and displayName are nullable until identity is chosen', () => {
+  const customer = read('src/domain/commercial/customer.ts');
+  assert(/email\s*:\s*string\s*\|\s*null/.test(customer), 'email must be string | null');
+  assert(/displayName\s*:\s*string\s*\|\s*null/.test(customer), 'displayName must be string | null');
+  const sql = read('db/migrations/0001_commercial_foundation.sql');
+  assert(/email\s+text\s+unique/i.test(sql), 'SQL email must remain nullable text unique');
 });
 
 // ---------------------------------------------------------------------------

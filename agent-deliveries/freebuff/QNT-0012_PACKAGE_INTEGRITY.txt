@@ -1,6 +1,5 @@
 QNT-0012 · PACKAGE INTEGRITY
 ============================
-PAQUETE: QNT-0012_Cambios.zip.txt
-RUTA: C:\Quantora\quantora-web\quantora-web\agent-deliveries\freebuff\QNT-0012_Cambios.zip.txt
-TAMAÑO (bytes): 539163
-SHA-256: c81352f1c0bf35e4f51e9532104b3cdf35039aaf1c53fbe2d55dd1b6511667dd
+Archivo: QNT-0012_Cambios.zip.txt
+Tamaño: 562446 bytes
+SHA-256: 58a0fe3a658447db14ac76b4e063049439f72d7cbf36aa9c692b245536ce3196

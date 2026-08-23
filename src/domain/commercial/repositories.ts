@@ -16,7 +16,8 @@ import type { Plan } from './plan';
 import type { Product } from './product';
 
 export interface ProductRepository {
-  findById(productId: string): Product | undefined;
+  /** Look up a product by its stable commercial productId (never the internal uuid). */
+  findByProductId(productId: string): Product | undefined;
   list(): Product[];
 }
 

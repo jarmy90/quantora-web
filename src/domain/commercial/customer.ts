@@ -4,6 +4,9 @@
  * No real customer records are ever created by this phase. No credentials,
  * passwords or hashing decisions live here — identity providers and hashing
  * are explicitly out of scope and will be decided in QNT-0013.
+ *
+ * email and displayName are nullable until QNT-0013 chooses the identity
+ * mechanism; only that phase decides which fields become mandatory.
  */
 
 export type CustomerRole = 'customer' | 'creator' | 'admin';
@@ -20,9 +23,9 @@ export const CUSTOMER_STATUSES: readonly CustomerStatus[] = [
 
 export type Customer = {
   customerId: string;
-  /** Personal data — never collected in this phase. */
-  email: string;
-  displayName: string;
+  /** Personal data — never collected in this phase; nullable until auth lands. */
+  email: string | null;
+  displayName: string | null;
   role: CustomerRole;
   status: CustomerStatus;
   createdAt: string;

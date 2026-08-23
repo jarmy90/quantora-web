@@ -12,7 +12,12 @@ the previous one; nothing is merged or deployed automatically.
 
 - **Prerequisites:** QNT-0011 (real strategies, product states) merged.
 - **Data involved:** none persisted; contracts, safe catalog, env contract,
-  preparatory migration (not applied).
+  preparatory migration (not applied). Identity contract: `id` (internal
+  uuid) vs `product_id` (stable text, UNIQUE) vs `strategy_id`; internal FKs
+  use `product_ref`. `customer.email`/`display_name` are nullable until
+  QNT-0013 decides identity. Billing rule: `rental` →
+  monthly/quarterly/annual; `purchase` → one_time (validated in TS,
+  `canSelectPlan` and SQL CHECK).
 - **Security boundary:** feature flags default false; no write endpoints;
   secrets never leave the server.
 - **Definition of done:** domain contracts, state rules, safe catalog,
