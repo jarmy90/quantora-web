@@ -5,6 +5,13 @@ import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  optimizeDeps: {
+    // The TanStack Start plugin injects virtual modules (#tanstack-router-entry,
+    // #tanstack-start-entry, tanstack-start-manifest:v) that esbuild cannot
+    // resolve during dependency pre-bundling — let Vite serve these modules
+    // directly instead of optimizing them.
+    exclude: ["@tanstack/start-server-core", "@tanstack/react-start-server"],
+  },
   server: {
     port: 3000,
     host: true,

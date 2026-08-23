@@ -1,0 +1,32 @@
+ARCHIVOS AÑADIDOS (14)
+----------------------
+db/migrations/0002_customers_auth_user.sql
+docs/AUTHENTICATION.md
+scripts/test-qnt-0013.ts
+src/components/AuthCard.tsx
+src/components/AuthForm.tsx
+src/components/AuthNotConfigured.tsx
+src/domain/auth/ (contracts.ts, validation.ts, service.ts, server.ts,
+  fake.ts, ssr-cookies.ts)
+src/lib/supabase/env.ts
+src/routes/login.tsx
+src/routes/register.tsx
+src/routes/forgot-password.tsx
+src/routes/reset-password.tsx
+src/routes/auth.callback.tsx
+src/routes/account.tsx
+agent-deliveries/freebuff/capturas-qnt-0013/ (7 PNG)
+
+ARCHIVOS MODIFICADOS (10)
+-------------------------
+.env.example (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_SERVICE_ROLE_KEY)
+.github/workflows/quantora-ci.yml (paso QNT-0013 authentication tests)
+bun.lock (@supabase/supabase-js + @supabase/ssr)
+docs/COMMERCIAL_ROADMAP.md (QNT-0013 implemented)
+package.json (test:qnt-0013 + dependencias Supabase)
+src/components/Nav.tsx (enlace Sign in en header y menú móvil)
+src/i18n/index.ts (claves auth/login/register/forgot/reset/account/callback)
+src/routes/strategies.$id.tsx (CTA 'Sign in to save your interest')
+src/styles/app.css (estilos auth: cards, formularios, badges, account)
+vite.config.ts (optimizeDeps.exclude para dev server)

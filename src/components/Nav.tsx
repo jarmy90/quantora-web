@@ -17,6 +17,7 @@ export function Nav({ extra }: { extra?: ReactNode }) {
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
+          <Link to="/login">{t('nav.signIn')}</Link>
           {extra}
         </div>
         <div className="nav-actions">
@@ -121,6 +122,7 @@ function MobileMenu({ extra }: { extra?: ReactNode }) {
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
+          <Link to="/login">{t('nav.signIn')}</Link>
           {extra}
         </div>
       )}
