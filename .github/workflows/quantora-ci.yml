@@ -78,3 +78,6 @@ jobs:
 
       - name: QNT-0012 commercial foundation tests
         run: bun run scripts/test-qnt-0012.ts
+
+      - name: QNT-0013 authentication tests
+        run: bun run scripts/test-qnt-0013.ts

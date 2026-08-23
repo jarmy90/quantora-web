@@ -1,0 +1,89 @@
+QNT-0013 · AUTENTICACIÓN Y EXPERIENCIA DE USUARIO (Supabase Auth)
+=============================================================================
+Rama: feat/QNT-0013-supabase-auth
+Base: main (dd4dc85 · incluye QNT-0012C fusionado vía PR #11)
+
+OBJETIVO ALCANZADO
+------------------
+Base real de autenticación con Supabase Auth (email + contraseña) y sesiones
+SSR mediante cookie HttpOnly. El usuario puede registrarse, confirmar correo,
+iniciar/cerrar sesión, solicitar recuperación de contraseña y establecer una
+nueva. Existe zona protegida /account con estados vacíos honestos. Sin
+pagos, licencias, precios ni descargas activadas.
+
+ARQUITECTURA
+------------
+- Proveedor: Supabase Auth (email + password). PKCE para el callback.
+- Sesión: cookie HttpOnly `quantora-auth-token` (SameSite=Lax, Secure en
+  prod) con el access token; verificación server-side vía getUser(token).
+  Nunca localStorage. Service role NUNCA usado.
+- Separación: la app depende de `AuthService` (src/domain/auth/contracts.ts),
+  no del SDK. Implementación única: `SupabaseAuthService` (service.ts).
+  `fake.ts` es TEST-ONLY.
+- Estados de entorno: configured / not_configured / invalid_configuration.
+  Sin claves => AUTH_NOT_CONFIGURED (la web funciona y muestra pantalla de
+  configuración; el resto del sitio no se bloquea).
+
+RUTAS
+-----
+/login · /register · /forgot-password · /reset-password · /auth/callback ·
+/account (protegida; sin sesión -> redirect a /login con returnTo seguro).
+CTA en fichas: "Sign in to save your interest" con returnTo interno validado
+(isSafeReturnTo: solo rutas internas, sin open redirects).
+
+RELACIÓN AUTH -> CUSTOMER
+-------------------------
+db/migrations/0002_customers_auth_user.sql:
+customers.auth_user_id uuid UNIQUE REFERENCES auth.users(id) ON DELETE SET NULL
++ índice + RLS preparatorio (comentado, mínimamente permisivo). customer_id
+sigue siendo el identificador comercial; auth_user_id es la identidad Supabase.
+
+ENTORNO
+-------
+.env.example: VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY (públicas) y
+SUPABASE_SERVICE_ROLE_KEY (server-only, reservada, sin usar). .env/.env.local
+ignorados.
+
+FIX DEV SERVER
+--------------
+vite.config.ts: optimizeDeps.exclude de @tanstack/start-server-core y
+@tanstack/react-start-server — el optimizador esbuild no puede resolver los
+módulos virtuales (#tanstack-router-entry, tanstack-start-manifest:v) que
+inyecta el plugin TanStack Start. Sin este fix `vite dev` se rompía tras la
+instalación de dependencias (lockfile re-optimizado). El build de producción
+ya funcionaba.
+
+TESTS
+-----
+scripts/test-qnt-0013.ts (20 tests, TEST-ONLY fake, sin Supabase real):
+validación email/contraseña/displayName; flujos signUp/signIn/signOut;
+reset sin filtrar existencia; updatePassword; not_configured; returnTo seguro
+(externos rechazados); estados de entorno sin secretos; .env.example sin
+valores; service role no leído en cliente; migración 0002 (auth_user_id uuid
+UNIQUE, no destructiva); customer email/displayName nullable; 4 productos
+siguen coming_soon; sin pedidos/pagos/licencias; rutas auth existen y
+/account está protegida; manifests intactos. Añadido al CI como "QNT-0013
+authentication tests" y a package.json (test:qnt-0013).
+
+DOCUMENTACIÓN
+-------------
+docs/AUTHENTICATION.md (arquitectura, variables, configuración pendiente de
+Supabase, callbacks, confirmación de correo, reset, relación auth/customer,
+tests, pasos manuales futuros, qué no está implementado).
+docs/COMMERCIAL_ROADMAP.md: QNT-0013 marcado como implemented (code) —
+proyecto live pendiente de configuración del owner.
+
+PREVIEW LOCAL
+-------------
+vite dev con el fix de optimizeDeps. HTTP 200 en /, /strategies, 4 fichas,
+/dashboard, /login, /register, /forgot-password, /reset-password,
+/auth/callback. /account -> 307 a /login (protegida). Consola limpia tras
+corregir el anidamiento <a> en AuthCard (hydration error). Estado
+AUTH_NOT_CONFIGURED visible y comprensible. Capturas:
+login/register/forgot desktop 1440 + móvil 390 + account-redirect.
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+Sin cambios en estrategias, métricas, scoring, manifests ni datos.
+Sin pagos, precios, licencias, descargas, OAuth, MFA ni despliegue.
+Sin merge. Sin deploy.

@@ -265,6 +265,13 @@ function RealDetail({ s }: { s: PublicStrategy }) {
               {t('detail.notifyMe')}
             </button>
             <a className="btn" href="#how-it-works">{t('detail.viewMethodology')}</a>
+            <Link
+              className="btn"
+              to="/login"
+              search={{ returnTo: `/strategies/${s.id}` } as never}
+            >
+              {t('detail.signInInterest')}
+            </Link>
           </div>
           <NotifyDialog open={notifyOpen} onClose={() => setNotifyOpen(false)} />
         </section>

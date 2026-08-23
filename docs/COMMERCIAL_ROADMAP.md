@@ -28,13 +28,20 @@ the previous one; nothing is merged or deployed automatically.
 
 ## QNT-0013 · Authentication and session
 
+**Status: implemented (code) — live project configuration pending.**
+
 - **Prerequisites:** QNT-0012 contracts; `.env.example`; customers table.
-- **Data involved:** customers, session state.
-- **Security boundary:** decide the identity provider and session mechanism;
-  server-side only; never store passwords in plain text; decide hashing or
-  delegated identity.
-- **Definition of done:** registration, login, logout, protected routes for
-  customer-only pages, session persistence, email verification (if chosen).
+- **Data involved:** customers, session state (Supabase Auth, HttpOnly cookie).
+- **Security boundary:** Supabase Auth (email + password), server-side session
+  verification via `getUser(token)`, HttpOnly/SameSite/Lax cookies, safe
+  `returnTo` (internal paths only), service-role key never used.
+- **Definition of done (code):** registration, login, logout, password reset
+  request + new-password flow, email-verification callback, protected
+  `/account`, auth↔customer relation migration (`0002`), `AUTH_NOT_CONFIGURED`
+  state, tests + CI step. See `docs/AUTHENTICATION.md`.
+- **Pending:** owner creates the Supabase project, sets `VITE_SUPABASE_URL` /
+  `VITE_SUPABASE_PUBLISHABLE_KEY`, configures redirect URLs, applies
+  migrations 0001+0002 with authorization.
 - **Remains disabled:** purchases, payments, downloads, demo monitoring.
 
 ## QNT-0014 · Demo monitoring pilot

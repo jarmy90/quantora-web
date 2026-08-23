@@ -16,6 +16,7 @@ export const enUS = {
   'nav.dashboard': 'Dashboard',
   'nav.mockEnvironment': 'MOCK ENVIRONMENT',
   'nav.backCatalog': '← Catalog',
+  'nav.signIn': 'Sign in',
   'nav.openMenu': 'Open navigation menu',
   'nav.closeMenu': 'Close navigation menu',
 
@@ -170,6 +171,7 @@ export const enUS = {
   'detail.notifyDialogBody':
     'Notifications are not active yet. When this product opens, availability will be announced here and through the catalog. Nothing was saved.',
   'detail.notifyClose': 'Close',
+  'detail.signInInterest': 'Sign in to save your interest',
   'detail.viewMethodology': 'View methodology',
   'detail.monitorEyebrow': 'Demo monitoring',
   'detail.monitorNotConnected': 'Not connected yet',
@@ -244,6 +246,75 @@ export const enUS = {
   'seo.dashboardDescription':
     'Illustrative customer preview. No products, licenses or payments are active.',
   'seo.strategyDescription': 'Historical backtest, performance, risk and limitations for a published Quantora strategy.',
+
+  'auth.eyebrow': 'Quantora account',
+  'auth.legalNote': 'By continuing you agree to our',
+  'auth.privacy': 'Privacy Policy',
+  'auth.terms': 'Terms of Use',
+  'auth.or': 'or',
+  'auth.loading': 'Please wait…',
+  'auth.notConfiguredTitle': 'Authentication is not configured yet',
+  'auth.notConfiguredBody':
+    'Quantora runs without a live auth project in this environment. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to enable registration and sign-in.',
+  'auth.backHome': '← Back to home',
+
+  'login.title': 'Welcome back',
+  'login.body': 'Sign in to your Quantora space to follow strategies and manage access — calmly, with clarity.',
+  'login.emailLabel': 'Email',
+  'login.passwordLabel': 'Password',
+  'login.submit': 'Sign in',
+  'login.registerLink': 'New here? Create an account',
+  'login.forgotLink': 'Forgot password?',
+  'login.success': 'Signed in. Taking you to your account…',
+
+  'register.title': 'Create your account',
+  'register.body': 'Your space to discover, follow and manage strategies with clarity. No commitments yet.',
+  'register.displayNameLabel': 'Display name (optional)',
+  'register.emailLabel': 'Email',
+  'register.passwordLabel': 'Password',
+  'register.passwordHint': 'At least 8 characters.',
+  'register.submit': 'Create account',
+  'register.loginLink': 'Already have an account? Sign in',
+  'register.checkYourEmail': 'Check your inbox',
+  'register.checkYourEmailBody':
+    'We sent a confirmation link to your email. Once you confirm, you can sign in.',
+  'register.success': 'Account created. Check your email to confirm.',
+
+  'forgot.title': 'Reset your password',
+  'forgot.body': 'Enter your email and we will send you a secure link to choose a new password.',
+  'forgot.emailLabel': 'Email',
+  'forgot.submit': 'Send reset link',
+  'forgot.backToLogin': '← Back to sign in',
+  'forgot.sentTitle': 'Check your inbox',
+  'forgot.sentBody': 'If an account exists for that email, a reset link is on its way.',
+  'forgot.error': 'Something went wrong. Please try again.',
+
+  'reset.title': 'Choose a new password',
+  'reset.body': 'Your reset link is valid. Pick a strong password to continue.',
+  'reset.passwordLabel': 'New password',
+  'reset.passwordHint': 'At least 8 characters.',
+  'reset.submit': 'Update password',
+  'reset.success': 'Password updated. You can now sign in.',
+  'reset.backToLogin': '← Back to sign in',
+
+  'account.title': 'Your account',
+  'account.welcome': 'Welcome back',
+  'account.emailVerified': 'Verified email',
+  'account.emailUnverified': 'Email not verified yet',
+  'account.signOut': 'Sign out',
+  'account.eyebrow': 'Account',
+  'account.strategies': 'Your strategies',
+  'account.strategiesEmpty': 'You have no active strategies yet.',
+  'account.licenses': 'Licenses',
+  'account.licensesEmpty': 'No licenses available.',
+  'account.billing': 'Billing',
+  'account.billingEmpty': 'Billing will become available when products are enabled.',
+  'account.accessNote': 'Products, licenses and payments are not active yet.',
+  'account.returned': 'Returning to where you were…',
+  'account.signInCta': 'Sign in to access your account',
+
+  'callback.invalid': 'Invalid or expired confirmation link. Please try again.',
+  'callback.processing': 'Confirming your account…',
 } as const satisfies Record<string, MessageValue>;
 export const messages: Record<Locale, Record<MessageKey, string>> = { 'en-US': enUS };
 export function t(key: MessageKey): string {

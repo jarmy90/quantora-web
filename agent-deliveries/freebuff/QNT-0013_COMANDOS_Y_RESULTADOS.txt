@@ -1,0 +1,51 @@
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0013)
+=============================================
+
+[1] PREPARACIÓN
+    git rev-parse --show-toplevel -> C:/Quantora/quantora-web/quantora-web
+    git status --short            -> 0 líneas (limpio)
+    git fetch origin && git checkout main && git pull --ff-only origin main
+        -> main dd4dc85 (PR #11/QNT-0012C fusionado)
+    git checkout -b feat/QNT-0013-supabase-auth -> OK
+
+[2] DEPENDENCIAS (bun, nunca npm)
+    bun add @supabase/supabase-js @supabase/ssr
+        -> supabase-js 2.112.3, ssr 0.12.4; bun.lock solo añade estos paquetes
+    (sin package-lock.json / yarn.lock / pnpm-lock.yaml)
+
+[3] IMPLEMENTACIÓN
+    - src/domain/auth/: contracts, validation, service (Supabase + cookies),
+      server (TanStack server fns con validator), fake TEST-ONLY.
+    - src/lib/supabase/env.ts: estados configured/not_configured/invalid.
+    - Rutas auth + /account protegida + callback PKCE.
+    - db/migrations/0002: auth_user_id uuid UNIQUE REFERENCES auth.users(id).
+    - Nav con Sign in; CTA de interés en fichas con returnTo seguro.
+    - vite.config.ts: optimizeDeps.exclude (fix dev server tras instalar).
+
+[4] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp)
+    bun install --frozen-lockfile    -> Checked 150 installs (no changes)
+    bun run scripts/test-validation.ts      -> 58 passed / 0 failed
+    bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
+    bun run scripts/test-qnt-0011.ts        -> 12 passed / 0 failed
+    bun run scripts/test-qnt-0012.ts        -> 26 passed / 0 failed
+    bun run scripts/test-qnt-0013.ts        -> 20 passed / 0 failed
+    bun run strategies:validate             -> 4 accepted | 0 errores
+    bun run build                           -> client + SSR OK
+    bun x tsc --noEmit                      -> exit 0 (0 errores)
+    git diff --check                        -> OK
+    bash .github/scripts/check-private-files.sh -> OK
+    public-strategies/catalog.json          -> sin cambios (métricas intactas)
+
+[5] PREVIEW LOCAL (vite dev, puerto 3000)
+    HTTP 200: /, /strategies, 4 fichas, /dashboard, /login, /register,
+    /forgot-password, /reset-password, /auth/callback
+    /account -> 307 a /login (protegida, sin sesión)
+    Consola: limpia (corregido nested <a> en AuthCard: hydration error)
+    Estado AUTH_NOT_CONFIGURED visible en login/register/forgot/reset
+
+[6] CAPTURAS (Chrome headless)
+    agent-deliveries/freebuff/capturas-qnt-0013/: login desktop 1440 + móvil
+    390, register desktop + móvil, forgot desktop + móvil, account-redirect.
+
+[7] GIT
+    Commit local + push + PR contra main. Sin merge · Sin deploy.
