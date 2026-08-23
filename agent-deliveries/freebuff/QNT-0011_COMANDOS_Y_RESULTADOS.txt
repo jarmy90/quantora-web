@@ -1,0 +1,45 @@
+COMANDOS EJECUTADOS Y RESULTADOS (QNT-0011)
+=================================================
+
+[1] PREPARACIÓN
+    git rev-parse --show-toplevel -> C:/quantora/quantora-web/quantora-web
+    git status --short            -> 0 líneas (limpio)
+    git fetch origin && git checkout main && git pull --ff-only origin main
+        -> main 82e921c (PR #9 fusionado, Quantora CI presente)
+    git checkout -b feat/QNT-0011-trust-surface-next-step -> OK
+
+[2] CONTRATO PÚBLICO (productStatus)
+    Edits: scripts/intake/manifest.ts (tipos + validación),
+           scripts/intake/pipeline.ts (CatalogEntry + toPublicStrategy),
+           src/domain/publicStrategy.ts (ProductStatus + campos),
+           4 ingest builders y 4 manifests (productId/status/download).
+    bun run strategies:build -> catálogo con 4 estrategias y los nuevos
+        campos; [build] blocking errors: 0 | warnings: 0
+
+[3] VALIDACIÓN LOCAL (bun 1.4.0 en /tmp, caché en /tmp)
+    bun install --frozen-lockfile    -> Checked 139 installs (no changes)
+    bun run scripts/test-validation.ts      -> 58 passed / 0 failed
+    bun run scripts/test-strategy-intake.ts -> 90 passed / 0 failed
+    bun run scripts/test-qnt-0011.ts        -> 12 passed / 0 failed
+    bun run strategies:validate             -> 4 accepted | 0 errors
+    bun run strategies:build + report       -> 0 errores bloqueantes
+    bun run build                           -> client + SSR OK
+    bun x tsc --noEmit                      -> exit 0 (0 errores)
+    git diff --check                        -> OK
+    bash .github/scripts/check-private-files.sh -> OK
+
+[4] PREVIEW LOCAL (vite dev, puerto 3000)
+    HTTP 200 en /, /strategies, /strategies/{4 fichas}, /dashboard
+    Consola del navegador: limpia (solo vite/React DevTools)
+    Menú móvil: abrir (aria-expanded true, 5 enlaces), Escape, clic fuera
+    Notify dialog: aria-modal, "Nothing was saved", cierre con Escape
+    Dashboard: 4 filas reales (coming soon / not connected)
+
+[5] CAPTURAS (Chrome headless, desktop 1440 x 900 y móvil 390 x 844)
+    15 PNG en agent-deliveries/freebuff/capturas-qnt-0011/:
+    home/catálogo/dashboard (desktop+móvil), 4 fichas (desktop+móvil),
+    menú móvil abierto (390, vía CDP).
+
+[6] GIT
+    Commit único local (tras validaciones) + push + PR contra main.
+    Sin merge · Sin deploy · Sin rama eliminada.
