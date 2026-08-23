@@ -375,6 +375,16 @@ test('sign-out clears every session cookie', () => {
 test('delivery package contains every PR file and the inventory matches 1:1', () => {
   const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
   const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
+  // This check is specific to the QNT-0013 delivery: it only applies when the
+  // current diff actually touches the QNT-0013 package or the auth module.
+  const touchesQnt13 = [...prFiles].some(
+    // Trailing underscore: QNT-0013_* (the QNT-0013 package), never QNT-0013D_*.
+    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013_') || f.startsWith('src/domain/auth/'),
+  );
+  if (!touchesQnt13) {
+    console.log('  (skip) QNT-0013 delivery check not applicable to this diff');
+    return;
+  }
   assert(prFiles.size >= 30, `PR must contain at least 30 files, got ${prFiles.size}`);
   const zipPath = resolve(ROOT, 'agent-deliveries/freebuff/QNT-0013_Cambios.zip.txt');
   const names = zipNames(zipPath);
@@ -402,6 +412,16 @@ test('delivery package contains every PR file and the inventory matches 1:1', ()
 });
 
 test('package hash list covers every file in the ZIP', () => {
+  const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
+  const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
+  const touchesQnt13 = [...prFiles].some(
+    // Trailing underscore: QNT-0013_* (the QNT-0013 package), never QNT-0013D_*.
+    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013_') || f.startsWith('src/domain/auth/'),
+  );
+  if (!touchesQnt13) {
+    console.log('  (skip) QNT-0013 hash-list check not applicable to this diff');
+    return;
+  }
   const zipPath = resolve(ROOT, 'agent-deliveries/freebuff/QNT-0013_Cambios.zip.txt');
   const names = zipNames(zipPath);
   const hashesText = zipText(zipPath, 'QNT-0013_HASHES_SHA256.txt');

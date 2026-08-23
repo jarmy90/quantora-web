@@ -1,0 +1,11 @@
+ARCHIVOS AÑADIDOS (3)
+---------------------
+db/migrations/live/001_live_setup.sql
+docs/SUPABASE_LIVE_SETUP.md
+scripts/test-qnt-0013d.ts
+
+ARCHIVOS MODIFICADOS (3)
+-------------------------
+.github/workflows/quantora-ci.yml (paso QNT-0013D live Supabase setup tests)
+package.json (test:qnt-0013d)
+scripts/test-qnt-0013.ts (scoping del test de entrega QNT-0013C)

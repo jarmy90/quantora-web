@@ -1,0 +1,8 @@
+QNT-0013D · SHA-256 de archivos incluidos en QNT-0013D_Cambios.zip.txt
+========================================================================
+ee1e9ac24a3319001cbeefbc04de48d61125792580b552dee7350fc862d3578a  .github/workflows/quantora-ci.yml
+03e6c6f8825061ffe7f802fa465d3bb55b29f97c76217e9c852895af63769f41  db/migrations/live/001_live_setup.sql
+e196943770e311c75d2f6f352d3182249e7dac356fcdac7614e46db9de7739fd  docs/SUPABASE_LIVE_SETUP.md
+483a8281f88596aa99967c738d1eb0b3af4f2fd2c0893f94aca096835c08d6ad  package.json
+416ffcdb727b9d1f43e53f4e3455fbccb13b2d54ccdc7a9f76761b8a68c0768e  scripts/test-qnt-0013.ts
+1da2b8ec44fc09afd18ddcc0b712fbd4a45b90f28d25527645692c857789f541  scripts/test-qnt-0013d.ts

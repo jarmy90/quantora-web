@@ -1,0 +1,85 @@
+QNT-0013D · CONFIGURAR Y VERIFICAR SUPABASE REAL (SETUP)
+================================================================
+Rama: chore/QNT-0013D-live-supabase-setup
+Base: main (9a8116e · incluye QNT-0013/PR #12 fusionado)
+
+OBJETIVO
+--------
+Preparar de forma segura la aplicación de las migraciones y la prueba de
+autenticación real en el proyecto Supabase del propietario. No se activa
+ninguna capacidad comercial: planes, precios, pedidos, pagos, licencias,
+descargas, EA, demo monitoring ni portal de creadores siguen desactivados.
+
+ESTADO DE LAS CREDENCIALES (información honesta)
+------------------------------------------------
+El propietario indicó haber creado .env.local, pero en esta máquina el
+archivo NO existe (ni en C:\Quantora\quantora-web\quantora-web ni en
+ninguna ruta bajo C:\Quantora). Por tanto:
+- la configuración auth resuelve a not_configured (comportamiento correcto);
+- el estado AUTH_NOT_CONFIGURED se muestra en /login (verificado);
+- la verificación de autenticación real con Supabase queda PENDIENTE de que
+  el archivo .env.local con VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY
+  esté presente en la raíz del repositorio.
+
+ENTREGA
+-------
+1. db/migrations/live/001_live_setup.sql
+   SQL único, ordenado e idempotente para pegar en Supabase SQL Editor:
+   (1) fundación comercial QNT-0012 (0001), (2) relación auth/customer
+   QNT-0013 (0002), (3) RLS mínima en customers (solo lectura/edición de la
+   propia fila; sin USING (true) en tablas privadas), (4) trigger OPCIONAL
+   que crea la fila customers al registrarse (solo auth_user_id; email/name
+   conforme a su nullabilidad; ON CONFLICT DO NOTHING). BEGIN/COMMIT.
+   No inserta usuarios, precios, pedidos, pagos, licencias ni descargas.
+2. docs/SUPABASE_LIVE_SETUP.md
+   Qué SQL ejecutar y en qué orden, resultado esperado, cómo verificar
+   tablas/constraints/RLS, rollback, qué no está activado, variables de
+   entorno (nombres, sin valores) y guía de prueba manual numerada con un
+   email de prueba controlado por el propietario (nunca en Git).
+3. scripts/test-qnt-0013d.ts (13 tests)
+   Validan SOLO artefactos del repositorio: idempotencia y seguridad del SQL,
+   RLS sin USING (true), trigger sin datos inventados, 4 productos
+   coming_soon con descarga off, relación auth_user_id única e indexada,
+   docs (orden/verificación/rollback/guía ≥10 pasos), .env.local ignorado por
+   Git (y si existe, solo las 2 variables públicas; sin service role),
+   .env.example sin valores, estado de configuración sin secretos,
+   migraciones históricas intactas. No llama a Supabase real ni imprime
+   tokens. Añadido a CI como "QNT-0013D live Supabase setup tests".
+4. Ajuste en scripts/test-qnt-0013.ts
+   El test de entrega de QNT-0013C (paquete == PR == inventario) asumía el
+   contexto de la rama QNT-0013; ahora se ejecuta solo cuando el diff toca
+   el paquete QNT-0013 o el módulo auth, evitando falsos fallos en otros PR.
+
+PREVIEW LOCAL
+-------------
+vite dev estable. HTTP 200 en /, /strategies, /register, /login,
+/forgot-password. /account -> 307 a /login (protegida). Consola limpia.
+/login muestra el estado AUTH_NOT_CONFIGURED (correcto sin credenciales).
+
+ENDURECIMIENTO QNT-0013E (misma rama, mismo PR #13)
+----------------------------------------------------
+1. Idempotencia real de políticas: cada CREATE POLICY lleva antes un
+   DROP POLICY IF EXISTS (customers_read_own). El SQL completo puede
+   ejecutarse 1.ª y 2.ª vez sin error por objetos existentes, sin duplicar
+   productos ni triggers y sin eliminar datos.
+2. RLS defensiva: activada en las 7 tablas comerciales (products, plans,
+   customers, orders, payments, licenses, entitlements). Solo customers
+   tiene política (SELECT de la propia fila, auth.uid() = auth_user_id); el
+   resto queda cerrada (sin políticas = cero filas para anon/authenticated).
+   Sin USING (true).
+3. Privilegios: REVOKE ALL de anon y authenticated sobre products, plans,
+   orders, payments, licenses y entitlements. customers: anon sin acceso,
+   authenticated solo SELECT de columnas mínimas (sin UPDATE en esta fase;
+   role/status/auth_user_id no pueden modificarse desde el cliente).
+4. Trigger de alta de cliente: estándar (ya no se documenta como opcional),
+   SECURITY DEFINER con search_path fijo, REVOKE ALL ON FUNCTION FROM
+   PUBLIC; crea la fila customers pending tras INSERT en auth.users con
+   ON CONFLICT DO NOTHING. No crea pedidos, pagos, licencias ni permisos.
+5. Paquete regenerado AL FINAL: PACKAGE_INTEGRITY con el tamaño y SHA-256
+   reales del ZIP final, inventario 1:1 e hashes internos verificados.
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+Sin cambios en estrategias, métricas, scoring, manifests ni datos.
+Sin pagos, precios, licencias, descargas ni despliegue.
+Sin merge. Sin deploy. Sin ejecutar el SQL remoto.
