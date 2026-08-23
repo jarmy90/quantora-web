@@ -8,8 +8,10 @@
  * reusable component, cross-linking (home / detail / account), accessibility
  * affordances and that commercial flags stay disabled.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import * as subprocess from 'node:child_process';
 import { buildCommercialCatalog } from '../src/commercial/catalog.ts';
 import { getFeatureFlags } from '../src/config.ts';
 
@@ -116,6 +118,73 @@ test('mobile responsiveness is supported', () => {
   const css = read('src/styles/app.css');
   assert(/@media\(max-width:760px\)/.test(css), 'responsive breakpoint present');
   assert(/easy-check/.test(css) && /easy-hero h1/.test(css), 'easy classes responsive');
+});
+
+test('home copy uses the three-steps wording, never an absolute time promise', () => {
+  assert(i18n.includes('From download to demo, in three clear steps.'), 'new home title copy must be used');
+  assert(!i18n.includes('running in minutes, not hours'), 'old absolute-time copy must be gone');
+  assert(!i18n.includes('guaranteed in'), 'no absolute time promise');
+  assert(!/in minutes, not hours/i.test(home), 'old copy must not remain in the home section');
+});
+
+// ---------------------------------------------------------------------------
+// QNT-0014C · delivery package integrity (external PACKAGE_INTEGRITY)
+// ---------------------------------------------------------------------------
+
+/** Test-only ZIP reader backed by the `unzip` CLI (Bun lacks ZipFile). */
+function zipNames(zipPath: string): string[] {
+  const out = subprocess.execSync(`unzip -Z1 "${zipPath}"`, { cwd: ROOT }).toString();
+  return out.split(/\r?\n/).filter(Boolean);
+}
+function zipText(zipPath: string, entry: string): string {
+  return subprocess.execSync(`unzip -p "${zipPath}" "${entry}"`, { cwd: ROOT, encoding: 'utf-8' }).toString();
+}
+function sha256File(path: string): string {
+  return createHash('sha256').update(readFileSync(path)).digest('hex');
+}
+
+test('QNT-0014C · PACKAGE_INTEGRITY matches the final ZIP exactly (external artifact)', () => {
+  const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
+  const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
+  const touchesQnt14 = [...prFiles].some(
+    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0014_') || f === 'src/i18n/index.ts' || f === 'src/routes/index.tsx',
+  );
+  if (!touchesQnt14) {
+    console.log('  (skip) QNT-0014C integrity check not applicable to this diff');
+    return;
+  }
+
+  const zipPath = resolve(ROOT, 'agent-deliveries/freebuff/QNT-0014_Cambios.zip.txt');
+  const zipBytes = statSync(zipPath).size;
+  const zipSha = sha256File(zipPath);
+  const entries = zipNames(zipPath);
+
+  const integrity = read('agent-deliveries/freebuff/QNT-0014_PACKAGE_INTEGRITY.txt');
+  // Declared size must equal the real file size.
+  const sizeMatch = integrity.match(/Tamaño:\s*([0-9]+)/i);
+  assert(sizeMatch !== null, 'integrity doc must declare the size');
+  assert(Number(sizeMatch[1]) === zipBytes, `size mismatch: declared ${sizeMatch[1]}, real ${zipBytes}`);
+  // Declared SHA-256 must equal the real hash.
+  const shaMatch = integrity.match(/SHA-256:\s*([0-9a-f]{64})/i);
+  assert(shaMatch !== null, 'integrity doc must declare SHA-256');
+  assert(shaMatch[1] === zipSha, `SHA-256 mismatch: declared ${shaMatch[1]}, real ${zipSha}`);
+  // Declared entry count must equal the real entry count.
+  const countMatch = integrity.match(/Entradas:\s*([0-9]+)/i);
+  assert(countMatch !== null, 'integrity doc must declare the entry count');
+  assert(Number(countMatch[1]) === entries.length, `entry count mismatch: declared ${countMatch[1]}, real ${entries.length}`);
+  // Inventory declared inside the ZIP must equal the real entries 1:1.
+  const inventoryText = zipText(zipPath, 'INVENTARIO_PAQUETE.txt');
+  const declared = inventoryText
+    .split(/\r?\n/)
+    .map((l) => l.trim().replace(/^-\s*/, ''))
+    .filter((l) => l.length > 0 && !l.includes('INVENTARIO DEL PAQUETE') && !/^=+$/.test(l));
+  const missing = declared.filter((f) => !entries.includes(f));
+  const extra = entries.filter((f) => !declared.includes(f));
+  assert(missing.length === 0, `declared but missing from ZIP: ${missing.join(', ')}`);
+  assert(extra.length === 0, `in ZIP but not declared: ${extra.join(', ')}`);
+  // PACKAGE_INTEGRITY must remain EXTERNAL to the ZIP (no self-reference).
+  assert(!entries.includes('QNT-0014_PACKAGE_INTEGRITY.txt'), 'PACKAGE_INTEGRITY must not be inside the ZIP');
+  assert(!entries.includes('agent-deliveries/freebuff/QNT-0014_PACKAGE_INTEGRITY.txt'), 'integrity must not be inside the ZIP');
 });
 
 test('strategies, metrics and auth remain intact', () => {

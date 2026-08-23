@@ -372,7 +372,7 @@ export const enUS = {
   'easy.installBlockTitle': 'No programming required.',
   'easy.installBlockBody': 'Receive a compiled MetaTrader 5 Expert Advisor and follow the visual guide when the product becomes available.',
   'easy.homeEyebrow': 'From strategy to MT5',
-  'easy.homeTitle': 'Your strategy running in minutes, not hours.',
+  'easy.homeTitle': 'From download to demo, in three clear steps.',
   'easy.homeBody': 'Quantora removes the technical friction. Follow three clear steps, use the compiled EA and begin with a demo account.',
   'easy.homeStep1': 'Download',
   'easy.homeStep2': 'Install',

@@ -28,7 +28,7 @@ the previous one; nothing is merged or deployed automatically.
 
 ## QNT-0013 · Authentication and session
 
-**Status: implemented (code) — live project configuration pending.**
+**Status: implemented and live-verified.**
 
 - **Prerequisites:** QNT-0012 contracts; `.env.example`; customers table.
 - **Data involved:** customers, session state (Supabase Auth, HttpOnly cookie).
@@ -39,9 +39,14 @@ the previous one; nothing is merged or deployed automatically.
   request + new-password flow, email-verification callback, protected
   `/account`, auth↔customer relation migration (`0002`), `AUTH_NOT_CONFIGURED`
   state, tests + CI step. See `docs/AUTHENTICATION.md`.
-- **Pending:** owner creates the Supabase project, sets `VITE_SUPABASE_URL` /
-  `VITE_SUPABASE_PUBLISHABLE_KEY`, configures redirect URLs, applies
-  migrations 0001+0002 with authorization.
+- **Live verification record (no personal data):** the Quantora Supabase
+  project is configured; migrations `0001` + `0002` applied via SQL Editor;
+  email registration verified; email confirmation verified; login verified;
+  protected `/account` verified; logout verified; password recovery verified;
+  one owner-controlled test account exists; zero orders, payments, licenses,
+  entitlements and downloads.
+- **No longer pending:** creating the project, configuring variables, applying
+  migrations, live auth verification.
 - **Remains disabled:** purchases, payments, downloads, demo monitoring.
 
 ## QNT-0014 · Easy Start installation onboarding

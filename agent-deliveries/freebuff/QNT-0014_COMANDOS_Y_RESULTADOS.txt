@@ -41,5 +41,24 @@ COMANDOS EJECUTADOS Y RESULTADOS (QNT-0014)
     ficha desktop + móvil. (account autenticado verificado en vivo, sin
     PNG para no exponer el email real de prueba.)
 
-[6] GIT
-    Commit + push + PR contra main. Sin merge · Sin deploy.
+[6] QNT-0014C · COHERENCIA DOCUMENTAL E INTEGRIDAD
+    - docs/COMMERCIAL_ROADMAP.md: QNT-0013 -> implemented and live-verified.
+    - Copy home: "From download to demo, in three clear steps." (i18n).
+    - QNT-0014_PACKAGE_INTEGRITY.txt: nombre + tamaño real + SHA-256 real +
+      Entradas; artefacto EXTERNO al ZIP (exclusión deliberada).
+    - ZIP contiene fuentes, docs internas, capturas, GIT_DIFF.patch e
+      INVENTARIO_PAQUETE.txt. Sin discrepancia: tamaño/SHA/entradas reales =
+      declarados; inventario interno = entradas reales.
+    - Test automático QNT-0014C (size/sha/entries/inventory/external).
+
+[7] VALIDACIÓN POSTERIOR
+    bun run scripts/test-qnt-0014.ts        -> N passed / 0 failed
+    Batería completa (dominio/intake/0011/0012/0013/0013d/0014) -> OK
+    bun run build                           -> client + SSR OK
+    bun x tsc --noEmit                      -> exit 0 (0 errores)
+    git diff --check                        -> OK
+    bash .github/scripts/check-private-files.sh -> OK
+
+[8] GIT
+    Commit + push a la misma rama (feat/QNT-0014-easy-start).
+    Sin PR nuevo. Sin merge · Sin deploy.
