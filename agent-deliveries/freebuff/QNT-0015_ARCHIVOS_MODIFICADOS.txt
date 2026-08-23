@@ -1,0 +1,26 @@
+ARCHIVOS DE LA ENTREGA (añadidos y modificados)
+.github/workflows/quantora-ci.yml
+agent-deliveries/freebuff/QNT-0015_ARCHIVOS_MODIFICADOS.txt
+agent-deliveries/freebuff/QNT-0015_CAMBIOS.txt
+agent-deliveries/freebuff/QNT-0015_COMANDOS_Y_RESULTADOS.txt
+agent-deliveries/freebuff/capturas-qnt-0015/ficha-cta-desktop-1440.png
+agent-deliveries/freebuff/capturas-qnt-0015/ficha-cta-movil-390.png
+agent-deliveries/freebuff/capturas-qnt-0015/producto-desktop-1440.png
+agent-deliveries/freebuff/capturas-qnt-0015/producto-gold-desktop-1440.png
+agent-deliveries/freebuff/capturas-qnt-0015/producto-movil-390.png
+docs/COMMERCIAL_ROADMAP.md
+docs/PRODUCT_PLANS_AND_CONVERSION.md
+package.json
+scripts/test-qnt-0011.ts
+scripts/test-qnt-0014.ts
+scripts/test-qnt-0015.ts
+src/components/AccessModeSelector.tsx
+src/components/ProductOfferCard.tsx
+src/domain/commercial/productOffer.ts
+src/i18n/index.ts
+src/routes/account.tsx
+src/routes/products.$productId.tsx
+src/routes/strategies.$id.tsx
+src/styles/app.css
+
+(no se incluyen .env, secretos, MQ5/EX5/SET/DLL, node_modules, dist, .git ni copias _new)

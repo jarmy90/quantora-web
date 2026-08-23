@@ -1,0 +1,57 @@
+QNT-0015 · PLANS, MODALIDADES Y RECORRIDO DE CONVERSION - CAMBIOS
+=====================================================================
+RAMA: feat/QNT-0015-product-plans-conversion
+FASE: QNT-0015 - capa visual y de dominio de planes y conversion (preview)
+NOTA: Sin precios, checkout, pedidos, pagos, licencias ni descargas.
+
+CONTEXTO
+- Cuatro estrategias publicas; cuatro productos coming_soon.
+- Auth Supabase SSR verificada (QNT-0013); Easy Start (QNT-0014).
+- Esta fase anade la capa de presentacion (ProductOfferViewModel) y la ruta
+  /products/:productId, manteniendo TODO desactivado comercialmente.
+
+CAMBIOS PRINCIPALES
+1. Dominio: src/domain/commercial/productOffer.ts
+   - ProductOfferViewModel: productId, strategyId, displayName, market,
+     timeframe, status, access modes, availabilityLabel, benefits,
+     requirements, limitations, canStartCheckout=false, canDownload=false.
+   - Access modes: monthly (destacado), quarterly/annual/purchase (coming soon).
+   - resolveProductCta(): signIn (anonimo) / seeOptions (autenticado); returnTo
+     interno y seguro.
+   - Sin amount, currency, tax, discount, checkout session, provider, licencia,
+     descarga, vault, MQ5/EX5/SET ni hashes.
+
+2. Ruta de producto: src/routes/products.$productId.tsx
+   - Resuelve solo los cuatro productos mapeados; invalido -> "Product not
+     found" seguro (sin filtracion).
+   - Breadcrumb Home/Strategies/Product; selector de modalidad accesible;
+     tarjeta de resumen (aria-live); "Que incluire"; requisitos; limitaciones;
+     onel 3-steps de conversion; modulo de instalacion (objetivo, no promesa).
+   - No crea order, no llama a Supabase, no checkout.
+
+3. Fichas: src/routes/strategies.$id.tsx
+   - Bloque de producto usando el componente reutilizable ProductOfferCard.
+   - CTA auth-aware: anonimo "Sign in to continue" (returnTo=/products/:id);
+     autenticado "See options" (-> /products/:id). Notify sigue informativo.
+
+4. Componentes
+   - src/components/ProductOfferCard.tsx: tarjeta auth-aware reutilizable.
+   - src/components/AccessModeSelector.tsx: selector (role=radio) + resumen.
+
+5. /account: seccion Products que enlaza los cuatro productos con
+   "See options" (estados vacios honestos; sin precios/licencias/descargas).
+
+6. i18n (offer.*, modes.*, prod.*, account.products*) y CSS.
+
+7. Docs: docs/PRODUCT_PLANS_AND_CONVERSION.md; COMMERCIAL_ROADMAP actualizado.
+
+8. Tests: scripts/test-qnt-0015.ts (verificado 20 aserciones) + CI.
+   Actualizados test-qnt-0011 (notify en ProductOfferCard) y test-qnt-0014.
+
+NO IMPLEMENTADO / NO ACTIVADO
+- Precios reales, checkout, Stripe, pedidos, pagos, suscripciones, licencias,
+  descargas, EA, prueba, codigos, facturacion, impuestos, reembolsos,
+  monitorizacion demo, portal de creadores.
+- Los cuatro productos siguen coming_soon; StochExtreme Gold sigue not_listed.
+- Sin cambios de estrategias, metricas, scoring, catalog, manifests, evidencia,
+  auth Supabase, RLS ni migraciones historicas.

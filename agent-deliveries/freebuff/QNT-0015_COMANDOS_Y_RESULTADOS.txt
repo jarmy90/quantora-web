@@ -1,0 +1,20 @@
+QNT-0015 · COMANDOS Y RESULTADOS
+bun install --frozen-lockfile                     -> OK
+bun run scripts/test-validation.ts                -> 58/58
+bun run scripts/test-strategy-intake.ts           -> 90/90
+bun run scripts/test-qnt-0011.ts                  -> 12/12
+bun run scripts/test-qnt-0012.ts                  -> 26/26
+bun run scripts/test-qnt-0013.ts                  -> 32/32
+bun run scripts/test-qnt-0013d.ts                 -> 15/15
+bun run scripts/test-qnt-0014.ts                  -> 14/14
+bun run scripts/test-qnt-0015.ts                  -> 20/20
+bun run strategies:validate                       -> 4 aceptadas, 0 errores
+bun run strategies:build                          -> OK
+bun run strategies:report                         -> OK
+bun run build                                     -> cliente + SSR OK
+bun x tsc --noEmit                                -> 0 errores
+git diff --check                                  -> OK
+bash .github/scripts/check-private-files.sh       -> OK (sin privados)
+Preview HTTP 200: / /strategies /4 fichas /4 productos /login; /account 307.
+Capturas: 5 (ficha desktop/movil; producto desktop/movil; producto gold desktop).
+CI quantora-ci.yml: anade paso "QNT-0015 product plans & conversion tests".

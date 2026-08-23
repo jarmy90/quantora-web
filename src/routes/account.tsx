@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { getAuthStatus, signOut } from '../domain/auth/server';
+import { commercialCatalog } from '../commercial/catalog';
 import { t } from '../i18n';
 import '../styles/app.css';
 
@@ -94,6 +95,20 @@ function AccountPage() {
         <div className="auth-box">
           <h2>{t('account.billing')}</h2>
           <p>{t('account.billingEmpty')}</p>
+        </div>
+        <div className="auth-box">
+          <h2>{t('account.products')}</h2>
+          <p>{t('account.productsEmpty')}</p>
+          <ul className="account-products">
+            {commercialCatalog.map((product) => (
+              <li key={product.productId}>
+                <span>{product.displayName} · <span className="muted">{t('account.productStatus')}</span></span>
+                <Link className="btn" to="/products/$productId" params={{ productId: product.productId } as never}>
+                  {t('account.productOptions')} →
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="auth-box">

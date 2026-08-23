@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { curveFor, findStrategy, type Asset, type Strategy } from '../data';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
 import { EasyStartSteps } from '../components/EasyStartSteps';
+import { ProductOfferCard } from '../components/ProductOfferCard';
 import '../styles/app.css';
 
 const CYAN = '#72d9ff';
@@ -97,37 +98,6 @@ function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'point
   );
 }
 
-/**
- * Informative availability dialog — never persists data, never confirms a list.
- */
-function NotifyDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-  return (
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="notify-dialog-title">
-        <h3 id="notify-dialog-title" style={{ margin: '0 0 10px' }}>
-          {t('detail.notifyDialogTitle')}
-        </h3>
-        <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, margin: '0 0 18px' }}>
-          {t('detail.notifyDialogBody')}
-        </p>
-        <button type="button" className="btn primary" onClick={onClose} autoFocus>
-          {t('detail.notifyClose')}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function RealDetail({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const score = s.score;
@@ -203,8 +173,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     });
   }
 
-  const [notifyOpen, setNotifyOpen] = useState(false);
-
   return (
     <>
       <Nav />
@@ -245,37 +213,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           ))}
         </section>
 
-        <section className="card product-card" style={{ marginTop: 15 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div className="eyebrow" style={{ marginBottom: 0 }}>{t('detail.productState')}</div>
-            <span className="status-chip coming-soon">{t('detail.comingSoonBadge')}</span>
-          </div>
-          <h2 style={{ fontSize: 23, margin: '14px 0 6px' }}>{t('detail.productPrepTitle')}</h2>
-          <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 720 }}>
-            {t('detail.productPrepBody')}
-          </p>
-          <div className="product-meta" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
-            {s.productId && <span className="tag">{t('detail.productId')}: {s.productId}</span>}
-            <span className="tag">
-              {t('detail.commercialDownload')}:{' '}
-              {s.commercialDownloadEnabled ? t('detail.commercialDownloadEnabled') : t('detail.commercialDownloadDisabled')}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-            <button type="button" className="btn primary" onClick={() => setNotifyOpen(true)}>
-              {t('detail.notifyMe')}
-            </button>
-            <a className="btn" href="#how-it-works">{t('detail.viewMethodology')}</a>
-            <Link
-              className="btn"
-              to="/login"
-              search={{ returnTo: `/strategies/${s.id}` } as never}
-            >
-              {t('detail.signInInterest')}
-            </Link>
-          </div>
-          <NotifyDialog open={notifyOpen} onClose={() => setNotifyOpen(false)} />
-        </section>
+        <ProductOfferCard strategy={s} />
 
         <section className="card monitor-card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 10 }}>{t('detail.monitorEyebrow')}</div>
