@@ -1,0 +1,6 @@
+QNT-0011 · PACKAGE INTEGRITY
+============================
+PAQUETE: QNT-0011_Cambios.zip.txt
+RUTA: C:\Quantora\quantora-web\quantora-web\agent-deliveries\freebuff\QNT-0011_Cambios.zip.txt
+TAMAÑO (bytes): 4788579
+SHA-256: e7a7cad76304b25c0a66c2f252295f0b4026da779a252779db97060b0ca39c85

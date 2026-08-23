@@ -1,0 +1,140 @@
+QNT-0011 · SUPERFICIE DE CONFIANZA Y SIGUIENTE PASO
+=====================================================
+Rama: feat/QNT-0011-trust-surface-next-step
+Base: main (82e921c · incluye QNT-0009/CI fusionado vía PR #9)
+
+OBJETIVO ALCANZADO
+------------------
+Evolución visual coherente que prioriza las cuatro estrategias reales,
+aumenta la confianza y prepara el futuro flujo de producto, sin activar
+compra, alquiler ni descarga. El usuario comprende en ~10 segundos qué es
+Quantora, qué estrategias reales existen, su rendimiento/riesgo, si los
+costes están aplicados, que el producto aún no está disponible y cuál es
+el siguiente paso.
+
+CONTRATO PÚBLICO (productStatus)
+--------------------------------
+Añadidos al manifest, al pipeline y al contrato público (PublicStrategy):
+  productId, productStatus (not_listed|coming_soon|available|paused|
+  deprecated), commercialDownloadEnabled.
+Valores iniciales (las 4 estrategias):
+  first-triangle-adaptive     -> first-triangle-ustec-m30     coming_soon
+  first-triangle-gold-adaptive-> first-triangle-gold-m15      coming_soon
+  stochextreme-adaptive       -> stochextreme-ustec           coming_soon
+  tm-bandas-s3                -> tm-bandas-s3-keeper          coming_soon
+  commercialDownloadEnabled=false en todas. Sin stochextreme-gold en el
+  catálogo público. El frontend deriva el estado de los datos; no hay
+  estados hardcodeados por strategyId. No se exponen rutas privadas,
+  nombres MQ5/SET, hashes ni URLs del vault.
+
+PORTADA
+-------
+- Sección REAL STRATEGIES inmediatamente después del hero con las 4
+  estrategias reales (datos del catálogo público): nombre, mercado e
+  instrumento, versión, estado comercial, estado de costes, net result,
+  Profit Factor, Quantora Score (con badge Beta methodology), drawdown,
+  curva sparkline derivada de la equity real y CTA "View strategy".
+- Sin métricas copiadas a mano: todo se consume del catálogo generado.
+- La demo (Atlas/Northstar/Vector) se mueve debajo, etiquetada
+  "DEMO ENVIRONMENT · SAMPLE DATA" con el texto obligatorio
+  "Illustrative product experience. These are not published Quantora
+  strategies." Peso visual reducido (estilo demo diferenciado).
+
+NAVEGACIÓN MÓVIL
+----------------
+- Botón hamburguesa accesible (aria-label dinámico, aria-expanded,
+  aria-controls) visible solo en viewport <=760px.
+- Panel con Home / Strategies / Dashboard (+ anclas de la portada).
+- Cierra con Escape, con el botón, al navegar y con clic fuera.
+- Foco devuelto al toggle al cerrar; foco movido al primer enlace al abrir.
+- Sin librerías externas; verificados 375/390/439px sin overflow.
+
+CORRECCIÓN "PTS PTS"
+--------------------
+- El bug de las tarjetas (fmtPoints() + sufijo extra) se corrige en el
+  componente compartido PublicStrategyCard: "+2,368.75 pts" y
+  "176.45 pts" muestran la unidad una sola vez. Gold sigue en puntos; el
+  resto en USD. Test de regresión incluido.
+
+QUANTORA SCORE
+--------------
+- Presentación: "Quantora Score" + badge "Beta methodology" (tooltip con
+  la nota de score experimental). Confianza mostrada solo cuando existe
+  en datos: "Evidence confidence: 100% / 95%" (nunca "0.95" suelto).
+- Cálculo del score intacto.
+
+CHIP DE COSTES
+--------------
+- Todas las tarjetas reales muestran: "Costs applied" (cian) /
+  "Costs not applied" (ámbar) / "Costs not confirmed" (gris), derivado
+  de costsApplied. Coste 0 nunca se interpreta como costes aplicados.
+
+SIGUIENTE PASO EN FICHAS
+------------------------
+- Bloque de producto tras las métricas: badge "Coming soon", título
+  "Strategy product access is being prepared", texto de estado, productId
+  y comercial download (Not enabled). CTA primario "Notify me when
+  available" abre un diálogo informativo que NO persiste datos ("Nothing
+  was saved"); CTA secundario "View methodology" (ancla a How it works).
+- Sin Buy/Rent/Download activos en fichas reales.
+
+SLOT DEMO MONITORING
+--------------------
+- Módulo "DEMO MONITORING" en cada ficha real: estado "Not connected yet"
+  y zona preparada (Status, Broker, Balance, Equity, Trades, Drawdown,
+  Last update) con valores "Not available" mientras not_connected.
+- Leyenda fija: "Backtest ≠ Demo monitoring ≠ Verified live result".
+- Sin balances, equity, posiciones ni timestamps inventados.
+
+CATÁLOGO
+--------
+- Tarjetas reales con estado comercial + costes + badge Beta (jerarquía
+  de métricas intacta: fila 1 net/PF/score, fila 2 trades/freq/DD).
+- Filtros demo acotados a su sección con etiqueta "Demo filters — apply
+  to the sample data below only."
+
+DASHBOARD
+---------
+- "DASHBOARD PREVIEW · MOCK ENVIRONMENT": las 4 estrategias reales como
+  prototipo con productStatus=coming_soon, licenseStatus=not_active y
+  demoMonitoring=not_connected. Sin licencias activas ficticias, sin
+  fechas de renovación ni pagos inventados. Downloads/Historial en
+  estado vacío honesto.
+
+SEO BÁSICO
+----------
+- Meta description + Open Graph (title/description) en __root, home,
+  catálogo, dashboard y ficha (título dinámico por estrategia). Sin
+  analytics ni cookies. Sin imágenes OG inventadas.
+
+ACCESIBILIDAD
+-------------
+- Menú móvil con aria, Escape, foco; diálogo aria-modal con cierre y
+  Escape; botones con nombres accesibles; sin regresiones de contraste.
+  Sin animaciones (sin necesidad de prefers-reduced-motion).
+
+TESTS NUEVOS
+------------
+scripts/test-qnt-0011.ts (12 tests): catálogo con exactamente 4
+estrategias; sin stochextreme-gold; productStatus=coming_soon +
+commercialDownloadEnabled=false en todas; sin estados internos ni rutas
+privadas en el bundle; sin "pts pts"; chip de costes derivado de datos;
+home consume el catálogo sin métricas hardcodeadas; menú móvil accesible;
+dashboard mock alineado con el catálogo; sin buy/rent activo en fichas
+reales; monitoring not_connected sin datos inventados; notify sin
+persistencia; métricas de manifiestos sin cambios.
+Añadido al CI (paso "QNT-0011 UI contract tests") y como script
+"test:qnt-0011" en package.json.
+
+CAPTURAS
+--------
+15 capturas reales (Chrome headless, desktop 1440 y móvil 390) en
+agent-deliveries/freebuff/capturas-qnt-0011/ (home, catálogo, 4 fichas,
+dashboard + menú móvil abierto vía CDP).
+
+SIN CAMBIOS DE NEGOCIO
+----------------------
+- Sin cambios en lógica de estrategias, métricas, scoring, backtests,
+  costes ni timestamps (verificado: las métricas del catálogo coinciden
+  con los manifests). Sin autenticación, pagos, descargas ni seguimiento
+  demo real. Sin merge. Sin deploy.

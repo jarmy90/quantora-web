@@ -72,3 +72,6 @@ jobs:
 
       - name: Typecheck
         run: bun x tsc --noEmit
+
+      - name: QNT-0011 UI contract tests
+        run: bun run scripts/test-qnt-0011.ts

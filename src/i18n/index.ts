@@ -16,6 +16,8 @@ export const enUS = {
   'nav.dashboard': 'Dashboard',
   'nav.mockEnvironment': 'MOCK ENVIRONMENT',
   'nav.backCatalog': '← Catalog',
+  'nav.openMenu': 'Open navigation menu',
+  'nav.closeMenu': 'Close navigation menu',
 
   'home.eyebrow': 'Systematic investing · made legible',
   'home.heroTitle': 'Strategies you can',
@@ -25,6 +27,13 @@ export const enUS = {
   'home.browse': 'Browse strategies →',
   'home.seeHow': 'See how it works',
   'home.mockNotice': 'HISTORICAL RESULTS DO NOT GUARANTEE FUTURE PERFORMANCE',
+  'home.realStrategies': 'Real strategies',
+  'home.realStrategiesBody':
+    'Four published, rules-based systems evaluated through a consistent backtesting methodology. Compare performance, risk, costs and limitations before deciding what to research next.',
+  'home.viewStrategy': 'View strategy',
+  'home.demoEnvironment': 'Demo environment · sample data',
+  'home.demoEnvironmentBody':
+    'Illustrative product experience. These are not published Quantora strategies.',
   'home.curated': 'Curated systems',
   'home.signals': 'Signals worth a closer look.',
   'home.startingPoint': 'A starting point for your research, not a promise of returns.',
@@ -62,11 +71,17 @@ export const enUS = {
     'Compare transparent, rules-based systems built for different markets and risk profiles.',
   'catalog.eyebrow': 'Strategy catalog',
   'catalog.published': 'Published strategies',
-  'catalog.demoSection': 'Demo strategies · mock data',
+  'catalog.demoSection': 'Demo environment · sample data',
   'catalog.demoNote':
-    'Mock / demo data for product demonstration — kept separate from the published strategies above.',
+    'Illustrative product experience. These are not published Quantora strategies.',
+  'catalog.demoFilters': 'Demo filters — apply to the sample data below only.',
   'catalog.sortReturn': 'Sort: demo return',
   'catalog.sortName': 'Sort: name',
+  'catalog.comingSoon': 'Coming soon',
+  'catalog.notListed': 'Not listed',
+  'catalog.paused': 'Paused',
+  'catalog.deprecated': 'Deprecated',
+  'catalog.available': 'Available',
 
   'detail.eyebrow': 'Strategy detail / MOCK DEMO',
   'detail.curve': 'EQUITY CURVE · MOCK SIMULATION',
@@ -79,6 +94,8 @@ export const enUS = {
   'detail.totalTrades': 'Total trades',
   'detail.dataStatus': 'Data status',
   'detail.score': 'Quantora Score',
+  'detail.scoreBetaBadge': 'Beta methodology',
+  'detail.evidenceConfidence': 'Evidence confidence: {pct}%',
   'detail.profitFactor': 'Profit Factor',
   'detail.frequency': 'Frequency',
   'detail.costs': 'Costs',
@@ -136,13 +153,44 @@ export const enUS = {
   'detail.openPositionsAtEnd': 'Open positions at end',
   'detail.expectancy': 'Expectancy',
   'detail.ptsPerTrade': 'pts/trade',
+  'card.costsApplied': 'Costs applied',
+  'card.costsNotApplied': 'Costs not applied',
+  'card.costsNotConfirmed': 'Costs not confirmed',
+  'card.backtestLabel': 'Historical backtest',
+  'detail.productState': 'Product status',
+  'detail.productId': 'Product',
+  'detail.commercialDownload': 'Commercial download',
+  'detail.commercialDownloadEnabled': 'Enabled',
+  'detail.commercialDownloadDisabled': 'Not enabled',
+  'detail.comingSoonBadge': 'Coming soon',
+  'detail.productPrepTitle': 'Strategy product access is being prepared',
+  'detail.productPrepBody': 'Secure delivery, licensing and customer access are not active yet.',
+  'detail.notifyMe': 'Notify me when available',
+  'detail.notifyDialogTitle': 'Availability notifications',
+  'detail.notifyDialogBody':
+    'Notifications are not active yet. When this product opens, availability will be announced here and through the catalog. Nothing was saved.',
+  'detail.notifyClose': 'Close',
+  'detail.viewMethodology': 'View methodology',
+  'detail.monitorEyebrow': 'Demo monitoring',
+  'detail.monitorNotConnected': 'Not connected yet',
+  'detail.monitorBody':
+    'A clearly labelled demo-account monitoring view is planned for this strategy. Historical backtest results and demo monitoring will remain separate.',
+  'detail.monitorStatus': 'Status',
+  'detail.monitorBroker': 'Broker',
+  'detail.monitorBalance': 'Balance',
+  'detail.monitorEquity': 'Equity',
+  'detail.monitorTrades': 'Trades',
+  'detail.monitorDrawdown': 'Observed drawdown',
+  'detail.monitorLastUpdate': 'Last update',
+  'detail.monitorNotAvailable': 'Not available',
+  'detail.monitorLegend': 'Backtest ≠ Demo monitoring ≠ Verified live result',
 
-  'dashboard.eyebrow': 'Account dashboard / MOCK PREVIEW',
+  'dashboard.eyebrow': 'Dashboard preview · MOCK ENVIRONMENT',
   'dashboard.title': 'Your workspace.',
   'dashboard.body':
-    'A simulated preview of licenses, downloads and account history. Nothing here is real — there is no authentication, no payments and no live delivery.',
+    'Illustrative customer experience. No products, licenses or payments are active.',
   'dashboard.demo': 'This is a simulated demo panel. No real licenses, downloads, payments or accounts are managed on this site.',
-  'dashboard.licenses': 'Licenses',
+  'dashboard.licenses': 'Product status',
   'dashboard.downloads': 'Downloads',
   'dashboard.history': 'Recent activity',
   'dashboard.status': 'Status',
@@ -154,8 +202,10 @@ export const enUS = {
   'dashboard.date': 'Date',
   'dashboard.event': 'Event',
   'dashboard.detail': 'Detail',
-  'dashboard.emptyLicenses': 'No licenses yet. Explore the catalog to model one in demo mode.',
-  'dashboard.emptyDownloads': 'No downloads in this demo workspace.',
+  'dashboard.product': 'Product',
+  'dashboard.monitor': 'Demo monitoring',
+  'dashboard.emptyLicenses': 'No products yet. Explore the catalog to see what is being prepared.',
+  'dashboard.emptyDownloads': 'No downloads available yet.',
   'dashboard.emptyHistory': 'No activity recorded.',
   'dashboard.viewStrategy': 'View',
 
@@ -182,6 +232,14 @@ export const enUS = {
   'footer.legalReview':
     'These legal pages are placeholders and must be reviewed by a qualified legal professional before use.',
   'footer.rights': 'Demo experience. Not financial advice.',
+
+  'seo.homeDescription':
+    'Quantora evaluates rules-based trading strategies through structured backtesting, with performance, risk and limitations shown clearly.',
+  'seo.catalogDescription':
+    'Compare transparent, rules-based strategies built for different markets and risk profiles.',
+  'seo.dashboardDescription':
+    'Illustrative customer preview. No products, licenses or payments are active.',
+  'seo.strategyDescription': 'Historical backtest, performance, risk and limitations for a published Quantora strategy.',
 } as const satisfies Record<string, MessageValue>;
 export const messages: Record<Locale, Record<MessageKey, string>> = { 'en-US': enUS };
 export function t(key: MessageKey): string {

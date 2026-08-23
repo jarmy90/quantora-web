@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { curveFor, findStrategy, type Asset, type Strategy } from '../data';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
@@ -96,16 +96,53 @@ function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'point
   );
 }
 
+/**
+ * Informative availability dialog — never persists data, never confirms a list.
+ */
+function NotifyDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="dialog-backdrop" onClick={onClose}>
+      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="notify-dialog-title">
+        <h3 id="notify-dialog-title" style={{ margin: '0 0 10px' }}>
+          {t('detail.notifyDialogTitle')}
+        </h3>
+        <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, margin: '0 0 18px' }}>
+          {t('detail.notifyDialogBody')}
+        </p>
+        <button type="button" className="btn primary" onClick={onClose} autoFocus>
+          {t('detail.notifyClose')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RealDetail({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const score = s.score;
   const pointsUnit = s.performanceUnit === 'points';
 
-  const cells: { label: string; value: string; accent?: string; title?: string }[] = [
+  const cells: { label: string; value: string; accent?: string; title?: string; badge?: string; note?: string }[] = [
     {
-      label: s.scoreVersion ? t('detail.scoreBeta') : t('detail.score'),
+      label: t('detail.score'),
       value: score ? String(score.value) : '—',
       accent: LIME,
+      badge: s.scoreVersion ? t('detail.scoreBetaBadge') : undefined,
+      title: s.scoreVersion ? t('detail.scoreBetaNote') : undefined,
+      note:
+        score?.confidence !== undefined
+          ? t('detail.evidenceConfidence').replace('{pct}', String(Math.round(score.confidence * 100)))
+          : undefined,
     },
     {
       label: t('detail.profitFactor'),
@@ -165,6 +202,8 @@ function RealDetail({ s }: { s: PublicStrategy }) {
     });
   }
 
+  const [notifyOpen, setNotifyOpen] = useState(false);
+
   return (
     <>
       <Nav />
@@ -194,12 +233,70 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           {cells.map((cell) => (
             <div className="metric-cell" key={cell.label}>
               <small>{cell.label}</small>
-              <strong title={cell.title} style={cell.accent ? { color: cell.accent } : undefined}>{cell.value}</strong>
+              <strong title={cell.title} style={cell.accent ? { color: cell.accent } : undefined}>
+                {cell.value}
+                {cell.badge && (
+                  <span className="score-beta" title={cell.title}>{cell.badge}</span>
+                )}
+              </strong>
+              {cell.note && <small className="metric-note">{cell.note}</small>}
             </div>
           ))}
         </section>
 
-        <section className="card" style={{ marginTop: 15 }}>
+        <section className="card product-card" style={{ marginTop: 15 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div className="eyebrow" style={{ marginBottom: 0 }}>{t('detail.productState')}</div>
+            <span className="status-chip coming-soon">{t('detail.comingSoonBadge')}</span>
+          </div>
+          <h2 style={{ fontSize: 23, margin: '14px 0 6px' }}>{t('detail.productPrepTitle')}</h2>
+          <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 720 }}>
+            {t('detail.productPrepBody')}
+          </p>
+          <div className="product-meta" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
+            {s.productId && <span className="tag">{t('detail.productId')}: {s.productId}</span>}
+            <span className="tag">
+              {t('detail.commercialDownload')}:{' '}
+              {s.commercialDownloadEnabled ? t('detail.commercialDownloadEnabled') : t('detail.commercialDownloadDisabled')}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+            <button type="button" className="btn primary" onClick={() => setNotifyOpen(true)}>
+              {t('detail.notifyMe')}
+            </button>
+            <a className="btn" href="#how-it-works">{t('detail.viewMethodology')}</a>
+          </div>
+          <NotifyDialog open={notifyOpen} onClose={() => setNotifyOpen(false)} />
+        </section>
+
+        <section className="card monitor-card" style={{ marginTop: 15 }}>
+          <div className="eyebrow" style={{ marginBottom: 10 }}>{t('detail.monitorEyebrow')}</div>
+          <span className="status-chip not-connected">{t('detail.monitorNotConnected')}</span>
+          <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 760, margin: '12px 0 0' }}>
+            {t('detail.monitorBody')}
+          </p>
+          <div className="monitor-grid">
+            {[
+              [t('detail.monitorStatus'), t('detail.monitorNotConnected')],
+              [t('detail.monitorBroker'), t('detail.monitorNotAvailable')],
+              [t('detail.monitorBalance'), t('detail.monitorNotAvailable')],
+              [t('detail.monitorEquity'), t('detail.monitorNotAvailable')],
+              [t('detail.monitorTrades'), t('detail.monitorNotAvailable')],
+              [t('detail.monitorDrawdown'), t('detail.monitorNotAvailable')],
+              [t('detail.monitorLastUpdate'), t('detail.monitorNotAvailable')],
+            ].map(([label, value]) => (
+              <div className="monitor-cell" key={label}>
+                <small>{label}</small>
+                <strong className="muted">{value}</strong>
+              </div>
+            ))}
+          </div>
+          <p className="mono research-note" style={{ color: 'var(--amber)' }}>
+            {t('detail.monitorLegend')}
+          </p>
+        </section>
+
+        <section id="how-it-works" className="card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 12 }}>
             {t('detail.howItWorks')}
           </div>
@@ -533,4 +630,19 @@ function Detail() {
   );
 }
 
-export const Route = createFileRoute('/strategies/$id')({ component: Detail });
+export const Route = createFileRoute('/strategies/$id')({
+  head: ({ match }) => {
+    const id = match.params.id;
+    const real = findPublicStrategy(id);
+    const title = real ? `${real.name} — Quantora` : 'Quantora — Strategy';
+    return {
+      meta: [
+        { title },
+        { name: 'description', content: t('seo.strategyDescription') },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: t('seo.strategyDescription') },
+      ],
+    };
+  },
+  component: Detail,
+});

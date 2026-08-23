@@ -383,6 +383,10 @@ export function buildTmBandasS3Manifest(evidenceDir: string = EVIDENCE_DIR): Man
     reviewLabel: 'Owner supplied',
     independentReproduction: false,
     costsApplied: false,
+    // QNT-0011 public product state (commercially safe).
+    productId: 'tm-bandas-s3-keeper',
+    productStatus: 'coming_soon',
+    commercialDownloadEnabled: false,
     rules,
     limitations: [
       'Historical backtest on Nasdaq-100 (USTEC) M1, IC Markets',

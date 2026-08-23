@@ -11,6 +11,9 @@
   "reviewLabel": "Owner supplied",
   "independentReproduction": false,
   "costsApplied": false,
+  "productId": "tm-bandas-s3-keeper",
+  "productStatus": "coming_soon",
+  "commercialDownloadEnabled": false,
   "rules": [
     "Entry: S3_ABOVE_TO_UPPER_RETURN — sell when price is above the upper rail (short-only)",
     "Rails: period 7 (shift 1) · ATR 14 · ATR range 15.00–21.00 · minimum rail gap 16.00",

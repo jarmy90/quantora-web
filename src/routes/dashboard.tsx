@@ -1,18 +1,19 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { activity, downloads, licenses, type DashboardLicense } from '../data';
+import { publicStrategies } from '../catalog';
+import { productStatusLabel } from '../components/PublicStrategyCard';
 import { t } from '../i18n';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import '../styles/app.css';
 
-const statusColor: Record<DashboardLicense['status'], string> = {
-  Active: 'var(--lime)',
-  Trial: 'var(--cyan)',
-  Expired: 'var(--red)',
-};
-
-function Licenses() {
-  if (licenses.length === 0) {
+/**
+ * Illustrative customer preview only. Every strategy is shown with its real
+ * public product state (coming_soon), licenseStatus=not_active and
+ * demoMonitoring=not_connected. No active licenses, payments or dates are
+ * invented anywhere on this page.
+ */
+function ProductPreview() {
+  if (publicStrategies.length === 0) {
     return <p className="muted">{t('dashboard.emptyLicenses')}</p>;
   }
   return (
@@ -21,27 +22,29 @@ function Licenses() {
         <thead>
           <tr>
             <th>{t('nav.strategies')}</th>
-            <th>{t('dashboard.type')}</th>
+            <th>{t('dashboard.product')}</th>
             <th>{t('dashboard.status')}</th>
-            <th>{t('dashboard.expires')}</th>
+            <th>{t('dashboard.monitor')}</th>
             <th />
           </tr>
         </thead>
         <tbody>
-          {licenses.map((l) => (
-            <tr key={l.id}>
-              <td style={{ fontWeight: 700 }}>{l.strategyName}</td>
-              <td>{l.type}</td>
+          {publicStrategies.map((s) => (
+            <tr key={s.id}>
+              <td style={{ fontWeight: 700 }}>{s.name}</td>
+              <td className="muted">{s.productId ?? '—'}</td>
               <td>
-                <span className="mono" style={{ color: statusColor[l.status] }}>
-                  {l.status}
+                <span className="status-chip coming-soon">{productStatusLabel(s.productStatus)}</span>
+              </td>
+              <td>
+                <span className="mono" style={{ color: 'var(--muted)' }}>
+                  {t('detail.monitorNotConnected')}
                 </span>
               </td>
-              <td className="muted">{l.expires}</td>
               <td>
                 <Link
                   to="/strategies/$id"
-                  params={{ id: l.strategyId }}
+                  params={{ id: s.id }}
                   className="dash-link"
                 >
                   {t('dashboard.viewStrategy')} ↗
@@ -56,59 +59,11 @@ function Licenses() {
 }
 
 function DownloadsList() {
-  if (downloads.length === 0) {
-    return <p className="muted">{t('dashboard.emptyDownloads')}</p>;
-  }
-  return (
-    <div className="dash-table-wrap">
-      <table className="log dash-table">
-        <thead>
-          <tr>
-            <th>{t('dashboard.name')}</th>
-            <th>{t('dashboard.format')}</th>
-            <th>{t('dashboard.size')}</th>
-            <th>{t('dashboard.date')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {downloads.map((d) => (
-            <tr key={d.id}>
-              <td className="mono" style={{ color: 'var(--cyan)' }}>
-                {d.name}
-              </td>
-              <td>{d.format}</td>
-              <td className="muted">{d.size}</td>
-              <td className="muted">{d.date}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <p className="muted">{t('dashboard.emptyDownloads')}</p>;
 }
 
 function History() {
-  if (activity.length === 0) {
-    return <p className="muted">{t('dashboard.emptyHistory')}</p>;
-  }
-  return (
-    <ul className="dash-timeline">
-      {activity.map((a) => (
-        <li key={a.id}>
-          <span className="dash-dot" />
-          <div>
-            <strong style={{ fontSize: 14 }}>{a.label}</strong>
-            <div className="muted" style={{ fontSize: 12, margin: '2px 0' }}>
-              {a.detail}
-            </div>
-            <div className="mono" style={{ fontSize: 11, color: '#65717d' }}>
-              {a.date}
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
+  return <p className="muted">{t('dashboard.emptyHistory')}</p>;
 }
 
 function Dashboard() {
@@ -136,7 +91,7 @@ function Dashboard() {
           <div className="eyebrow" style={{ marginBottom: 16 }}>
             {t('dashboard.licenses')}
           </div>
-          <Licenses />
+          <ProductPreview />
         </section>
 
         <section className="card" style={{ marginBottom: 18 }}>
@@ -158,4 +113,14 @@ function Dashboard() {
   );
 }
 
-export const Route = createFileRoute('/dashboard')({ component: Dashboard });
+export const Route = createFileRoute('/dashboard')({
+  head: () => ({
+    meta: [
+      { title: 'Quantora — Dashboard preview' },
+      { name: 'description', content: t('seo.dashboardDescription') },
+      { property: 'og:title', content: 'Quantora — Dashboard preview' },
+      { property: 'og:description', content: t('seo.dashboardDescription') },
+    ],
+  }),
+  component: Dashboard,
+});

@@ -208,6 +208,10 @@ export function buildStochExtremeManifest(evidenceDir: string = EVIDENCE_DIR): M
     reviewLabel: 'Owner supplied',
     independentReproduction: false,
     costsApplied: false,
+    // QNT-0011 public product state (commercially safe).
+    productId: 'stochextreme-ustec',
+    productStatus: 'coming_soon',
+    commercialDownloadEnabled: false,
     rules,
     limitations: [
       'Period analyzed: 2025-08-01 to 2026-08-07',
