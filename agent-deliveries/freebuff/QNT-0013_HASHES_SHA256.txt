@@ -1,13 +1,13 @@
 QNT-0013 · SHA-256 de archivos incluidos en QNT-0013_Cambios.zip.txt
 ========================================================================
 be46871d31c3b7c74b23a4cb1b450cfea3c7937ae188f5c2d41cdab5cc46510a  .env.example
-f12adf9dcb8f5e129e2ba33658433e07dd29fcab8cbb41c1d2fd79d05f900852  .github/workflows/quantora-ci.yml
+be3880e2e9cb4d9a50bf736e4afd6467e7063fbf6d8768ef50c5d392fba1b451  .github/workflows/quantora-ci.yml
 792742fee6b9d7d69c37912ec1ed7880c8e5e1236243f119741959843cff1b2e  agent-deliveries/freebuff/INVENTARIO_PAQUETE.txt
 952c696ab36a5e8d67ff5cee17587ba77448009f2fc15c09aa38c5def7a702ea  agent-deliveries/freebuff/QNT-0013_ARCHIVOS_MODIFICADOS.txt
 e5af43599f940e62e9d7c1a359e43d3ec5b809872e1c7a1bb80ccf07c17e1685  agent-deliveries/freebuff/QNT-0013_CAMBIOS.txt
 d870d622ae659fd4ea74d08b5e617aed3d9dc1c8474b329d49e6608cec6a90dd  agent-deliveries/freebuff/QNT-0013_COMANDOS_Y_RESULTADOS.txt
-6e2145a5cf0c29169c0d87280f5219231fee2c529d89d3ca758755548ff99eea  agent-deliveries/freebuff/QNT-0013_HASHES_SHA256.txt
-8c297080af283e7fc9f04bcd0a2c3ffe8346f81b54a104740346c2c7a609f6bb  agent-deliveries/freebuff/QNT-0013_PACKAGE_INTEGRITY.txt
+c16654bc7a05d1a76609de595e3e22c823dec2e99889ba10f551042367986cf3  agent-deliveries/freebuff/QNT-0013_HASHES_SHA256.txt
+c8fe1409fff588fe78b7c7ab03d5d9c51dfc6409b4ce08ab32734b820ed681fd  agent-deliveries/freebuff/QNT-0013_PACKAGE_INTEGRITY.txt
 40961fcaadb61c1a4ae6b5f11b9bf60d65e52432fa66db2b4695c4904a70f547  agent-deliveries/freebuff/capturas-qnt-0013/account-redirect-mobile-390.png
 acef0889a05c634832f93247a7b5a9de0c1eeef4ec4f8839fa13b3069d42eb8b  agent-deliveries/freebuff/capturas-qnt-0013/forgot-desktop-1440.png
 294105aadb42087896dd986df8e0fe19da230dd645c6c8068b994b056c174ebf  agent-deliveries/freebuff/capturas-qnt-0013/forgot-mobile-390.png
