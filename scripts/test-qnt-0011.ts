@@ -136,10 +136,12 @@ test('dashboard preview is mock and uses the real catalog', () => {
 // 9. No active buy/rent/download on real strategy pages.
 test('no active buy/rent/download in real strategy UI', () => {
   const detail = read('src/routes/strategies.$id.tsx');
+  const offerCard = read('src/components/ProductOfferCard.tsx');
   const realSectionStart = detail.indexOf('function RealDetail');
   const realSectionEnd = detail.indexOf('function MockDetail');
   const realSection = detail.slice(realSectionStart, realSectionEnd);
-  assert(realSection.includes('detail.notifyMe'), 'real detail must offer a non-transactional notify CTA');
+  assert(realSection.includes('<ProductOfferCard'), 'real detail must render the reusable product card');
+  assert(offerCard.includes('offer.notifyMe'), 'product card must offer a non-transactional notify CTA');
   // The picker may be *defined* between the two sections, but it must only be
   // *used* inside the mock detail (never in the real one).
   assert(
@@ -163,10 +165,11 @@ test('demo monitoring is not_connected with no invented values', () => {
 // 11. Notify CTA never persists data.
 test('notify CTA does not persist anything', () => {
   const detail = read('src/routes/strategies.$id.tsx');
+  const offerCard = read('src/components/ProductOfferCard.tsx');
   const i18n = read('src/i18n/index.ts');
-  assert(!detail.includes('localStorage'), 'notify flow must not use localStorage');
-  assert(!detail.includes('sessionStorage'), 'notify flow must not use sessionStorage');
-  assert(detail.includes('detail.notifyDialogBody'), 'notify dialog must use the informational copy');
+  assert(!detail.includes('localStorage') && !offerCard.includes('localStorage'), 'notify flow must not use localStorage');
+  assert(!detail.includes('sessionStorage') && !offerCard.includes('sessionStorage'), 'notify flow must not use sessionStorage');
+  assert(offerCard.includes('offer.notifyDialogBody'), 'notify dialog must use the informational copy');
   assert(i18n.includes('Nothing was saved'), 'notify copy must state nothing is saved');
 });
 

@@ -1,0 +1,11 @@
+QNT-0015 PACKAGE INTEGRITY
+========================
+Artefacto EXTERNO calculado despues de cerrar el ZIP (fuera de el de forma deliberada; sin autorreferencia).
+Nombre: QNT-0015_Cambios.zip.txt
+Tamano (bytes): 1773658
+SHA-256: 12a9b1a9c111bfdbaf5673a267a1c0899fa3c93e545c5825365e5a3a04ef8bb4
+Entradas: 26
+
+Contenido: todos los archivos fuente/dominio/rutas, documentacion, tests,
+GIT_DIFF.patch, capturas, hashes e inventario de este PR. PACKAGE_INTEGRITY
+queda EXTERNO al ZIP. Sin discrepancias documentales.

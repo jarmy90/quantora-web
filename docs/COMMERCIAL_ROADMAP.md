@@ -68,7 +68,33 @@ the previous one; nothing is merged or deployed automatically.
 - **Remains disabled:** products, plans, payments, downloads, licenses,
   demo monitoring.
 
-## QNT-0015 · Demo monitoring pilot
+## QNT-0015 · Product plans & conversion preview (this phase)
+
+**Status: implemented.**
+
+- **Product plans UX:** implemented.
+- **Active prices:** not implemented.
+- **Checkout:** not implemented.
+- **Payments:** not implemented.
+- **Licensing:** not implemented.
+- **Downloads:** not implemented.
+- **Demo monitoring:** coming_soon.
+- **Prerequisites:** QNT-0014 merged; four coming_soon products; Supabase auth.
+- **Data involved:** none persisted. A presentation view-model
+  (`ProductOfferViewModel` in `src/domain/commercial/productOffer.ts`) derived
+  from the safe public catalog. All four products stay `coming_soon`;
+  StochExtreme Gold stays `not_listed`.
+- **Security boundary:** no orders, checkout, payment, licence or download;
+  CTA resolved from derived availability + auth; `returnTo` internal-only;
+  selector changes local visual state only and never calls Supabase.
+- **Definition of done:** canonical `/products/$productId` route, access-mode
+  selector (monthly highlighted; quarterly/annual/purchase coming soon),
+  pre-checkout summary, safe login-return flow, auth-aware strategy-detail CTA,
+  account product links, installation onboarding module; tests + CI step.
+- **Remains disabled:** active prices, checkout, orders, payments,
+  subscriptions, licenses, downloads, demo telemetry.
+
+## QNT-0016 · Demo monitoring pilot
 
 - **Prerequisites:** server functions infrastructure; safe product linkage.
 - **Data involved:** demo-account monitoring records per strategy.
@@ -79,9 +105,9 @@ the previous one; nothing is merged or deployed automatically.
   (`not_connected`, `connecting`, `live_demo`, `stale`, `offline`).
 - **Remains disabled:** checkout, payments, downloads.
 
-## QNT-0016 · Plans, purchase and rental
+## QNT-0017 · Plans, purchase and rental (checkout)
 
-- **Prerequisites:** QNT-0013; plans table; pricing decisions.
+- **Prerequisites:** QNT-0013; QNT-0015 plans preview; plans table; pricing decisions.
 - **Data involved:** plans (rental/purchase), orders (draft/pending_payment).
 - **Security boundary:** `paid` set only server-side; price shown only from
   active plans; checkout cannot start for coming_soon/paused/deprecated.
@@ -89,7 +115,7 @@ the previous one; nothing is merged or deployed automatically.
   readiness gated by `canStartCheckout`, customer order history.
 - **Remains disabled:** actual payment capture, downloads, licenses.
 
-## QNT-0017 · Payment provider and webhooks
+## QNT-0018 · Payment provider and webhooks
 
 - **Prerequisites:** QNT-0016; provider decision (none chosen yet).
 - **Data involved:** payments, provider webhooks.
@@ -99,7 +125,7 @@ the previous one; nothing is merged or deployed automatically.
   transitions server-side, refund/cancel handling.
 - **Remains disabled:** downloads, license activation (next phase).
 
-## QNT-0018 · Licensing and protected delivery
+## QNT-0019 · Licensing and protected delivery
 
 - **Prerequisites:** QNT-0017; licenses + entitlements tables.
 - **Data involved:** licenses, entitlements, protected files.

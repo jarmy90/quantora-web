@@ -193,8 +193,9 @@ test('strategies, metrics and auth remain intact', () => {
     assert(![guide, stepsComp, home, detail, account].some((s) => s.includes(f)), `should not edit ${f}`);
   }
   // The strategy detail still renders metrics, monitor and product state.
+  // (Product state now lives in the reusable ProductOfferCard component.)
   assert(detail.includes('metric-grid'), 'metrics still rendered');
-  assert(detail.includes('detail.productState'), 'product state still rendered');
+  assert(detail.includes('<ProductOfferCard') || detail.includes('detail.productState'), 'product state still rendered');
   assert(account.includes('beforeLoad'), 'auth protection still present');
 });
 
