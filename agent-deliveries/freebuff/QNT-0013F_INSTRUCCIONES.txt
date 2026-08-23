@@ -1,0 +1,43 @@
+QNT-0013F · INSTRUCCIONES PARA APLICAR LA BASE QUANTORA EN SUPABASE
+===================================================================
+Archivo SQL: QNT-0013F_SUPABASE_SETUP.sql.txt
+(es el SQL aprobado en QNT-0013E; retira el sufijo .txt si quieres un .sql)
+
+PASOS
+-----
+1. Abrir Supabase (Dashboard) del proyecto Quantora.
+2. Abrir SQL Editor.
+3. Crear una consulta nueva (New query).
+4. Copiar TODO el contenido de QNT-0013F_SUPABASE_SETUP.sql.txt.
+5. Pulsar Run.
+6. Comprobar el resultado (banner verde de éxito).
+7. No volver a ejecutar si aparece un error inesperado sin revisarlo antes.
+
+VERIFICACIÓN (copia y ejecuta estas tres consultas después del Run)
+-------------------------------------------------------------------
+-- 1) Tablas creadas (deben salir las 7 tablas comerciales)
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('products','plans','customers','orders','payments','licenses','entitlements')
+ORDER BY table_name;
+
+-- 2) RLS activada (deben salir las 7 filas con relrowsecurity = t)
+SELECT relname, relrowsecurity
+FROM pg_class
+WHERE relname IN ('products','plans','customers','orders','payments','licenses','entitlements')
+ORDER BY relname;
+
+-- 3) Trigger y función presentes (debe salir 1 fila por cada uno)
+SELECT tgname AS object_name, 'trigger' AS kind
+FROM pg_trigger
+WHERE tgname = 'on_auth_user_created' AND NOT tgisinternal
+UNION ALL
+SELECT proname AS object_name, 'function' AS kind
+FROM pg_proc
+WHERE proname = 'handle_new_auth_user';
+
+Si las tres consultas devuelven lo esperado, la base está lista. Después,
+la prueba de registro/confirmación creará automáticamente la fila del
+cliente (customers) vía el trigger. Sin secretos: no se necesita service
+role ni credenciales para estos pasos.
