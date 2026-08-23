@@ -378,7 +378,8 @@ test('delivery package contains every PR file and the inventory matches 1:1', ()
   // This check is specific to the QNT-0013 delivery: it only applies when the
   // current diff actually touches the QNT-0013 package or the auth module.
   const touchesQnt13 = [...prFiles].some(
-    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013') || f.startsWith('src/domain/auth/'),
+    // Trailing underscore: QNT-0013_* (the QNT-0013 package), never QNT-0013D_*.
+    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013_') || f.startsWith('src/domain/auth/'),
   );
   if (!touchesQnt13) {
     console.log('  (skip) QNT-0013 delivery check not applicable to this diff');
@@ -414,7 +415,8 @@ test('package hash list covers every file in the ZIP', () => {
   const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
   const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
   const touchesQnt13 = [...prFiles].some(
-    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013') || f.startsWith('src/domain/auth/'),
+    // Trailing underscore: QNT-0013_* (the QNT-0013 package), never QNT-0013D_*.
+    (f) => f.startsWith('agent-deliveries/freebuff/QNT-0013_') || f.startsWith('src/domain/auth/'),
   );
   if (!touchesQnt13) {
     console.log('  (skip) QNT-0013 hash-list check not applicable to this diff');
