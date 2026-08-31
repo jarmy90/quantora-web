@@ -59,6 +59,22 @@ export type DemoMonitoringMetrics = {
 };
 
 /**
+ * Domain sanity boundaries for supplied demo metrics. Applied BEFORE any
+ * demo value is served to the UI: negative or non-integer minor units,
+ * impossible drawdown percentages and unparseable reportedAt values are
+ * rejected so no invented or malformed data reaches the module.
+ */
+export function isSaneDemoMetrics(metrics: DemoMonitoringMetrics): boolean {
+  if (typeof metrics.reportedAt !== 'string' || Number.isNaN(Date.parse(metrics.reportedAt))) return false;
+  if (metrics.balanceMinor !== undefined && (!Number.isInteger(metrics.balanceMinor) || metrics.balanceMinor < 0)) return false;
+  if (metrics.equityMinor !== undefined && (!Number.isInteger(metrics.equityMinor) || metrics.equityMinor < 0)) return false;
+  if (metrics.openTrades !== undefined && (!Number.isInteger(metrics.openTrades) || metrics.openTrades < 0)) return false;
+  if (metrics.drawdownPct !== undefined && (typeof metrics.drawdownPct !== 'number' || Number.isNaN(metrics.drawdownPct) || metrics.drawdownPct < 0 || metrics.drawdownPct > 100)) return false;
+  if (metrics.currency !== undefined && typeof metrics.currency !== 'string') return false;
+  return true;
+}
+
+/**
  * Read-only snapshot for a strategy's demo monitoring module, resolved
  * server-side. The client renders this snapshot; it never computes a
  * connection state on its own.

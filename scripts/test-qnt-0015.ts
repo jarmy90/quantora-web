@@ -19,13 +19,15 @@ import { getFeatureFlags } from '../src/config.ts';
 import {
   DEMO_MONITORING_STATUSES,
   isDemoMonitoringStatus,
+  isSaneDemoMetrics,
+  type DemoMonitoringMetrics,
 } from '../src/domain/demoMonitoring/contracts.ts';
 import {
   canTransition,
   deriveDemoFreshness,
   resolveConnectionStatus,
 } from '../src/domain/demoMonitoring/stateMachine.ts';
-import { resolvePilotSnapshot } from '../src/domain/demoMonitoring/source.ts';
+import { resolvePilotSnapshot, sanitizePilotSnapshot } from '../src/domain/demoMonitoring/source.ts';
 import { canMarkOrderPaidFromClient, canPurchaseProduct } from '../src/domain/commercial/rules.ts';
 
 const ROOT = resolve(import.meta.dir, '..');
@@ -100,6 +102,58 @@ test('freshness is derived deterministically from the documented window', () => 
   assert(deriveDemoFreshness('2026-08-31T11:50:00.000Z', now) === 'live', 'inside window -> live');
   assert(deriveDemoFreshness('2026-08-31T11:44:59.000Z', now) === 'stale', 'outside window -> stale');
   assert(deriveDemoFreshness('not-a-date', now) === 'unknown', 'invalid timestamp -> unknown');
+  assert(
+    deriveDemoFreshness('2026-09-01T00:00:00.000Z', now) === 'unknown',
+    'future timestamps must never be treated as fresh',
+  );
+});
+
+// ---------------------------------------------------------------------------
+// 3c. Demo metrics are sanity-checked before being served.
+// ---------------------------------------------------------------------------
+test('demo metrics are sanity-checked in the domain', () => {
+  const valid: DemoMonitoringMetrics = {
+    balanceMinor: 10000,
+    equityMinor: 10500,
+    openTrades: 3,
+    drawdownPct: 12.5,
+    currency: 'USD',
+    reportedAt: '2026-08-31T11:50:00.000Z',
+  };
+  assert(isSaneDemoMetrics(valid), 'valid metrics accepted');
+  assert(!isSaneDemoMetrics({ ...valid, balanceMinor: -5 }), 'negative balance rejected');
+  assert(!isSaneDemoMetrics({ ...valid, balanceMinor: 1.5 }), 'non-integer minor units rejected');
+  assert(!isSaneDemoMetrics({ ...valid, openTrades: 2.5 }), 'non-integer trade count rejected');
+  assert(!isSaneDemoMetrics({ ...valid, drawdownPct: 150 }), 'drawdown above 100% rejected');
+  assert(!isSaneDemoMetrics({ ...valid, reportedAt: 'nope' }), 'unparseable reportedAt rejected');
+});
+
+// ---------------------------------------------------------------------------
+// 3d. A future pilot entry can never emit a boundary other than demo.
+// ---------------------------------------------------------------------------
+test('sanitizePilotSnapshot forces the demo boundary and safe metrics', () => {
+  const baseline = resolvePilotSnapshot('first-triangle-adaptive', {
+    publishedIds: EXPECTED_IDS,
+    productId: 'first-triangle-ustec-m30',
+  });
+  // No registry injection is public: build the hypothetical malicious entry.
+  const malicious = {
+    ...baseline,
+    declaredBoundary: 'verified_live' as const,
+    sourceType: 'demo' as const,
+    metrics: {
+      balanceMinor: 999,
+      equityMinor: 999,
+      openTrades: 0,
+      drawdownPct: 400,
+      currency: 'USD',
+      reportedAt: '2026-08-31T11:50:00.000Z',
+    },
+  };
+  const cleaned = sanitizePilotSnapshot(malicious);
+  assert(cleaned.declaredBoundary === 'demo', 'boundary is forced back to demo');
+  assert(cleaned.sourceType === 'demo', 'sourceType stays demo');
+  assert(cleaned.metrics === undefined, 'insane metrics are dropped before serving');
 });
 
 // ---------------------------------------------------------------------------

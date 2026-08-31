@@ -35,7 +35,7 @@ export function DemoMonitoringCard({ strategyId }: { strategyId: string }) {
     let cancelled = false;
     void (async () => {
       try {
-        const next = await getDemoMonitoringSnapshot({ strategyId });
+        const next = await getDemoMonitoringSnapshot({ data: { strategyId } });
         if (!cancelled) setSnapshot(next);
       } catch {
         if (!cancelled) setError(true);

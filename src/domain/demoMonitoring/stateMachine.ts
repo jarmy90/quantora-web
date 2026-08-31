@@ -66,7 +66,10 @@ export function deriveDemoFreshness(
 ): DemoFreshness {
   if (lastUpdatedAt === undefined) return 'unknown';
   const updatedAt = Date.parse(lastUpdatedAt);
+  // Invalid timestamps never convert into a live state.
   if (Number.isNaN(updatedAt)) return 'unknown';
+  // Future timestamps are invalid data: never treated as fresh without control.
+  if (updatedAt > now) return 'unknown';
   if (now - updatedAt <= staleAfterMs) return 'live';
   return 'stale';
 }

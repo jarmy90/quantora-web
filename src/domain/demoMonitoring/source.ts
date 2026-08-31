@@ -11,7 +11,25 @@
  * resolver inside `resolvePilotSnapshot`. Consumers (the server function and
  * the UI) do not change.
  */
-import type { DemoMonitoringSnapshot } from './contracts';
+import { isSaneDemoMetrics, type DemoMonitoringSnapshot, type ResultsBoundary } from './contracts';
+
+/**
+ * Clamp any snapshot to the demo-only boundary before serving. A future
+ * registry entry can never accidentally emit a different declared boundary
+ * or unsanitized metrics: sourceType/declaredBoundary are always ‘demo’ and
+ * metrics are only kept when they pass the domain sanity checks.
+ */
+export function sanitizePilotSnapshot(snapshot: DemoMonitoringSnapshot): DemoMonitoringSnapshot {
+  return {
+    ...snapshot,
+    sourceType: 'demo',
+    declaredBoundary: 'demo' as ResultsBoundary,
+    metrics:
+      snapshot.metrics !== undefined && isSaneDemoMetrics(snapshot.metrics)
+        ? snapshot.metrics
+        : undefined,
+  };
+}
 
 /** Pilot registry: intentionally empty until real demo data is supplied. */
 const PILOT_REGISTRY: Record<string, DemoMonitoringSnapshot> = {};
@@ -44,6 +62,6 @@ export function resolvePilotSnapshot(
     };
   }
   const known = PILOT_REGISTRY[strategyId];
-  if (known) return known;
-  return notConnectedSnapshot(strategyId, opts.productId);
+  if (known) return sanitizePilotSnapshot(known);
+  return sanitizePilotSnapshot(notConnectedSnapshot(strategyId, opts.productId));
 }
