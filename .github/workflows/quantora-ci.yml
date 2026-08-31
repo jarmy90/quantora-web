@@ -91,3 +91,6 @@ jobs:
 
       - name: QNT-0014 Easy Start tests
         run: bun run scripts/test-qnt-0014.ts
+
+      - name: QNT-0015 demo monitoring tests
+        run: bun run scripts/test-qnt-0015.ts

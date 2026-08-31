@@ -96,6 +96,12 @@
 .monitor-cell{background:#0b1016;border:1px solid var(--line);border-radius:8px;padding:12px}
 .monitor-cell small{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}
 .monitor-cell strong{font-size:13px;font-weight:600}
+.demo-monitor-card{border-color:#23303c}
+.status-chip.demo-status-not_connected{color:#7d8b99;border:1px solid #3a4652;background:#0d1219}
+.status-chip.demo-status-connecting{color:#9fc7ff;border:1px solid #3a5a80;background:#0d1622}
+.status-chip.demo-status-live_demo{color:var(--lime);border:1px solid #44612a;background:#10170c}
+.status-chip.demo-status-stale{color:var(--amber);border:1px solid #8a6a3a;background:#171208}
+.status-chip.demo-status-offline{color:#c07d8a;border:1px solid #6e3a44;background:#190d10}
 .dialog-backdrop{position:fixed;inset:0;background:rgba(5,8,12,.72);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
 .dialog{background:#10151d;border:1px solid var(--line);border-radius:12px;padding:24px;max-width:420px;width:100%}
 @media(max-width:760px){.monitor-grid{grid-template-columns:repeat(2,1fr)}}

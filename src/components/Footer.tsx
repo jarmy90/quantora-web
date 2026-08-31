@@ -31,7 +31,7 @@ export function Footer() {
         </div>
       </div>
       <div className="wrap footer-bar">
-        <span>© 2025 Quantora.io</span>
+        <span>© 2026 Quantora.io</span>
         <span className="mono">{t('footer.rights')}</span>
       </div>
     </footer>

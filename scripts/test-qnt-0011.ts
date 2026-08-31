@@ -152,8 +152,14 @@ test('no active buy/rent/download in real strategy UI', () => {
 // 10. Demo monitoring slot invents no data for real strategies.
 test('demo monitoring is not_connected with no invented values', () => {
   const detail = read('src/routes/strategies.$id.tsx');
-  assert(detail.includes('detail.monitorNotConnected'), 'monitoring status must be not_connected');
-  assert(detail.includes('detail.monitorLegend'), 'monitoring legend must distinguish backtest vs demo vs verified');
+  const monitorModule = read('src/components/DemoMonitoringCard.tsx');
+  assert(detail.includes('<DemoMonitoringCard'), 'real detail must render the demo monitoring module');
+  assert(monitorModule.includes("'monitor.statusNotConnected'"), 'module must expose a not_connected state');
+  assert(monitorModule.includes('detail.monitorLegend'), 'monitoring legend must distinguish backtest vs demo vs verified');
+  assert(
+    !monitorModule.includes('localStorage') && !monitorModule.includes('sessionStorage'),
+    'module must not persist anything client-side',
+  );
   for (const s of publicStrategies) {
     assert(!('balance' in (s.equity ?? {})), `${s.id} must not carry invented balance`);
     assert(!('monitor' in s), `${s.id} must not carry invented monitoring data`);

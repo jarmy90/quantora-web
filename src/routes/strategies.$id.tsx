@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
 import { EasyStartSteps } from '../components/EasyStartSteps';
+import { DemoMonitoringCard } from '../components/DemoMonitoringCard';
 import '../styles/app.css';
 
 const CYAN = '#72d9ff';
@@ -277,32 +278,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           <NotifyDialog open={notifyOpen} onClose={() => setNotifyOpen(false)} />
         </section>
 
-        <section className="card monitor-card" style={{ marginTop: 15 }}>
-          <div className="eyebrow" style={{ marginBottom: 10 }}>{t('detail.monitorEyebrow')}</div>
-          <span className="status-chip not-connected">{t('detail.monitorNotConnected')}</span>
-          <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 760, margin: '12px 0 0' }}>
-            {t('detail.monitorBody')}
-          </p>
-          <div className="monitor-grid">
-            {[
-              [t('detail.monitorStatus'), t('detail.monitorNotConnected')],
-              [t('detail.monitorBroker'), t('detail.monitorNotAvailable')],
-              [t('detail.monitorBalance'), t('detail.monitorNotAvailable')],
-              [t('detail.monitorEquity'), t('detail.monitorNotAvailable')],
-              [t('detail.monitorTrades'), t('detail.monitorNotAvailable')],
-              [t('detail.monitorDrawdown'), t('detail.monitorNotAvailable')],
-              [t('detail.monitorLastUpdate'), t('detail.monitorNotAvailable')],
-            ].map(([label, value]) => (
-              <div className="monitor-cell" key={label}>
-                <small>{label}</small>
-                <strong className="muted">{value}</strong>
-              </div>
-            ))}
-          </div>
-          <p className="mono research-note" style={{ color: 'var(--amber)' }}>
-            {t('detail.monitorLegend')}
-          </p>
-        </section>
+        <DemoMonitoringCard strategyId={s.id} />
 
         <section className="card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 12 }}>{t('easy.installBlockEyebrow')}</div>

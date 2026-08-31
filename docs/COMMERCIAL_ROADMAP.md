@@ -70,14 +70,21 @@ the previous one; nothing is merged or deployed automatically.
 
 ## QNT-0015 · Demo monitoring pilot
 
+**Status: implemented (pilot, flag off).**
+
 - **Prerequisites:** server functions infrastructure; safe product linkage.
 - **Data involved:** demo-account monitoring records per strategy.
 - **Security boundary:** demo data is separate from backtest and from
-  verified live results; clearly labelled; no invented balances.
+  verified live results; clearly labelled; no invented balances;
+  `DEMO_MONITORING_ENABLED` defaults to false.
 - **Definition of done:** a pilot module (labelled DEMO MONITORING) that
   distinguishes backtest / demo / verified live; connection state machine
-  (`not_connected`, `connecting`, `live_demo`, `stale`, `offline`).
-- **Remains disabled:** checkout, payments, downloads.
+  (`not_connected`, `connecting`, `live_demo`, `stale`, `offline`); domain
+  contract + pilot source returning honest `not_connected` until real demo
+  data is supplied; tests + CI step; see
+  `docs/DEMO_MONITORING_ARCHITECTURE.md`.
+- **Remains disabled:** checkout, payments, downloads, licenses, real MT5
+  connection.
 
 ## QNT-0016 · Plans, purchase and rental
 
