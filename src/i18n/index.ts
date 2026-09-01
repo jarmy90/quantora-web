@@ -383,6 +383,18 @@ export const enUS = {
   'easy.accountCta': 'Open Easy Start',
   'easy.compactCta': 'See how installation works',
   'easy.previewNote': 'This guide is informational. No product or license is active yet.',
+
+  // QNT-0015 · demo monitoring pilot
+  'monitor.statusNotConnected': 'Not connected yet',
+  'monitor.statusConnecting': 'Connecting…',
+  'monitor.statusLiveDemo': 'Demo active',
+  'monitor.statusStale': 'Data out of date',
+  'monitor.statusOffline': 'No connection',
+  'monitor.body':
+    'A clearly labelled demo monitoring module is prepared for this strategy. No real MetaTrader connection is active yet, so nothing is reported as live.',
+  'monitor.unavailableReason': 'No demo monitoring data is available for this strategy.',
+  'monitor.disclaimer':
+    'A demo account is a simulated trading environment. Demo monitoring is not a real-account result, a guarantee or investment advice.',
 } as const satisfies Record<string, MessageValue>;
 export const messages: Record<Locale, Record<MessageKey, string>> = { 'en-US': enUS };
 export function t(key: MessageKey): string {

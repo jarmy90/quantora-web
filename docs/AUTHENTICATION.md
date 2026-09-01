@@ -3,7 +3,10 @@
 Status:
 
 - **Auth foundation: implemented** (contracts, service, routes, SSR sessions)
-- **Live Supabase project: pending configuration** (no project keys exist yet)
+- **Live Supabase project: configured and live-verified** (migrations `0001`
+  + `0002` applied; registration, confirmation, login, logout and password
+  recovery verified with one owner-controlled test account; zero orders,
+  payments, licenses, entitlements and downloads)
 - **Payments: not implemented**
 - **Licensing: not implemented**
 - **Downloads: not implemented**
@@ -50,7 +53,7 @@ SUPABASE_SERVICE_ROLE_KEY=          # server-only, NEVER VITE_, not used yet
 - Missing public variables → the app shows a clear **AUTH_NOT_CONFIGURED**
   screen instead of forms; the rest of the site keeps working.
 
-## Setting up the live Supabase project (manual, pending)
+## Setting up the live Supabase project (manual, applied)
 
 1. Create a Supabase project (URL + anon key go into `VITE_SUPABASE_URL` /
    `VITE_SUPABASE_PUBLISHABLE_KEY`).
@@ -102,6 +105,5 @@ activation guarantees.
 
 ## Not implemented (future phases)
 
-- Payments (QNT-0015/16), licensing (QNT-0017), protected downloads.
+- Payments (QNT-0017), licensing and protected downloads (QNT-0018).
 - OAuth, MFA, phone auth, admin/creator portals.
-- Live project configuration and migration execution (requires owner).

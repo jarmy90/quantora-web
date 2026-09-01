@@ -2,7 +2,7 @@
 
 Status: **foundation only** — nothing commercial is active. This document
 records the architectural decisions made in QNT-0012 so future phases
-(QNT-0013..QNT-0017) build on contracts and state rules instead of ad-hoc
+(QNT-0013..QNT-0018) build on contracts and state rules instead of ad-hoc
 React components.
 
 ## 1. Current infrastructure (verified, not assumed)
@@ -65,7 +65,7 @@ removed. The repository layer looks products up by the stable identifier:
    `paid` order.
 4. **Private storage ≠ customer delivery.** Source EAs, vault paths and
    private hashes never enter the public bundle. Future protected delivery
-   (QNT-0017) will serve files from private storage through a server-side
+   (QNT-0018) will serve files from private storage through a server-side
    entitlement check.
 
 ## 3. State machines (implemented in `src/domain/commercial/rules.ts`)
@@ -126,12 +126,12 @@ orders, no payments, no licenses, no granted entitlements.
 - Authentication provider and session mechanism (QNT-0013).
 - Password hashing / identity provider (QNT-0013).
 - Email provider (QNT-0013).
-- Demo-monitoring pilot mechanics (QNT-0014).
-- Pricing amounts, currency and plan final shapes (QNT-0015).
-- Payment provider and webhooks (QNT-0016).
-- Licensing rules (maxActivations), protected delivery mechanics (QNT-0017).
+- Demo-monitoring pilot mechanics (QNT-0015).
+- Pricing amounts, currency and plan final shapes (QNT-0016).
+- Payment provider and webhooks (QNT-0017).
+- Licensing rules (maxActivations), protected delivery mechanics (QNT-0018).
 - Database connection and migration execution (authorization required).
 
-## 7. What QNT-0013..QNT-0017 must do
+## 7. What QNT-0013..QNT-0018 must do
 
 See `docs/COMMERCIAL_ROADMAP.md` for the phase-by-phase contract.
