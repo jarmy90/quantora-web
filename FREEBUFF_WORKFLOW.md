@@ -1,400 +1,142 @@
-# FREEBUFF_WORKFLOW · QNT-WORKFLOW-LOCAL
+# FREEBUFF_WORKFLOW.md · Quantora
+
+Permanent operating and delivery protocol for Freebuff sessions in `jarmy90/quantora-web`.
+
+## 1. Mandatory session start
+
+At the beginning of every Quantora session, Freebuff must:
+
+1. Read this file in full.
+2. Read `MASTER.md`, if present.
+3. Read the continuity documents specified by Javier.
+4. Read `docs/COMMERCIAL_ROADMAP.md`.
+5. Check the real repository state with Git.
+6. Identify the active branch, HEAD, `origin/main`, and untracked files.
+7. Separate clearly what is implemented, validated, pending, designed, desired, and blocked.
+8. Never assume status from old documents.
+9. Never invent data, metrics, slugs, deployments, validations, or functions.
+10. Continue from the actual repository state, not incomplete memory.
+
+## 2. Source of truth
+
+- Git and the code are the technical source of truth.
+- `docs/COMMERCIAL_ROADMAP.md` is the source of truth for commercial phases.
+- `MASTER.md` is the living continuity document.
+- Earlier reports are historical evidence and may be outdated.
+- Before claiming something is implemented, deployed, merged, or validated, verify it.
+- Local validation is not automatically CI-green.
+- A pushed branch is not a created PR.
+- A created PR is not a merged PR.
+- A commit is not a production deployment.
 
-Permanent workflow configuration for the `jarmy90/quantora-web` workspace.
+## 3. Git working rules
 
-This file is part of the public repository. It is descriptive documentation only
-and does **not** alter the application's runtime behavior.
+- Work through branches and Pull Requests.
+- Do not modify `main` directly.
+- Do not force-push.
+- Do not perform destructive resets.
+- Do not merge without explicit authorization.
+- Do not delete reference branches without authorization.
+- Do not accidentally include local continuity files or reports.
+- Review `git status` before and after changes.
+- Run `git diff --check`.
+- Check for secrets.
+- Keep one scope per PR.
+- Do not mix QNT phases.
+- Do not renumber the roadmap.
+- If a specifically authorized future deployment is required: commit, push, create or merge according to authorization, deploy, verify the real URL, and report the result.
+- If deployment is not authorized, do not deploy.
 
----
+## 4. Quantora safety and truthfulness
 
-## 1. ARCHIVO DE WORKFLOW
+- Backtest is not demo.
+- Demo is not a real account.
+- Demo monitoring is not verified live.
+- Internal review is not independent validation.
+- Never invent balances, equity, trades, returns, or connections.
+- Never promote a strategy to `quantora_validated` without an explicit editorial decision.
+- Never expose credentials, tokens, keys, complete account identifiers, or passwords.
+- Do not write to live Supabase without authorization.
+- Do not run live migrations without authorization.
+- Checkout, payments, licenses, and downloads are activated only in authorized phases.
+- Secrets belong only on the server or in secure systems.
+- Do not set prices or revenue shares without Javier's decision.
+- Do not present future functionality as available.
 
-Este archivo, `FREEBUFF_WORKFLOW.md`, conserva las reglas permanentes del flujo
-de trabajo local en este workspace.
+## 5. Required validation
 
-Cualquier encargo debe cumplir lo aquí definido. Las reglas son aditivos a
-las normas globales del proyecto y nunca las sustituyen.
+When applicable, require:
 
----
+- Reproducible installation respecting the lockfile.
+- Build.
+- TypeScript.
+- Existing canonical tests.
+- New phase tests.
+- Private-file protection.
+- `git diff --check`.
+- Final `git status`.
+- Full diff review.
+- Visual inspection when a browser is available.
+- Never say “OK” for a command that was not executed.
+- Separate local, CI, visual, and production validation.
+- Document environment blocks precisely.
 
-## 2. SEPARACIÓN DE REPOSITORIOS
+## 6. Continuity updates
 
-`quantora-web` es un repositorio **PÚBLICO**.
+At the end of a relevant task, Freebuff must:
 
-**Puede contener:**
+- Update `MASTER.md` with date and time.
+- Keep the actual state of branches, commits, PRs, CI, and deployment.
+- Correct stale references when newer evidence exists.
+- Include no secrets.
+- Keep `MASTER.md` brief, precise, and operational.
+- If `MASTER.md` is local and untracked, update it locally without accidentally committing it.
+- If Javier later decides to version it, use a separate documentation task.
 
-- frontend;
-- catálogo;
-- fichas;
-- pipeline de intake;
-- manifests públicos;
-- métricas;
-- curvas;
-- documentación no sensible;
-- metadatos comerciales seguros.
+## 7. Permanent delivery contract: exactly one file
 
-**Nunca puede contener:**
+Freebuff must deliver exactly one final file per session. Delivery is incorrect if two or more files are returned.
 
-- MQ5;
-- EX5;
-- SET;
-- ZIP comerciales;
-- secretos;
-- credenciales;
-- enlaces directos al vault;
-- rutas privadas;
-- hashes de código fuente privado;
-- archivos de entrega de EA.
+Do not return an extra report, index, ZIP, loose PR body, loose logs, loose Git state, or copies of package contents alongside the final artifact. Repository-modified files are not delivery artifacts; this rule applies to files copied to Downloads or delivered to Javier.
 
-El repositorio privado es:
+### Mode A: text only
 
-`jarmy90/quantora-ea-vault`
+Prefer this mode. Create exactly one UTF-8 plain-text `.txt` containing all necessary summary, Git state, validations, PR, CI, errors, recommendations, human instructions, PR body if needed, important paths, and final `git status`.
 
-**No abrir, leer, listar, modificar ni copiar archivos de ese repositorio
-desde este workspace salvo encargo explícito y separado.**
+Do not create a separate PR body or index.
 
----
+### Mode B: multiple internal files are genuinely necessary
 
-## 3. FLUJO GIT OBLIGATORIO
+Create one real ZIP containing everything, including a main TXT report. Rename the final ZIP so it ends exactly in `.zip.txt`; it must remain internally a valid ZIP. Deliver only that file, with no loose copies or second report.
 
-Antes de cada tarea:
+## 8. Delivery folder
 
-1. Ejecutar `git status`.
-2. Verificar la ruta exacta del working tree.
-3. Verificar el remoto `origin`.
-4. Ejecutar `git fetch origin`.
-5. Actualizar `main` mediante fast-forward only.
-6. Confirmar working tree limpio.
-7. Registrar SHA base.
-8. Crear una rama nueva para el encargo, salvo que el usuario indique
-   expresamente continuar un PR existente.
+Copy the one final file directly to the user's real Downloads folder. In Termux, first check `$HOME/storage/downloads/`; on desktop Linux, check `$HOME/Downloads/`. Use only a path that actually exists; never invent it. Do not leave the artifact only in the repository. Verify its existence using a read-only operation at the end.
 
-**Nunca trabajar directamente en `main`.**
+## 9. Artifact cleanup
 
-Nombres de rama:
+Before finishing, identify artifacts created during the session. Keep exactly one new delivery artifact in Downloads. Do not delete Javier's pre-existing files, continuity documents, or repository files. Delete only redundant auxiliary artifacts newly created by Freebuff during this session, and only when safe. Do not copy `MASTER.md` or this workflow file to Downloads unless explicitly requested.
 
-```
-feat/QNT-XXXX-descripcion
-```
+## 10. Final chat response
 
-Cuando exista un PR previo:
+Keep the visible response very short. State only the verdict, exact filename, exact Downloads path, commit/push/PR/CI/merge status, and the literal sentence:
 
-- usar su misma rama;
-- actualizar el mismo PR;
-- no crear otro PR sin autorización.
+> He entregado exactamente un solo archivo.
 
-- No hacer merge automáticamente.
-- No hacer deploy automáticamente.
-- No ejecutar `go-live`.
+Do not paste the report or enumerate internal files when using a ZIP.
 
----
+## 11. Short activation instruction
 
-## 4. GESTIÓN DE DEPENDENCIAS
+Once this file is incorporated into the repository, Javier may start future sessions with:
 
-**Package manager:** `bun`.
+> Lee íntegramente FREEBUFF_WORKFLOW.md, MASTER.md y los documentos de continuidad. Comprueba Git y continúa con la tarea indicada. Respeta el contrato de un único archivo final en Downloads.
 
-Si faltan dependencias:
+Freebuff must interpret that sentence as activation of this complete protocol.
 
-```
-bun install
-```
+## Delivery invariant for every session
 
-**No crear:**
+Every Freebuff intervention must finish with a physically created, verified, and delivered TXT report. This applies to completed, partial, blocked, paused, authorization-required, and expiring sessions. If multiple files are needed, deliver the TXT separately and also a real ZIP renamed with `.zip.txt`; a chat-only response is never a valid delivery.
 
-- `package-lock.json`;
-- `yarn.lock`;
-- `pnpm-lock.yaml`.
+## Current incorporation rule
 
-**Conservar** `bun.lock`.
-
-No instalar dependencias nuevas salvo necesidad justificada.
-
----
-
-## 5. VALIDACIÓN OBLIGATORIA
-
-Después de cada cambio ejecutar, cuando correspondan:
-
-```
-bun run strategies:ingest
-bun run strategies:validate
-bun run strategies:build
-bun run strategies:report
-bun run strategies:intake
-bun run build
-```
-
-Ejecutar también los scripts de tests existentes aunque `package.json` no tenga
-un alias general de `test`.
-
-Inspeccionar `scripts/` para identificar:
-
-- tests de dominio;
-- tests del intake;
-- validaciones específicas de la estrategia modificada.
-
-Ejecutar el typecheck mediante el comando apropiado del proyecto.
-
-Registrar por separado:
-
-- errores nuevos;
-- errores preexistentes.
-
-No declarar éxito completo si se introducen errores nuevos.
-
-Ejecutar:
-
-```
-git diff --check
-```
-
-Confirmar working tree limpio después del commit.
-
----
-
-## 6. PREVIEW LOCAL
-
-En Desktop sí se permite iniciar el entorno local para verificar la web.
-
-Usar los comandos definidos por el proyecto, preferiblemente:
-
-```
-bun run dev
-```
-
-**No ejecutar:**
-
-```
-bun run go-live
-```
-
-El preview local debe utilizarse para comprobar:
-
-- catálogo;
-- fichas;
-- navegación;
-- responsive;
-- errores de consola;
-- HTTP;
-- visualización desktop;
-- visualización móvil.
-
-Detener el servidor al finalizar si ya no es necesario.
-
-No publicar ni desplegar para obtener un preview.
-
----
-
-## 7. CAPTURAS
-
-Cuando una tarea modifique interfaz, generar:
-
-- catálogo desktop;
-- catálogo móvil;
-- ficha afectada desktop;
-- ficha afectada móvil.
-
-Guardar las capturas dentro de:
-
-```
-agent-deliveries/freebuff/capturas-<encargo>/
-```
-
-**No reutilizar capturas antiguas como evidencia de una versión nueva.**
-
----
-
-## 8. ENTREGA ÚNICA OBLIGATORIA
-
-Cada encargo debe generar **un único paquete principal**:
-
-```
-agent-deliveries/freebuff/<ENCARGO>_Cambios.zip.txt
-```
-
-Debe ser un **ZIP real** aunque termine en `.zip.txt`.
-
-Debe contener:
-
-- archivos añadidos completos;
-- archivos modificados completos;
-- `GIT_DIFF.patch`;
-- `CAMBIOS.txt`;
-- `ARCHIVOS_MODIFICADOS.txt`;
-- `COMANDOS_Y_RESULTADOS.txt`;
-- `INVENTARIO_PAQUETE.txt`;
-- tests relevantes;
-- capturas cuando exista cambio visual.
-
-`PACKAGE_INTEGRITY` puede entregarse junto al paquete para registrar su tamaño
-y SHA-256 exactos.
-
-**No entregar numerosos enlaces individuales.**
-
----
-
-## 9. FORMATO FINAL SIMPLIFICADO
-
-La respuesta final debe utilizar solamente los siguientes campos:
-
-```
-STATUS:
-REPOSITORY:
-BRANCH:
-SHA BASE:
-SHA FINAL:
-PR:
-PR STATUS:
-MERGEABILITY:
-TESTS:
-BUILD:
-TYPECHECK:
-PREVIEW:
-WORKING TREE:
-PAQUETE PRINCIPAL:
-TAMAÑO:
-SHA-256:
-ENLACE DE DESCARGA:
-NO MERGE:
-NO DEPLOY:
-```
-
-Mostrar únicamente:
-
-1. Enlace del PR.
-2. Enlace del paquete principal.
-3. Enlace opcional de `PACKAGE_INTEGRITY`.
-
-No enumerar enlaces separados a cada documento.
-
----
-
-## 10. REGLAS DE DATOS
-
-**No inventar:**
-
-- costes;
-- timestamps UTC;
-- capital;
-- unidades;
-- drawdown porcentual;
-- métricas monetarias;
-- brokers;
-- símbolos;
-- resultados.
-
-**Separar:**
-
-- operaciones cerradas;
-- posiciones abiertas;
-- costes aplicados;
-- costes no disponibles;
-- equity intratrade;
-- equity reconstruida al cierre.
-
-**Mantener los estados internos fuera del bundle público.**
-
----
-
-## 11. REGLAS VISUALES DE QUANTORA
-
-En tarjetas públicas:
-
-**Primera fila:**
-
-1. Net result
-2. Profit Factor
-3. Quantora Score
-
-**Segunda fila:**
-
-4. Total trades
-5. Frequency
-6. Drawdown
-
-Reglas:
-
-- net result positivo en verde;
-- PF neutro;
-- score verde lima;
-- drawdown al final;
-- drawdown como magnitud positiva;
-- coral suave o ámbar para riesgo normal;
-- rojo intenso para error o riesgo crítico;
-- no fabricar porcentaje;
-- mantener unidades derivadas de datos.
-
----
-
-## 12. SEGURIDAD
-
-Antes de cada commit comprobar:
-
-- ausencia de secretos;
-- ausencia de tokens;
-- ausencia de rutas personales;
-- ausencia de MQ5, EX5 y SET;
-- ausencia de archivos del vault privado;
-- ausencia de `node_modules`;
-- ausencia de builds innecesarios;
-- ausencia de archivos temporales.
-
-**No modificar la visibilidad del repositorio.**
-
----
-
-## 13. OBJETIVO DEL ENCARGO
-
-**Crear únicamente:**
-
-- `FREEBUFF_WORKFLOW.md`
-
-**No modificar lógica, catálogo, manifests ni frontend.**
-
-**Crear rama:**
-
-```
-chore/QNT-local-workflow
-```
-
-**Abrir un PR nuevo.**
-
-**Generar paquete:**
-
-```
-agent-deliveries/freebuff/QNT-WORKFLOW-LOCAL_Cambios.zip.txt
-```
-
-- No hacer merge.
-- No hacer deploy.
-
-Al finalizar, responder con el formato simplificado y un único enlace principal.
-
----
-
-## 14. CI AUTOMÁTICO
-
-`quantora-web` dispone de integración continua en GitHub Actions:
-
-- **Workflow:** `.github/workflows/quantora-ci.yml` (`Quantora CI`).
-- **Disparadores:** cada `pull_request` dirigido a `main`, cada `push` a
-  `main` y ejecución manual (`workflow_dispatch`).
-
-El CI valida automáticamente:
-
-- instalación reproducible con `bun install --frozen-lockfile`;
-- tests de dominio;
-- tests de intake;
-- `strategies:validate` y pipeline de estrategias;
-- typecheck (`bun x tsc --noEmit`);
-- build cliente y SSR;
-- `git diff --check`;
-- protección de archivos privados (sin MQ5, EX5, SET ni DLL versionados,
-  sin `.env`/claves/tokens).
-
-Reglas:
-
-- **Un PR contra `main` no debe fusionarse si `Quantora CI` está en rojo.**
-- El CI **no hace deploy**: solo valida.
-- El merge sigue siendo manual.
-- MQ5, EX5, SET y DLL están **prohibidos** en `quantora-web`.
+This file is currently prepared locally and must not be included in the QNT-0015 PR. Incorporate it later through a separate documentation branch based on `main`, after QNT-0015 PR and CI work is closed.
