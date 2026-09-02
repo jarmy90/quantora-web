@@ -16,6 +16,7 @@ export function Nav({ extra }: { extra?: ReactNode }) {
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
           <Link to="/login">{t('nav.signIn')}</Link>
           {extra}
@@ -41,6 +42,7 @@ export function CatalogNav() {
         <Logo />
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
         </div>
         <div className="nav-actions">
@@ -121,6 +123,7 @@ function MobileMenu({ extra }: { extra?: ReactNode }) {
         >
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
           <Link to="/dashboard">{t('nav.dashboard')}</Link>
           <Link to="/login">{t('nav.signIn')}</Link>
           {extra}

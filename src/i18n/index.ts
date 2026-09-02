@@ -9,6 +9,7 @@ export type MessageKey = keyof typeof enUS;
 export const enUS = {
   'nav.howItWorks': 'How it works',
   'nav.strategies': 'Strategies',
+  'nav.install': 'How to install',
   'nav.trustRisk': 'Trust & risk',
   'nav.explore': 'Explore strategies',
   'nav.home': 'Home',
