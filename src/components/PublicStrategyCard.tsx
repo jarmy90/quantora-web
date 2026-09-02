@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import type { ProductStatus, PublicStrategy } from '../domain/publicStrategy';
+import type { PublicStrategy } from '../domain/publicStrategy';
 import { fmtNum, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
 
@@ -21,7 +21,7 @@ export function EquitySpark({ points }: { points: number[] }) {
   );
 }
 
-export function productStatusLabel(status: ProductStatus | undefined): string {
+export function productStatusLabel(status: string | undefined): string {
   switch (status) {
     case 'available':
       return t('catalog.available');
@@ -30,9 +30,9 @@ export function productStatusLabel(status: ProductStatus | undefined): string {
     case 'deprecated':
       return t('catalog.deprecated');
     case 'coming_soon':
-      return t('catalog.comingSoon');
+      return t('catalog.commercialOpeningSoon');
     default:
-      return t('catalog.notListed');
+      return t('catalog.commercialOpeningSoon');
   }
 }
 
@@ -54,7 +54,6 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
   const pointsUnit = s.performanceUnit === 'points';
   const net = pointsUnit ? m.netPoints : m.netUsd;
   const dd = pointsUnit ? m.maxDrawdownPoints : m.maxDrawdownUsd;
-  const status = s.productStatus ?? 'not_listed';
   const cost = costsChip(s);
 
   const netValue =
@@ -77,7 +76,8 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
       <div className="strategy-top">
         <div>
           <span className="badge">
-            {s.market}
+            {t('catalog.publishedStrategy')}
+            {s.market ? ` · ${s.market}` : ''}
             {s.instrument ? ` · ${s.instrument}` : ''}
           </span>
           <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
@@ -88,7 +88,8 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
             </div>
           )}
           <div className="card-chips">
-            <span className="status-chip coming-soon">{productStatusLabel(status)}</span>
+            <span className="status-chip published">{t('catalog.publishedStrategy')}</span>
+            <span className="status-chip historical">{t('catalog.historicalBacktest')}</span>
             <span className={cost.className}>{cost.label}</span>
           </div>
         </div>
@@ -112,9 +113,6 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
           <small>{t('detail.score')}</small>
           <strong style={{ color: 'var(--lime)' }}>
             {score ?? '—'}
-            <span className="score-beta" title={t('detail.scoreBetaNote')}>
-              {s.scoreVersion ? t('detail.scoreBetaBadge') : ''}
-            </span>
           </strong>
         </div>
       </div>

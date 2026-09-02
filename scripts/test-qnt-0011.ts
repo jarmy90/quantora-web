@@ -139,7 +139,7 @@ test('no active buy/rent/download in real strategy UI', () => {
   const realSectionStart = detail.indexOf('function RealDetail');
   const realSectionEnd = detail.indexOf('function MockDetail');
   const realSection = detail.slice(realSectionStart, realSectionEnd);
-  assert(realSection.includes('detail.notifyMe'), 'real detail must offer a non-transactional notify CTA');
+  assert(realSection.includes('detail.joinWaitlist'), 'real detail must offer the non-transactional waitlist CTA');
   // The picker may be *defined* between the two sections, but it must only be
   // *used* inside the mock detail (never in the real one).
   assert(

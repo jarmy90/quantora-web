@@ -556,21 +556,22 @@ function documentaryManifest(id: string): Record<string, unknown> {
   });
 }
 
-// 28. reviewLabel reaches the public output
-test('reviewLabel reaches the public output', () => {
+// 28. reviewLabel never reaches the public output (QNT-0020: editorial stays internal)
+test('reviewLabel never reaches the public output', () => {
   for (const manifestPath of [MANIFEST_PATH, STOCHEXTREME_MANIFEST_PATH]) {
     const result = processManifest(manifestPath);
     assert(result.issues.length === 0, `expected no issues: ${JSON.stringify(result.issues)}`);
     const pub = buildPublicCatalog([result.entry!])[0]!;
-    assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
+    assert(!('reviewLabel' in pub), 'reviewLabel must not reach the public output');
   }
 });
 
-// 29. independentReproduction=false reaches the public output
-test('independentReproduction=false reaches the public output', () => {
+// 29. independentReproduction stays internal (QNT-0020)
+test('independentReproduction never reaches the public output', () => {
   const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
+  assert(result.entry!.independentReproduction === false, 'entry keeps independentReproduction internally');
   const pub = buildPublicCatalog([result.entry!])[0]!;
-  assert(pub.independentReproduction === false, 'independentReproduction must be false');
+  assert(!('independentReproduction' in pub), 'independentReproduction must not reach the public output');
 });
 
 // 30. validationStatus never reaches the public output
@@ -640,7 +641,7 @@ test('scoreVersion=beta-1', () => {
   assert(result.entry!.scoreVersion === 'beta-1', 'entry scoreVersion');
   assert(result.entry!.score!.version === 'beta-1', 'score.version');
   const pub = buildPublicCatalog([result.entry!])[0]!;
-  assert(pub.scoreVersion === 'beta-1', 'public scoreVersion');
+  assert(!('scoreVersion' in pub), 'scoreVersion must not reach the public output');
 });
 
 // 38. filterVersion=beta-1
@@ -650,23 +651,25 @@ test('filterVersion=beta-1', () => {
   const result = processManifest(STOCHEXTREME_MANIFEST_PATH);
   assert(result.entry!.filterVersion === 'beta-1', 'entry filterVersion');
   const pub = buildPublicCatalog([result.entry!])[0]!;
-  assert(pub.filterVersion === 'beta-1', 'public filterVersion');
+  assert(!('filterVersion' in pub), 'filterVersion must not reach the public output');
 });
 
-// 39. First Triangle publicationMode=results
-test('First Triangle publicationMode=results', () => {
+// 39. First Triangle publication mode stays internal (QNT-0020)
+test('First Triangle publicationMode stays internal', () => {
   const manifest = buildFirstTriangleManifest();
   assert(manifest.publicationMode === 'results', `publicationMode: ${manifest.publicationMode}`);
+  assert(processManifest(MANIFEST_PATH).entry!.publicationMode === 'results', 'entry keeps publicationMode internally');
   const pub = buildPublicCatalog([processManifest(MANIFEST_PATH).entry!])[0]!;
-  assert(pub.publicationMode === 'results', 'public publicationMode');
+  assert(!('publicationMode' in pub), 'publicationMode must not reach the public output');
 });
 
-// 40. StochExtreme publicationMode=results
-test('StochExtreme publicationMode=results', () => {
+// 40. StochExtreme publication mode stays internal (QNT-0020)
+test('StochExtreme publicationMode stays internal', () => {
   const manifest = buildStochExtremeManifest();
   assert(manifest.publicationMode === 'results', `publicationMode: ${manifest.publicationMode}`);
+  assert(processManifest(STOCHEXTREME_MANIFEST_PATH).entry!.publicationMode === 'results', 'entry keeps publicationMode internally');
   const pub = buildPublicCatalog([processManifest(STOCHEXTREME_MANIFEST_PATH).entry!])[0]!;
-  assert(pub.publicationMode === 'results', 'public publicationMode');
+  assert(!('publicationMode' in pub), 'publicationMode must not reach the public output');
 });
 
 // 41. Documentary real strategy without PF publishes as documentary
@@ -773,7 +776,7 @@ test('costsApplied=false does not change the source Profit Factor', () => {
   assert(pub.metrics?.profitFactor === sourcePf, 'public PF must be unchanged');
 });
 
-// 52. Passing the filter does not change independentReproduction
+// 52. Passing the filter does not change independentReproduction (stays internal)
 test('passing the filter does not change independentReproduction', () => {
   const manifest = buildFirstTriangleManifest();
   assert(manifest.independentReproduction === false, 'source independentReproduction');
@@ -781,7 +784,7 @@ test('passing the filter does not change independentReproduction', () => {
   assert(result.entry?.published === true, 'must be published');
   assert(result.entry?.independentReproduction === false, 'entry independentReproduction unchanged');
   const pub = buildPublicCatalog([result.entry!])[0]!;
-  assert(pub.independentReproduction === false, 'public independentReproduction unchanged');
+  assert(!('independentReproduction' in pub), 'independentReproduction must not reach the public output');
 });
 
 // 53. Passing the filter does not assign Quantora Validated
@@ -948,8 +951,8 @@ test('QNT-0005 passes the beta-1 results filter and publishes', () => {
   assert(entry.filterVersion === 'beta-1', 'filterVersion');
   assert(entry.published === true, `expected published: ${JSON.stringify(entry.filterReasons)}`);
   const pub = GOLD_PUBLIC();
-  assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
-  assert(pub.independentReproduction === false, 'independentReproduction must be false');
+  assert(!('reviewLabel' in pub), 'reviewLabel must not reach the public output');
+  assert(!('independentReproduction' in pub), 'independentReproduction must not reach the public output');
 });
 
 // 67. Internal states never reach the public output for the gold strategy
@@ -1190,15 +1193,15 @@ test('TM Bandas S3 passes the results filter', () => {
   assert(result.entry?.scoreVersion === 'beta-1', 'scoreVersion');
 });
 
-// 88. Public catalog strips internal states and keeps the safe review label.
+// 88. Public catalog strips internal states and keeps editorial metadata internal.
 test('TM Bandas S3 public catalog strips internal states', () => {
   const result = processManifest(TM_BANDAS_S3_MANIFEST_PATH);
   const pub = buildPublicCatalog([result.entry!])[0]!;
   assert(!('validationStatus' in pub), 'no validationStatus');
   assert(!('dataStatus' in pub), 'no dataStatus');
   assert(!('status' in pub), 'no status');
-  assert(pub.reviewLabel === 'Owner supplied', `reviewLabel: ${pub.reviewLabel}`);
-  assert(pub.independentReproduction === false, 'independentReproduction false');
+  assert(!('reviewLabel' in pub), 'reviewLabel must not reach the public output');
+  assert(!('independentReproduction' in pub), 'independentReproduction must not reach the public output');
   assert(Math.abs(pub.metrics!.profitFactor! - 1.74045802) < 1e-7, 'PF preserved');
   assert(pub.equity?.points.length === 621, 'equity preserved');
 });

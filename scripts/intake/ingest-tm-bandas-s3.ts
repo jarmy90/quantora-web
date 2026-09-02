@@ -396,7 +396,7 @@ export function buildTmBandasS3Manifest(evidenceDir: string = EVIDENCE_DIR): Man
       'Maximum closed-trade drawdown: 384.00 USD',
       'Equity is reconstructed from closed trades (no separate equity file)',
       'No walk-forward / out-of-sample split is declared',
-      'Owner-supplied evidence; independent reproduction pending',
+      'Historical results available: backtest evidence covering the declared period',
       'Past performance does not guarantee future results',
     ],
     costs: {

@@ -37,8 +37,6 @@ export type QuantoraScore = {
   version: string;
 };
 
-export type PublicationMode = 'documentary' | 'results';
-
 /** Public commercial availability state (internal availability stays private). */
 export type ProductStatus =
   | 'not_listed'
@@ -68,19 +66,11 @@ export type PublicStrategy = {
   limitations?: string[];
   costs?: Record<string, string>;
   disclaimer?: string;
-  // QNT-0003H public transparency (commercially safe; internal states stay private):
-  /** Public review label, e.g. "Owner supplied". Never the internal validationStatus. */
-  reviewLabel?: string;
-  /** False until Quantora independently reproduces the strategy. */
-  independentReproduction: boolean;
+  // QNT-0020: public presentation only. No editorial/provenance metadata
+  // (reviewLabel, independentReproduction, scoreVersion, filterVersion,
+  // publicationMode) is part of the public contract — those stay internal.
   /** True when the reported results already include commissions/spread/slippage costs. */
   costsApplied?: boolean;
-  /** Version of the score formula ("beta-1"). */
-  scoreVersion?: string;
-  /** Version of the publication filter ("beta-1"). */
-  filterVersion?: string;
-  /** "documentary" (no results required) or "results" (performance required). */
-  publicationMode?: PublicationMode;
   /** Unit of results metrics/equity: "points" or "usd" (default "usd"). */
   performanceUnit?: 'points' | 'usd';
   // QNT-0011 public product state (commercially safe):

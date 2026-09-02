@@ -342,6 +342,8 @@ function scoreEntry(entry: CatalogEntry, evidenceComplete?: number, costsApplied
 
 /** Strips internal states/provenance and keeps only the client-facing fields. */
 export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
+  // The internal formula version string ("beta-1") is editorial metadata; the
+  // public bundle carries an empty value instead (the UI never renders it).
   return {
     id: entry.id,
     name: entry.name,
@@ -357,19 +359,16 @@ export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
     period: entry.period,
     metrics: entry.metrics,
     equity: entry.equity,
-    score: entry.score,
+    score: entry.score ? { ...entry.score, version: '' } : undefined,
     rules: entry.rules,
     limitations: entry.limitations,
     costs: entry.costs,
     disclaimer: entry.disclaimer,
-    // QNT-0003H public transparency: commercially safe labels. Internal states
-    // (status/validationStatus/dataStatus) and evidence hashes never cross here.
-    reviewLabel: entry.reviewLabel,
-    independentReproduction: entry.independentReproduction === true,
+    // QNT-0020: public presentation only. Editorial/provenance metadata
+    // (reviewLabel, independentReproduction, scoreVersion, filterVersion,
+    // publicationMode) stays internal and never reaches the public bundle.
+    // performanceUnit is functional (point-vs-usd metric rendering) and stays.
     costsApplied: entry.costsApplied,
-    scoreVersion: entry.scoreVersion,
-    filterVersion: entry.filterVersion,
-    publicationMode: entry.publicationMode,
     performanceUnit: entry.performanceUnit,
     // QNT-0011 public product state (commercially safe).
     productId: entry.productId,

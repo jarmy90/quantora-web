@@ -161,4 +161,16 @@
 .package-card{border:1px dashed #3a4c60;border-radius:10px;padding:14px}
 .file-row{font-family:'DM Mono',monospace;font-size:12.5px;color:#cdd7df;padding:8px 10px;border-bottom:1px solid #ffffff0d}
 .file-row:last-child{border-bottom:0}
+
+/* ---- QNT-0020: published catalog presentation ---- */
+.status-chip.published{color:var(--lime);border:1px solid #44612a;background:#10170c}
+.status-chip.historical{color:var(--cyan);border:1px solid #2c5a6e;background:#0b1418}
+.badge.published{color:var(--lime);border-color:#44612a;background:#10170c}
+.status-chip.commercial-soon{color:var(--cyan);border:1px solid #2c5a6e;background:#0b1418}
+.mobile-menu-action{background:none;border:0;color:var(--text);font-size:15px;font-weight:600;padding:12px 8px;border-radius:6px;text-align:left;cursor:pointer;font-family:inherit}
+.mobile-menu-action:hover{background:#ffffff0a}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
 @media(max-width:760px){.easy-check{grid-template-columns:1fr}.guide-step{padding:18px}.easy-hero h1{font-size:30px}}

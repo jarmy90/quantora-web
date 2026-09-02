@@ -19,7 +19,6 @@
  * independent validation. A PF of 1.20 or higher is the *favorable* tier and is
  * rewarded by the Quantora Score (see scoring.ts), but it is not mandatory.
  */
-import type { PublicStrategy } from '../../src/domain/publicStrategy.ts';
 
 export const MIN_PROFIT_FACTOR = 1.15;
 export const FILTER_VERSION = 'beta-1';
@@ -125,24 +124,4 @@ export function evaluatePublishFilter(input: PublishFilterInput): PublishDecisio
   }
 
   return { publish: reasons.length === 0, reasons };
-}
-
-/** Convenience wrapper over the public shape used by the catalog builder. */
-export function shouldPublish(strategy: PublicStrategy): PublishDecision {
-  return evaluatePublishFilter({
-    id: strategy.id,
-    name: strategy.name,
-    version: strategy.version,
-    descriptionOrRules: Boolean(strategy.description || (strategy.rules?.length ?? 0) > 0),
-    marketOrAssets: Boolean(strategy.market || strategy.instrument || strategy.assets.length > 0),
-    limitations: Boolean(strategy.limitations && strategy.limitations.length > 0),
-    publicationMode: strategy.publicationMode,
-    profitFactor: strategy.metrics?.profitFactor,
-    trades: strategy.metrics?.trades,
-    equityPointCount: strategy.equity?.points.length,
-    periodStart: strategy.period?.start,
-    periodEnd: strategy.period?.end,
-    maxDrawdownUsd: strategy.metrics?.maxDrawdownUsd,
-    costsApplied: strategy.costsApplied,
-  });
 }
