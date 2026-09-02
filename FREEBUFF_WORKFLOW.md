@@ -7,7 +7,7 @@ Permanent operating and delivery protocol for Freebuff sessions in `jarmy90/quan
 At the beginning of every Quantora session, Freebuff must:
 
 1. Read this file in full.
-2. Read `MASTER.md`, if present.
+2. Read `MASTER.md` at the beginning of every session.
 3. Read the continuity documents specified by Javier.
 4. Read `docs/COMMERCIAL_ROADMAP.md`.
 5. Check the real repository state with Git.
@@ -52,6 +52,7 @@ At the beginning of every Quantora session, Freebuff must:
 - Backtest is not demo.
 - Demo is not a real account.
 - Demo monitoring is not verified live.
+- Keep a strict distinction between implemented, pending, designed, and validated.
 - Internal review is not independent validation.
 - Never invent balances, equity, trades, returns, or connections.
 - Never promote a strategy to `quantora_validated` without an explicit editorial decision.
@@ -60,6 +61,7 @@ At the beginning of every Quantora session, Freebuff must:
 - Do not run live migrations without authorization.
 - Checkout, payments, licenses, and downloads are activated only in authorized phases.
 - Secrets belong only on the server or in secure systems.
+- Safe actions may proceed autonomously; human intervention is reserved for credentials, permissions, irreversible decisions, and genuine blockers.
 - Do not set prices or revenue shares without Javier's decision.
 - Do not present future functionality as available.
 
@@ -74,6 +76,8 @@ When applicable, require:
 - New phase tests.
 - Private-file protection.
 - `git diff --check`.
+- Verify delivery files with `test -f`, `test -s`, `wc -c`, and `sha256sum`.
+- Validate ZIP packages with `unzip -t` and `unzip -l`.
 - Final `git status`.
 - Full diff review.
 - Visual inspection when a browser is available.
@@ -92,6 +96,7 @@ At the end of a relevant task, Freebuff must:
 - Keep `MASTER.md` brief, precise, and operational.
 - If `MASTER.md` is local and untracked, update it locally without accidentally committing it.
 - If Javier later decides to version it, use a separate documentation task.
+- Update `MASTER.md` at the end of every relevant session.
 
 ## 7. Permanent delivery contract: exactly one file
 
@@ -103,6 +108,8 @@ Do not return an extra report, index, ZIP, loose PR body, loose logs, loose Git 
 
 Prefer this mode. Create exactly one UTF-8 plain-text `.txt` containing all necessary summary, Git state, validations, PR, CI, errors, recommendations, human instructions, PR body if needed, important paths, and final `git status`.
 
+Always create the TXT, including partial, blocked, or pending responses. Deliver the TXT separately even when a ZIP is also required. When multiple files are genuinely necessary, create a real ZIP and rename it with `.zip.txt`.
+
 Do not create a separate PR body or index.
 
 ### Mode B: multiple internal files are genuinely necessary
@@ -111,7 +118,7 @@ Create one real ZIP containing everything, including a main TXT report. Rename t
 
 ## 8. Delivery folder
 
-Copy the one final file directly to the user's real Downloads folder. In Termux, first check `$HOME/storage/downloads/`; on desktop Linux, check `$HOME/Downloads/`. Use only a path that actually exists; never invent it. Do not leave the artifact only in the repository. Verify its existence using a read-only operation at the end.
+Copy the final TXT and, when multiple files are required, the ZIP.TXT directly to the user's real Downloads folder. Mark the delivery `ADJUNTADO` when attachments are supported, otherwise mark `INTERFAZ_SIN_ADJUNTOS`. Use only a path that actually exists; In Termux, first check `$HOME/storage/downloads/`; on desktop Linux, check `$HOME/Downloads/`. Use only a path that actually exists; never invent it. Do not leave the artifact only in the repository. Verify its existence using a read-only operation at the end.
 
 ## 9. Artifact cleanup
 
@@ -139,4 +146,9 @@ Every Freebuff intervention must finish with a physically created, verified, and
 
 ## Current incorporation rule
 
-This file is currently prepared locally and must not be included in the QNT-0015 PR. Incorporate it later through a separate documentation branch based on `main`, after QNT-0015 PR and CI work is closed.
+This file is incorporated through its own documentation branch based on the main commit after QNT-0015. It must never be mixed with QNT-0015, QNT-0016, runtime code, Supabase, or deployment work.
+
+## 12. Authorization boundaries
+
+- Commit, push, and PR creation require authorization; merge and deployment require separate explicit authorization.
+- Do not begin the next ticket automatically.
