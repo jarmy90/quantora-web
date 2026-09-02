@@ -8,7 +8,7 @@
 // member's `bun run publish` runs as their own user), so publish never collides
 // with an already-running server. Every sandbox user has passwordless sudo, so
 // the takeover works across user boundaries.
-import handler from "./dist/server/server.js";
+import handler from "./.output/server/index.mjs";
 
 // Pinned, NOT read from the environment. The published preview URL
 // (<label>.<PUBLIC_SITE_DOMAIN>) is reverse-proxied to 0.0.0.0:3000 inside the

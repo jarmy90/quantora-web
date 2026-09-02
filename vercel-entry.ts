@@ -10,7 +10,7 @@
 // .vercel/output/functions/render.func/index.mjs by build-vercel.sh.
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import handler from "./dist/server/server.js";
+import handler from "./.output/server/index.mjs";
 
 const fetchHandler = handler as {
   fetch: (request: Request) => Response | Promise<Response>;
