@@ -194,7 +194,7 @@ test('strategies, metrics and auth remain intact', () => {
   }
   // The strategy detail still renders metrics, monitor and product state.
   assert(detail.includes('metric-grid'), 'metrics still rendered');
-  assert(detail.includes('detail.productState'), 'product state still rendered');
+  assert(detail.includes('detail.earlyAccess'), 'product state still rendered (early access block)');
   assert(account.includes('beforeLoad'), 'auth protection still present');
 });
 

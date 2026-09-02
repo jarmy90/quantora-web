@@ -32,6 +32,7 @@ const catalog = read('src/routes/strategies.index.tsx');
 const nav = read('src/components/Nav.tsx');
 const i18n = read('src/i18n/index.ts');
 const monitorCard = read('src/components/DemoMonitoringCard.tsx');
+const dash = read('src/routes/dashboard.tsx');
 
 // ---------------------------------------------------------------------------
 // 1. The four strategies are published.
@@ -111,21 +112,128 @@ test('no invented prices, allocations or licenses remain in the UI', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 5. Honest commercial state + no verified-live framing.
+// 5. Honest early-access state + no verified-live framing.
 // ---------------------------------------------------------------------------
-test('commercial access is honest and never claims live results', () => {
-  assert(i18n.includes('Commercial access opening soon'), 'commercial opening copy present');
-  assert(i18n.includes('Join the waitlist'), 'waitlist copy present');
-  assert(i18n.includes('Get notified when available'), 'notify copy present');
-  assert(i18n.includes('Interest registration will be enabled in a later phase'), 'waitlist is honest about persistence');
-  assert(detail.includes('detail.commercialOpeningSoon'), 'detail renders commercial opening state');
-  assert(detail.includes('detail.joinWaitlist'), 'detail renders the waitlist CTA');
+test('early access is honest, never claims live results and never fakes saving', () => {
+  for (const file of [i18n, home, detail, catalog]) {
+    assert(!file.includes('Commercial access opening soon'), 'public surface must not say "Commercial access opening soon"');
+  }
+  for (const file of [home, detail]) {
+    assert(file.includes('detail.getAccessUpdates') || file.includes('home.getAccessUpdates'), 'account-based early access CTA rendered');
+  }
+  assert(i18n.includes('Early access'), 'early access eyebrow present');
+  assert(i18n.includes('Nothing is collected on this page'), 'early access copy states nothing is collected');
+  assert(i18n.includes('no purchase, rental or download is available'), 'no commercial transaction may be implied');
   assert(!detail.includes('Verified live result'), 'detail must not claim verified live results');
   assert(!monitorCard.includes('Verified live'), 'monitor card must not render a verified-live label');
   assert(
     i18n.includes('Backtest ≠ Demo monitoring ≠ Real account results'),
     'separation legend uses Real account results',
   );
+});
+
+// ---------------------------------------------------------------------------
+// 5b. Cards and details disclose costs without badges or unsupported claims.
+// ---------------------------------------------------------------------------
+test('published cards never say "Costs not applied" and disclose costs discreetly', () => {
+  assert(!card.includes('Costs not applied'), 'card must not render "Costs not applied"');
+  assert(!card.includes('card.costsNotApplied'), 'card must not reference the old badge key');
+  assert(card.includes('card.costsNotIncluded'), 'card renders the discreet costs note');
+  assert(
+    card.includes("s.costsApplied === false && <p className=\"cost-note\">"),
+    'the note appears only when costsApplied=false, before the CTA',
+  );
+  assert(!i18n.includes('Costs not applied'), 'dictionary must not contain "Costs not applied"');
+});
+
+test('detail explains trading costs per strategy without overstating them', () => {
+  assert(detail.includes('detail.tradingCosts'), 'detail renders a Trading costs section');
+  assert(detail.includes('detail.costsNotIncludedCopy'), 'detail renders the excluded-costs copy');
+  assert(detail.includes('detail.costsIncludedCopy'), 'detail renders the included-data copy');
+  assert(i18n.includes('This backtest does not include commission, spread, slippage or swap'), 'excluded-costs wording is exact');
+  assert(
+    i18n.includes('Reported results include the available commission data. Other broker costs are included only when supplied by the source.'),
+    'included-costs wording never claims spread/slippage/swap were applied',
+  );
+  assert(!detail.includes('detail.costsNotApplied'), 'detail must not render the badge string');
+});
+
+test('the methodology states costs are shown exactly as provided', () => {
+  assert(
+    i18n.includes('Trading costs are shown exactly as provided by each backtest'),
+    'single methodology note about trading costs is present',
+  );
+  assert(detail.includes('detail.tradingCostsMethodology'), 'methodology note is rendered on the detail page');
+});
+
+// ---------------------------------------------------------------------------
+// 5c. No duplicated primary navigation (desktop or mobile).
+// ---------------------------------------------------------------------------
+test('navigation has one Strategies link per menu and no duplicate on home', () => {
+  const homeExtra = home.slice(home.indexOf('extra='), home.indexOf('</Nav>'));
+  assert(!homeExtra.includes('nav.strategies'), 'home extra nav must not duplicate Strategies');
+  assert(!homeExtra.includes('home.joinWaitlist'), 'home extra nav must not duplicate a waitlist CTA');
+  const desktop = nav.slice(nav.indexOf('<div className="links">'), nav.indexOf('</div>', nav.indexOf('<div className="links">')));
+  assert((desktop.match(/to="\/strategies"/g) ?? []).length === 1, 'desktop menu has exactly one Strategies link');
+  const mobileStart = nav.indexOf('className="mobile-menu"');
+  const mobile = nav.slice(mobileStart, nav.indexOf('{extra}', mobileStart));
+  assert((mobile.match(/to="\/strategies"/g) ?? []).length === 1, 'mobile menu has exactly one Strategies link');
+  assert(home.includes('href="#compare"'), 'Compare strategies remains a real home section link');
+});
+
+// ---------------------------------------------------------------------------
+// 5d. Global footer is professional: no demo closing, no legal placeholder.
+// ---------------------------------------------------------------------------
+test('global footer has no "Demo experience" closing and no legal placeholder notice', () => {
+  const footer = read('src/components/Footer.tsx');
+  assert(!footer.includes('footer.legalReview'), 'footer must not render the legal placeholder notice');
+  assert(
+    i18n.includes("'footer.rights': 'Historical results do not guarantee future performance. Not financial advice.'"),
+    'footer closing is the professional disclaimer',
+  );
+  assert(!i18n.includes('Demo experience'), 'dictionary must not contain "Demo experience"');
+});
+
+// ---------------------------------------------------------------------------
+// 5e. Strategy metrics are untouched fixtures are not in the public surface.
+// ---------------------------------------------------------------------------
+test('strategy metrics still match their manifests (no data changes)', () => {
+  const ids = [
+    'first-triangle-adaptive',
+    'first-triangle-gold-adaptive',
+    'stochextreme-adaptive',
+    'tm-bandas-s3',
+  ];
+  for (const id of ids) {
+    const manifest = JSON.parse(read(`public-strategies/manifests/${id}.manifest.json`));
+    const strategy = publicStrategies.find((s) => s.id === id)!;
+    const metrics = strategy.metrics ?? {};
+    const source = manifest.results?.metrics ?? {};
+    for (const [key, value] of Object.entries(source) as [string, number][]) {
+      if (typeof value === 'number' && Number.isFinite(value) && metrics[key] !== undefined) {
+        assert(metrics[key] === value, `metric "${key}" changed for ${id} (${metrics[key]} vs ${value})`);
+      }
+    }
+  }
+});
+
+// ---------------------------------------------------------------------------
+// 5f. Demo experiences stay unmistakably labelled as demo.
+// ---------------------------------------------------------------------------
+test('demo experiences remain clearly identified as demo', () => {
+  assert(detail.includes('<DemoMonitoringCard'), 'detail keeps the demo monitoring module');
+  assert(i18n.includes("'detail.monitorEyebrow': 'Demo monitoring'"), 'monitoring module heading says Demo monitoring');
+  assert(monitorCard.includes('monitor.disclaimer'), 'monitoring module renders the demo disclaimer');
+  assert(dash.includes('dashboard.demo'), 'dashboard surfaces the demo/account state label');
+});
+
+// ---------------------------------------------------------------------------
+// 5g. The global header never renders the mock banner.
+// ---------------------------------------------------------------------------
+test('the global header does not render a MOCK ENVIRONMENT banner', () => {
+  assert(!nav.includes('nav.mockEnvironment'), 'header must not render the mock environment banner');
+  assert(nav.includes('to="/register"') && nav.includes('nav.createAccount'), 'Create account CTA still present');
+  assert(nav.includes('to="/login"') && nav.includes('nav.signIn'), 'Sign in link still present');
 });
 
 // ---------------------------------------------------------------------------

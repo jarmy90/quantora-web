@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
 import type { EquityPoint } from '../domain/types';
@@ -97,37 +97,6 @@ function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'point
   );
 }
 
-/**
- * Informative availability dialog — never persists data, never confirms a list.
- */
-function NotifyDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-  return (
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="notify-dialog-title">
-        <h3 id="notify-dialog-title" style={{ margin: '0 0 10px' }}>
-          {t('detail.notifyDialogTitle')}
-        </h3>
-        <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, margin: '0 0 18px' }}>
-          {t('detail.notifyDialogBody')}
-        </p>
-        <button type="button" className="btn primary" onClick={onClose} autoFocus>
-          {t('detail.notifyClose')}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function RealDetail({ s }: { s: PublicStrategy }) {
   const m = s.metrics ?? {};
   const score = s.score;
@@ -171,15 +140,14 @@ function RealDetail({ s }: { s: PublicStrategy }) {
       accent: AMBER,
       title: pointsUnit ? t('detail.drawdownNote') : undefined,
     },
-    {
-      label: t('detail.costs'),
-      value:
-        s.costsApplied === false
-          ? t('detail.costsNotApplied')
-          : m.costPerTradeUsd !== undefined
-            ? `${fmtUsd(m.costPerTradeUsd)} / trade`
-            : '—',
-    },
+    ...(m.costPerTradeUsd !== undefined
+      ? [
+          {
+            label: t('detail.costs'),
+            value: `${fmtUsd(m.costPerTradeUsd)} / trade`,
+          },
+        ]
+      : []),
     {
       label: t('detail.netResult'),
       value:
@@ -207,8 +175,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
       value: String(fmtNum(m.openPositionsAtEnd)),
     });
   }
-
-  const [notifyOpen, setNotifyOpen] = useState(false);
 
   return (
     <>
@@ -249,14 +215,18 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           ))}
         </section>
 
+        <section className="card" style={{ marginTop: 15 }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>{t('detail.tradingCosts')}</div>
+          <p className="muted" style={{ fontSize: 13, lineHeight: 1.7, margin: 0, maxWidth: 760 }}>
+            {s.costsApplied === false ? t('detail.costsNotIncludedCopy') : t('detail.costsIncludedCopy')}
+          </p>
+        </section>
+
         <section className="card product-card" style={{ marginTop: 15 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div className="eyebrow" style={{ marginBottom: 0 }}>{t('detail.productState')}</div>
-            <span className="status-chip commercial-soon">{t('detail.commercialOpeningSoon')}</span>
-          </div>
-          <h2 style={{ fontSize: 23, margin: '14px 0 6px' }}>{t('detail.commercialOpeningSoon')}</h2>
+          <div className="eyebrow" style={{ marginBottom: 0 }}>{t('detail.earlyAccess')}</div>
+          <h2 style={{ fontSize: 23, margin: '14px 0 6px' }}>{t('detail.earlyAccessTitle')}</h2>
           <p className="muted" style={{ fontSize: 13, lineHeight: 1.6, maxWidth: 720 }}>
-            {t('detail.commercialOpeningBody')}
+            {t('detail.earlyAccessBody')}
           </p>
           <div className="product-meta" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
             {s.productId && <span className="tag">{t('detail.productId')}: {s.productId}</span>}
@@ -266,19 +236,12 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             </span>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-            <button type="button" className="btn primary" onClick={() => setNotifyOpen(true)}>
-              {t('detail.joinWaitlist')}
-            </button>
-            <a className="btn" href="#how-it-works">{t('detail.viewMethodology')}</a>
-            <Link
-              className="btn"
-              to="/login"
-              search={{ returnTo: `/strategies/${s.id}` } as never}
-            >
-              {t('detail.signInInterest')}
+            <Link className="btn primary" to="/register" search={{ returnTo: `/strategies/${s.id}` } as never}>
+              {t('detail.getAccessUpdates')}
             </Link>
+            <a className="btn" href="#how-it-works">{t('detail.viewMethodology')}</a>
           </div>
-          <NotifyDialog open={notifyOpen} onClose={() => setNotifyOpen(false)} />
+          <p className="mono research-note">{t('detail.earlyAccessNote')}</p>
         </section>
 
         <DemoMonitoringCard strategyId={s.id} />
@@ -307,6 +270,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.configuration && <li>Configuration: {s.configuration}</li>}
           </ul>
 
+          <p className="mono research-note">{t('detail.tradingCostsMethodology')}</p>
           <p className="mono research-note">{t('detail.researchNote')}</p>
         </section>
 
@@ -329,7 +293,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {(s.limitations ?? []).map((limitation) => (
               <li key={limitation}>{limitation}</li>
             ))}
-            {s.costsApplied === false && <li>{t('detail.costsNotApplied')} — {t('detail.costsWarning')}</li>}
           </ul>
           {s.disclaimer && <p className="mono research-note">{s.disclaimer}</p>}
         </section>

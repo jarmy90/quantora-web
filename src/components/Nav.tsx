@@ -52,9 +52,6 @@ export function Nav({ extra }: { extra?: ReactNode }) {
           {extra}
         </div>
         <div className="nav-actions">
-          {!import.meta.env.PROD && (
-            <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
-          )}
           {auth === 'user' ? (
             <button type="button" className="btn nav-explore" onClick={handleSignOut}>
               {t('account.signOut')}

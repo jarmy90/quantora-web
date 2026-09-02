@@ -76,10 +76,7 @@
 .status-chip{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:99px;white-space:nowrap}
 .status-chip.coming-soon{color:var(--amber);border:1px solid #8a6a3a;background:#171208}
 .status-chip.not-connected{color:#7d8b99;border:1px solid #3a4652;background:#0d1219}
-.cost-chip{font-size:10px;font-weight:600;padding:4px 8px;border-radius:99px;white-space:nowrap}
-.cost-chip.applied{color:var(--cyan);border:1px solid #2c5a6e;background:#0b1418}
-.cost-chip.not-applied{color:var(--amber);border:1px solid #8a6a3a;background:#171208}
-.cost-chip.unknown{color:#7d8b99;border:1px solid #3a4652;background:#0d1219}
+.cost-note{font-size:12px;font-weight:400;line-height:1.55;color:var(--muted);margin:14px 0 0;max-width:34ch;text-transform:none}
 .score-beta{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#7d8b99;border:1px solid #3a4652;border-radius:99px;padding:2px 6px;margin-left:6px;vertical-align:middle}
 .metric-note{color:#65717d;font-size:10px;margin-top:6px}
 .card-cta{margin-top:16px;width:100%;text-align:center}

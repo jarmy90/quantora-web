@@ -27,7 +27,7 @@ export const enUS = {
   'home.heroTitle': 'Strategies you can',
   'home.heroAccent': 'understand.',
   'home.heroBody':
-    'Explore four published, rules-based trading strategies with historical results, risk metrics, costs, limitations and a consistently calculated Quantora Score — so you can compare before you decide.',
+    'Quantora publishes rules-based Expert Advisors for MetaTrader 5. Explore four published strategies with historical results, risk metrics, costs, limitations and a consistently calculated Quantora Score — so you can compare before you decide.',
   'home.browse': 'Browse the catalog →',
   'home.seeHow': 'How evaluation works',
   'home.realStrategies': 'Four published strategies',
@@ -39,12 +39,12 @@ export const enUS = {
   'home.compareTitle': 'The same structured evaluation for every strategy.',
   'home.compareBody':
     'Every published strategy is evaluated through the same structured methodology, so historical results and risk metrics can be compared directly.',
-  'home.waitlistEyebrow': 'Commercial access opening soon',
-  'home.waitlistTitle': 'Be the first to know when a strategy becomes available.',
-  'home.waitlistBody':
-    'Join the waitlist to get notified when a strategy opens for commercial access. Registration of interest will be enabled in the next phase — nothing is saved yet.',
-  'home.joinWaitlist': 'Join the waitlist',
-  'home.waitlistNote': 'Interest registration will be enabled when commercial access opens. No details are collected on this page yet.',
+  'home.waitlistEyebrow': 'Early access',
+  'home.waitlistTitle': 'Be first to know when a strategy becomes available.',
+  'home.waitlistBody': 'Join the Quantora early-access list to receive product availability updates.',
+  'home.getAccessUpdates': 'Get access updates',
+  'home.waitlistNote':
+    'Availability updates will appear in your Quantora account. Nothing is collected on this page yet.',
   'home.workflow': 'A consistent way to evaluate strategies',
   'home.workflowTitle': 'Less promise. More evidence.',
   'home.workflowIntro':
@@ -78,8 +78,8 @@ export const enUS = {
   'catalog.published': 'Four published strategies',
   'catalog.publishedStrategy': 'Published strategy',
   'catalog.historicalBacktest': 'Historical backtest',
-  'catalog.comingSoon': 'Commercial access opening soon',
-  'catalog.commercialOpeningSoon': 'Commercial access opening soon',
+  'catalog.comingSoon': 'Early access',
+  'catalog.commercialOpeningSoon': 'Early access',
   'catalog.notListed': 'Not listed',
   'catalog.paused': 'Paused',
   'catalog.deprecated': 'Deprecated',
@@ -92,7 +92,6 @@ export const enUS = {
   'detail.totalTrades': 'Total trades',
   'detail.dataStatus': 'Data status',
   'detail.score': 'Quantora Score',
-  'detail.scoreBetaBadge': 'Comparative score',
   'detail.scoreExplanation': 'Comparative score calculated consistently from the historical evidence available for each strategy.',
   'detail.evidenceConfidence': 'Evidence confidence: {pct}%',
   'detail.profitFactor': 'Profit Factor',
@@ -114,11 +113,6 @@ export const enUS = {
   'detail.notFoundBody':
     'The strategy you are looking for does not exist. Browse the catalog to explore available systems.',
   'detail.backCatalog': '← Back to catalog',
-  'detail.scoreBeta': 'Quantora Score · Beta',
-  'detail.scoreBetaNote':
-    'Comparative score calculated consistently from the historical evidence available for each strategy.',
-  'detail.costsNotApplied': 'Costs not applied',
-  'detail.costsWarning': 'Reported performance may be reduced after commission, spread, slippage and swap.',
   'detail.historicalBacktest': 'Historical backtest',
   'detail.resultsInPoints': 'Results in points',
   'detail.closedTradeDrawdown': 'Closed-trade drawdown',
@@ -130,26 +124,28 @@ export const enUS = {
   'detail.openPositionsAtEnd': 'Open positions at end',
   'detail.expectancy': 'Expectancy',
   'detail.ptsPerTrade': 'pts/trade',
-  'card.costsApplied': 'Costs applied',
-  'card.costsNotApplied': 'Costs not applied',
-  'card.costsNotConfirmed': 'Costs not confirmed',
   'card.backtestLabel': 'Historical backtest',
+  'card.costsNotIncluded': 'Backtest results exclude commission, spread, slippage and swap.',
   'detail.productState': 'Availability',
   'detail.productId': 'Product',
   'detail.commercialDownload': 'Commercial download',
   'detail.commercialDownloadEnabled': 'Enabled',
   'detail.commercialDownloadDisabled': 'Not enabled',
-  'detail.comingSoonBadge': 'Commercial access opening soon',
-  'detail.commercialOpeningSoon': 'Commercial access opening soon',
-  'detail.commercialOpeningBody': 'Join the waitlist to get notified when this strategy becomes available. Interest registration will be enabled in a later phase.',
-  'detail.joinWaitlist': 'Join the waitlist',
-  'detail.notifyMe': 'Get notified when available',
-  'detail.notifyDialogTitle': 'Availability notifications',
-  'detail.notifyDialogBody':
-    'Notifications are not active yet. When this product opens, availability will be announced here and through the catalog. Nothing was saved.',
-  'detail.notifyClose': 'Close',
-  'detail.signInInterest': 'Sign in to save your interest',
   'detail.viewMethodology': 'View methodology',
+  'detail.earlyAccess': 'Early access',
+  'detail.earlyAccessTitle': 'Be first to know when a strategy becomes available.',
+  'detail.earlyAccessBody':
+    'Quantora is preparing commercial access to its published strategies. Create an account and availability updates will appear there.',
+  'detail.earlyAccessNote':
+    'Nothing is collected on this page. Commercial access is not open yet — no purchase, rental or download is available.',
+  'detail.getAccessUpdates': 'Get access updates',
+  'detail.tradingCosts': 'Trading costs',
+  'detail.costsNotIncludedCopy':
+    'This backtest does not include commission, spread, slippage or swap. Actual results may therefore be lower.',
+  'detail.costsIncludedCopy':
+    'Reported results include the available commission data. Other broker costs are included only when supplied by the source.',
+  'detail.tradingCostsMethodology':
+    'Trading costs are shown exactly as provided by each backtest. When commission, spread, slippage or swap are not included, Quantora identifies this in the strategy detail.',
   'detail.monitorEyebrow': 'Demo monitoring',
   'detail.monitorNotConnected': 'Not connected yet',
   'detail.monitorBody':
@@ -212,9 +208,7 @@ export const enUS = {
   'footer.legalTerms': 'Terms of Use',
   'footer.legalPrivacy': 'Privacy Policy',
   'footer.legalRisk': 'Risk Disclosure',
-  'footer.legalReview':
-    'These legal pages are placeholders and must be reviewed by a qualified legal professional before use.',
-  'footer.rights': 'Demo experience. Not financial advice.',
+  'footer.rights': 'Historical results do not guarantee future performance. Not financial advice.',
 
   'seo.homeDescription':
     'Quantora evaluates rules-based trading strategies through structured backtesting, with performance, risk and limitations shown clearly.',

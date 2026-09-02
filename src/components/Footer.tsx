@@ -27,7 +27,6 @@ export function Footer() {
           <Link to="/legal/terms">{t('footer.legalTerms')}</Link>
           <Link to="/legal/privacy">{t('footer.legalPrivacy')}</Link>
           <Link to="/legal/risk-disclosure">{t('footer.legalRisk')}</Link>
-          <span className="footer-review">{t('footer.legalReview')}</span>
         </div>
       </div>
       <div className="wrap footer-bar">

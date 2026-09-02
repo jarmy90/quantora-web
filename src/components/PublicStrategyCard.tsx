@@ -36,16 +36,13 @@ export function productStatusLabel(status: string | undefined): string {
   }
 }
 
-/** Cost indicator derived from the public data — never hardcoded per strategy. */
-export function costsChip(s: PublicStrategy): { label: string; className: string } {
-  if (s.costsApplied === true) return { label: t('card.costsApplied'), className: 'cost-chip applied' };
-  if (s.costsApplied === false) return { label: t('card.costsNotApplied'), className: 'cost-chip not-applied' };
-  return { label: t('card.costsNotConfirmed'), className: 'cost-chip unknown' };
-}
-
 /**
  * Public strategy card. `cta` renders an explicit "View strategy" action (home);
  * without it the whole card links to the detail page (catalog).
+ *
+ * QNT-0020: cost treatment is never a badge on the card. When costs are not
+ * applied, a discreet typographic note appears after the metrics and before
+ * the CTA — no alert icon, no caps, no highlighted border.
  */
 export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?: boolean }) {
   const m = s.metrics ?? {};
@@ -54,7 +51,6 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
   const pointsUnit = s.performanceUnit === 'points';
   const net = pointsUnit ? m.netPoints : m.netUsd;
   const dd = pointsUnit ? m.maxDrawdownPoints : m.maxDrawdownUsd;
-  const cost = costsChip(s);
 
   const netValue =
     net !== undefined
@@ -90,7 +86,6 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
           <div className="card-chips">
             <span className="status-chip published">{t('catalog.publishedStrategy')}</span>
             <span className="status-chip historical">{t('catalog.historicalBacktest')}</span>
-            <span className={cost.className}>{cost.label}</span>
           </div>
         </div>
         <span style={{ color: 'var(--cyan)', fontSize: 20 }} aria-hidden="true">
@@ -130,6 +125,7 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
           <strong style={{ color: 'var(--amber)' }}>{ddValue}</strong>
         </div>
       </div>
+      {s.costsApplied === false && <p className="cost-note">{t('card.costsNotIncluded')}</p>}
     </>
   );
 

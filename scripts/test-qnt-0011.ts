@@ -12,7 +12,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { publicCatalog, publicStrategies } from '../src/catalog.ts';
-import { costsChip } from '../src/components/PublicStrategyCard.tsx';
 import { fmtPoints, fmtSignedPoints } from '../src/format.ts';
 
 const ROOT = resolve(import.meta.dir, '..');
@@ -96,14 +95,24 @@ test('points formatting never duplicates the unit (pts pts)', () => {
   assert(net.startsWith('+'), `positive net must be signed: "${net}"`);
 });
 
-// 5. Cost indicator is derived from public data, never hardcoded.
-test('costs chip derives from costsApplied data', () => {
-  const first = publicStrategies.find((s) => s.id === 'first-triangle-adaptive')!;
-  const gold = publicStrategies.find((s) => s.id === 'first-triangle-gold-adaptive')!;
-  assert(costsChip(first).label === 'Costs applied', 'first-triangle costsApplied=true -> Costs applied');
-  assert(costsChip(gold).label === 'Costs not applied', 'gold costsApplied=false -> Costs not applied');
-  const unknown = { ...first, costsApplied: undefined as boolean | undefined };
-  assert(costsChip(unknown).label === 'Costs not confirmed', 'undefined costs -> Costs not confirmed');
+// 5. Cards never render a costs badge (QNT-0020: discreet note only).
+test('cards disclose costs discreetly and never render a costs badge', () => {
+  const card = read('src/components/PublicStrategyCard.tsx');
+  const i18n = read('src/i18n/index.ts');
+  assert(!card.includes('costsChip'), 'card must not render a costs chip');
+  assert(
+    !card.includes('card.costsNotApplied') && !card.includes('card.costsApplied') && !card.includes('card.costsNotConfirmed'),
+    'card must not reference old costs badge keys',
+  );
+  assert(card.includes('card.costsNotIncluded'), 'card renders the discreet costs note key');
+  assert(
+    card.includes("s.costsApplied === false && <p className=\"cost-note\">"),
+    'the note renders only when costsApplied=false',
+  );
+  assert(
+    i18n.includes("'card.costsNotIncluded': 'Backtest results exclude commission, spread, slippage and swap.'"),
+    'costs note copy is the required discreet disclosure',
+  );
 });
 
 // 6. Home page consumes the catalog and hardcodes no real metrics.
@@ -139,7 +148,7 @@ test('no active buy/rent/download in real strategy UI', () => {
   const realSectionStart = detail.indexOf('function RealDetail');
   const realSectionEnd = detail.indexOf('function MockDetail');
   const realSection = detail.slice(realSectionStart, realSectionEnd);
-  assert(realSection.includes('detail.joinWaitlist'), 'real detail must offer the non-transactional waitlist CTA');
+  assert(realSection.includes('detail.getAccessUpdates'), 'real detail must offer the account-based early access CTA');
   // The picker may be *defined* between the two sections, but it must only be
   // *used* inside the mock detail (never in the real one).
   assert(
@@ -166,14 +175,15 @@ test('demo monitoring is not_connected with no invented values', () => {
   }
 });
 
-// 11. Notify CTA never persists data.
-test('notify CTA does not persist anything', () => {
+// 11. Early access never persists data and never claims it saved anything.
+test('early access CTA never persists data and makes no false claim', () => {
   const detail = read('src/routes/strategies.$id.tsx');
   const i18n = read('src/i18n/index.ts');
-  assert(!detail.includes('localStorage'), 'notify flow must not use localStorage');
-  assert(!detail.includes('sessionStorage'), 'notify flow must not use sessionStorage');
-  assert(detail.includes('detail.notifyDialogBody'), 'notify dialog must use the informational copy');
-  assert(i18n.includes('Nothing was saved'), 'notify copy must state nothing is saved');
+  assert(!detail.includes('localStorage'), 'early access flow must not use localStorage');
+  assert(!detail.includes('sessionStorage'), 'early access flow must not use sessionStorage');
+  assert(!detail.includes('NotifyDialog'), 'disposable dialog must be gone');
+  assert(detail.includes('detail.getAccessUpdates'), 'detail uses the account-based early access CTA');
+  assert(i18n.includes('Nothing is collected on this page'), 'early access copy states nothing is collected');
 });
 
 // 12. Manifests and metrics are unchanged by QNT-0011.

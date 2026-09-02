@@ -315,7 +315,7 @@ test('Easy Start, routes and account protection are untouched', () => {
   assert(guide.includes("createFileRoute('/how-to-install')"), 'how-to-install route still registered');
   assert(detail.includes('EasyStartSteps') && detail.includes('asLinkTo="/how-to-install"'), 'Easy Start block intact on detail');
   assert(detail.includes('metric-grid'), 'metrics still rendered');
-  assert(detail.includes('detail.joinWaitlist'), 'waitlist CTA still present');
+  assert(detail.includes('detail.getAccessUpdates'), 'early access CTA still present');
   assert(account.includes('beforeLoad'), 'account auth protection intact');
 });
 

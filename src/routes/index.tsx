@@ -12,9 +12,7 @@ function Home() {
       <Nav
         extra={
           <>
-            <a href="#catalog">{t('nav.strategies')}</a>
             <a href="#compare">{t('home.compare')}</a>
-            <a href="#waitlist">{t('home.joinWaitlist')}</a>
           </>
         }
       />
@@ -117,10 +115,7 @@ function Home() {
             </p>
             <div className="actions">
               <Link className="btn primary" to="/register">
-                {t('nav.createAccount')}
-              </Link>
-              <Link className="btn" to="/strategies">
-                {t('home.joinWaitlist')} →
+                {t('home.getAccessUpdates')}
               </Link>
             </div>
             <p className="mono research-note">{t('home.waitlistNote')}</p>
