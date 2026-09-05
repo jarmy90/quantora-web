@@ -1,0 +1,133 @@
+================================================================================
+QNT-0020 · PUBLIC PRODUCT TRUTH AND ACTIVE CATALOG
+INFORME FINAL DE ENTREGA
+Fecha: 2026-09-02
+Repositorio: jarmy90/quantora-web
+================================================================================
+
+1. RAMA Y REVISIONES
+--------------------------------------------------------------------------------
+Rama        : feat/QNT-0020-public-product-truth
+Base (SHA)  : d68b0f24939b39c07217f2c6608c39dcdc0991d5  (origin/main, PR #18 fusionado)
+Final (SHA) : actualizado en el commit de cierre (MASTER.md + informe).
+PR          : https://github.com/jarmy90/quantora-web/pull/20
+CI          : Verde (Quality: pass · Vercel: pass · Vercel Preview Comments: pass)
+Estado      : Abierto, sin fusión automática (revisión pendiente)
+
+Nota: la preview de rama de Vercel queda tras el muro de autenticación de Vercel
+("Login – Vercel"). La verificación de contenido de esta entrega se realizó sobre
+el preview gestionado del sandbox con el MISMO código (ver sección 5).
+
+2. OBJETIVO CUMPLIDO
+--------------------------------------------------------------------------------
+Quantora se presenta como una plataforma activa con cuatro estrategias
+publicadas, no como demo eterna, producto en revisión o beta técnica.
+
+3. TEXTOS RETIRADOS DE LA EXPERIENCIA PÚBLICA (lista exacta)
+--------------------------------------------------------------------------------
+- Coming soon (badge principal de tarjeta/ficha)
+- Beta methodology
+- Quantora Score · Beta
+- Quantora Score · beta-1
+- Owner supplied
+- Independent reproduction pending
+- under review / Under Review
+- verified / unverified (estados)
+- reviewLabel (campo público)
+- independentReproduction (campo público)
+- scoreVersion (campo público)
+- filterVersion (campo público)
+- publicationMode (campo público)
+- $49
+- $299
+- Simulate allocation
+- Demo allocation
+- Mock license
+- Verified live result
+Los campos editoriales se mantienen SOLO internamente (manifests/pipeline) para
+compatibilidad; no atraviesan la frontera pública (catalog.json ni UI).
+
+4. TEXTOS NUEVOS EN PÚBLICO
+--------------------------------------------------------------------------------
+- Published strategy
+- Quantora Score (sin badge Beta; tooltip: "Comparative score calculated
+  consistently from the historical evidence available for each strategy")
+- Historical backtest
+- Historical results available
+- Four published strategies · Historical results
+- Compare strategies
+- Create account (CTA principal del header) / Sign in
+- My account / Sign out (usuario autenticado)
+- Commercial access opening soon
+- Join the waitlist
+- Get notified when available
+- Waitlist honesta: "Interest registration will be enabled in a later phase"
+  (sin éxito falso, sin escrituras en Supabase)
+- Backtest ≠ Demo monitoring ≠ Real account results (nueva leyenda)
+
+5. PÁGINAS VERIFICADAS (preview gestionado, mismas fuentes que el PR)
+--------------------------------------------------------------------------------
+- /                                            HTTP 200 · hero "Four published
+                                               strategies · Historical results",
+                                               Compare strategies, Join the
+                                               waitlist, Create account, Sign in
+- /strategies                                  HTTP 200 · 4 fichas con badges
+                                               Published strategy + Historical
+                                               backtest + Quantora Score
+- /strategies/first-triangle-adaptive         HTTP 200
+- /strategies/first-triangle-gold-adaptive    HTTP 200
+- /strategies/stochextreme-adaptive           HTTP 200
+- /strategies/tm-bandas-s3                    HTTP 200 · "Commercial access
+                                               opening soon", "Join the
+                                               waitlist", "Real account results",
+                                               enlace How to install presente
+- /how-to-install                             HTTP 200 (Easy Installation)
+- /login / /register / /account               HTTP 200 (header + CTAs de cuenta)
+
+Comprobaciones de contenido en el HTML servido:
+- Presentes: Published strategy, Historical backtest, Quantora Score, Join the
+  waitlist, Create account, Sign in, Commercial access opening soon, Real
+  account results, Four published strategies, Compare strategies, How to install.
+- Ausentes (scan del HTML): Coming soon, Beta methodology, Quantora Score · Beta,
+  beta-1, $49, $299, Simulate allocation, Demo allocation, Mock license,
+  Verified live result, Owner supplied, Independent reproduction, under review.
+
+6. TESTS
+--------------------------------------------------------------------------------
+- QNT-0020  (scripts/test-qnt-0020.ts)   : 9/9  OK
+- Intake    (scripts/test-strategy-intake.ts): 90/90 OK
+- QNT-0011  : 12/12 OK   QNT-0012 : 26/26 OK
+- QNT-0013  : 32/32 OK   QNT-0013d: 15/15 OK
+- QNT-0014  : 14/14 OK   QNT-0015 : 17/17 OK
+- Validation (scripts/test-validation.ts): 58/58 OK
+Cobertura J: las cuatro publicadas; sin Coming soon/Beta methodology/
+Independent reproduction pending/$49/$299/Simulate allocation/Verified live
+result; Quantora Score + Historical backtest presentes; pagos y descargas
+desactivados; sin filtrado de estados internos al cliente.
+
+7. BUILD Y CHECKS
+--------------------------------------------------------------------------------
+- Typecheck  : tsc --noEmit        OK
+- Build      : vite build          OK
+- private-files check              OK (sin .mq5/.ex5/.set/.dll ni secretos)
+- git diff --check                 OK
+- estrategias:build                OK (catalog.json: 4 publicadas, sin campos
+                                    editoriales ni cadenas prohibidas)
+
+8. CONFIRMACIONES DE ALCANCE
+--------------------------------------------------------------------------------
+- Pagos: NO activados (flags.paymentsEnabled === false)
+- Descargas: NO activadas (flags.downloadsEnabled === false)
+- Demo Monitoring: NO activado (flags.demoMonitoringEnabled === false)
+- Supabase: sin escrituras nuevas desde la app (solo UI)
+- QNT-0016: no iniciado / no mezclado
+- Rama product-plans: no tocada
+- PR #19 (navegación Easy Start): se mantiene separado, sin PR duplicado
+- Fórmula del Quantora Score: sin cambios (solo presentación)
+- No merge automático: PR #20 queda abierto a revisión
+
+9. ENTREGA
+--------------------------------------------------------------------------------
+Este TXT es el único informe de entrega de QNT-0020 (archivo único; no se
+requiere ZIP renombrado). MASTER.md actualizado sin secretos.
+================================================================================

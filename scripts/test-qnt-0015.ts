@@ -237,8 +237,8 @@ test('demo can never be presented as verified live', () => {
   assert(!server.includes("declaredBoundary: 'verified_live'"), 'server must not declare verified_live');
   assert(!i18n.includes("'monitor.statusVerifiedLive'"), 'no verified-live status label may exist');
   assert(!monitorModule.includes('Verified live'), 'card must not render a Verified live label');
-  // The only mention allowed is the separation legend (backtest vs demo vs verified).
-  assert(i18n.includes('Backtest ≠ Demo monitoring ≠ Verified live result'), 'separation legend is present');
+  // The only mention allowed is the separation legend (backtest vs demo vs real account).
+  assert(i18n.includes('Backtest ≠ Demo monitoring ≠ Real account results'), 'separation legend is present (QNT-0020)');
 });
 
 // ---------------------------------------------------------------------------
@@ -315,7 +315,7 @@ test('Easy Start, routes and account protection are untouched', () => {
   assert(guide.includes("createFileRoute('/how-to-install')"), 'how-to-install route still registered');
   assert(detail.includes('EasyStartSteps') && detail.includes('asLinkTo="/how-to-install"'), 'Easy Start block intact on detail');
   assert(detail.includes('metric-grid'), 'metrics still rendered');
-  assert(detail.includes('detail.notifyMe'), 'product notify CTA still present');
+  assert(detail.includes('detail.getAccessUpdates'), 'early access CTA still present');
   assert(account.includes('beforeLoad'), 'account auth protection intact');
 });
 

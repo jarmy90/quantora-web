@@ -34,7 +34,7 @@ function ProductPreview() {
               <td style={{ fontWeight: 700 }}>{s.name}</td>
               <td className="muted">{s.productId ?? '—'}</td>
               <td>
-                <span className="status-chip coming-soon">{productStatusLabel(s.productStatus)}</span>
+                <span className="status-chip commercial-soon">{productStatusLabel(s.productStatus)}</span>
               </td>
               <td>
                 <span className="mono" style={{ color: 'var(--muted)' }}>

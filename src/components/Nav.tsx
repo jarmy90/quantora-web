@@ -2,13 +2,40 @@ import { Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from './Logo';
 import { t } from '../i18n';
+import { getAuthStatus, signOut } from '../domain/auth/server';
+
+type AuthState = 'loading' | 'guest' | 'user';
 
 /**
- * Global site header. Renders the Quantora logo, primary navigation and a
- * persistent "mock environment" badge so every page is clearly a demo.
- * `extra` allows pages (e.g. the landing page) to add in-page anchor links.
+ * Global site header. Renders the Quantora logo, primary navigation and an
+ * account area: "My account" + "Sign out" for signed-in visitors, or
+ * "Sign in" + a primary "Create account" CTA for everyone else. The mock
+ * dashboard is not promoted as a primary destination while it remains a
+ * preview.
  */
 export function Nav({ extra }: { extra?: ReactNode }) {
+  const [auth, setAuth] = useState<AuthState>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await getAuthStatus();
+        if (!cancelled) setAuth(status.user ? 'user' : 'guest');
+      } catch {
+        if (!cancelled) setAuth('guest');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleSignOut() {
+    await signOut();
+    window.location.href = '/';
+  }
+
   return (
     <header className="wrap site-header">
       <nav className="nav" aria-label="Primary">
@@ -16,18 +43,25 @@ export function Nav({ extra }: { extra?: ReactNode }) {
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
-          <Link to="/dashboard">{t('nav.dashboard')}</Link>
-          <Link to="/login">{t('nav.signIn')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
+          {auth === 'user' ? (
+            <Link to="/account">{t('nav.myAccount')}</Link>
+          ) : (
+            <Link to="/login">{t('nav.signIn')}</Link>
+          )}
           {extra}
         </div>
         <div className="nav-actions">
-          {!import.meta.env.PROD && (
-            <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
+          {auth === 'user' ? (
+            <button type="button" className="btn nav-explore" onClick={handleSignOut}>
+              {t('account.signOut')}
+            </button>
+          ) : (
+            <Link className="btn primary nav-explore" to="/register">
+              {t('nav.createAccount')}
+            </Link>
           )}
-          <Link className="btn primary nav-explore" to="/strategies">
-            {t('nav.explore')}
-          </Link>
-          <MobileMenu extra={extra} />
+          <MobileMenu auth={auth} onSignOut={handleSignOut} extra={extra} />
         </div>
       </nav>
     </header>
@@ -41,13 +75,13 @@ export function CatalogNav() {
         <Logo />
         <div className="links">
           <Link to="/">{t('nav.home')}</Link>
-          <Link to="/dashboard">{t('nav.dashboard')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
         </div>
         <div className="nav-actions">
-          {!import.meta.env.PROD && (
-            <span className="badge nav-badge">{t('nav.mockEnvironment')}</span>
-          )}
-          <MobileMenu />
+          <Link className="btn primary nav-explore" to="/register">
+            {t('nav.createAccount')}
+          </Link>
+          <MobileMenu auth="guest" onSignOut={async () => undefined} />
         </div>
       </nav>
     </header>
@@ -59,7 +93,15 @@ export function CatalogNav() {
  * replaces the header links with a toggle + panel. Closes on Escape, on
  * navigation, on the close button and on outside clicks.
  */
-function MobileMenu({ extra }: { extra?: ReactNode }) {
+function MobileMenu({
+  auth,
+  onSignOut,
+  extra,
+}: {
+  auth: AuthState;
+  onSignOut: () => void;
+  extra?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -121,8 +163,20 @@ function MobileMenu({ extra }: { extra?: ReactNode }) {
         >
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
-          <Link to="/dashboard">{t('nav.dashboard')}</Link>
-          <Link to="/login">{t('nav.signIn')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
+          {auth === 'user' ? (
+            <>
+              <Link to="/account">{t('nav.myAccount')}</Link>
+              <button type="button" className="mobile-menu-action" onClick={onSignOut}>
+                {t('account.signOut')}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/register">{t('nav.createAccount')}</Link>
+              <Link to="/login">{t('nav.signIn')}</Link>
+            </>
+          )}
           {extra}
         </div>
       )}

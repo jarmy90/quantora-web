@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-23T08:57:11.929Z",
+  "generatedAt": "2026-09-02T12:24:16.085Z",
   "strategies": [
     {
       "id": "first-triangle-adaptive",
@@ -826,7 +826,7 @@
           }
         ],
         "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
-        "version": "beta-1"
+        "version": ""
       },
       "rules": [
         "Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)",
@@ -845,12 +845,7 @@
         "commission": "1.20 USD per trade"
       },
       "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
-      "reviewLabel": "Owner supplied",
-      "independentReproduction": false,
       "costsApplied": true,
-      "scoreVersion": "beta-1",
-      "filterVersion": "beta-1",
-      "publicationMode": "results",
       "performanceUnit": "usd",
       "productId": "first-triangle-ustec-m30",
       "productStatus": "coming_soon",
@@ -1972,7 +1967,7 @@
           }
         ],
         "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
-        "version": "beta-1"
+        "version": ""
       },
       "rules": [
         "Entry: First Triangle signal on M15 (First Triangle)",
@@ -1994,12 +1989,7 @@
         "status": "Costs not applied. The export reports commission 0.0 and slippage 0.0, but the source manifest warns that USD fields are unavailable until broker costs are reconciled — those zeros are not confirmed real costs."
       },
       "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
-      "reviewLabel": "Owner supplied",
-      "independentReproduction": false,
       "costsApplied": false,
-      "scoreVersion": "beta-1",
-      "filterVersion": "beta-1",
-      "publicationMode": "results",
       "performanceUnit": "points",
       "productId": "first-triangle-gold-m15",
       "productStatus": "coming_soon",
@@ -3875,7 +3865,7 @@
           }
         ],
         "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
-        "version": "beta-1"
+        "version": ""
       },
       "rules": [
         "Entry: stochastic-extreme arming (Q_PINE_INTRABAR_ORIGIN) on PERIOD_M30, confirmed on PERIOD_M3 (60s)",
@@ -3897,12 +3887,7 @@
         "swap": "0.00 USD per trade (not applied in this export)"
       },
       "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
-      "reviewLabel": "Owner supplied",
-      "independentReproduction": false,
       "costsApplied": false,
-      "scoreVersion": "beta-1",
-      "filterVersion": "beta-1",
-      "publicationMode": "results",
       "performanceUnit": "usd",
       "productId": "stochextreme-ustec",
       "productStatus": "coming_soon",
@@ -7116,7 +7101,7 @@
           }
         ],
         "formula": "0-100 weighted average: Profit Factor 25% (break-even 1.0 = 50, 2.0+ = 100; PF >= 1.20 favorable tier +5, capped), Drawdown-vs-result 25%, Equity stability 15%, Trade count 10%, Temporal consistency 10%, Frequency 5%, Costs 5%, Evidence completeness 5%. Missing components are excluded and reduce confidence.",
-        "version": "beta-1"
+        "version": ""
       },
       "rules": [
         "Entry: S3_ABOVE_TO_UPPER_RETURN — sell when price is above the upper rail (short-only)",
@@ -7134,7 +7119,7 @@
         "Maximum closed-trade drawdown: 384.00 USD",
         "Equity is reconstructed from closed trades (no separate equity file)",
         "No walk-forward / out-of-sample split is declared",
-        "Owner-supplied evidence; independent reproduction pending",
+        "Historical results available: backtest evidence covering the declared period",
         "Past performance does not guarantee future results"
       ],
       "costs": {
@@ -7142,12 +7127,7 @@
         "fees": "0.00 USD per trade (not applied in this export)"
       },
       "disclaimer": "Historical results calculated from the available data. Past performance does not guarantee future results.",
-      "reviewLabel": "Owner supplied",
-      "independentReproduction": false,
       "costsApplied": false,
-      "scoreVersion": "beta-1",
-      "filterVersion": "beta-1",
-      "publicationMode": "results",
       "performanceUnit": "usd",
       "productId": "tm-bandas-s3-keeper",
       "productStatus": "coming_soon",
