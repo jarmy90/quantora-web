@@ -1,15 +1,20 @@
-import tailwindcss from "@tailwindcss/vite";
+﻿import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { nitro } from "nitro/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+// When building on Vercel (VERCEL=1 is always set by their build system),
+// use the vercel preset so Nitro produces a Vercel-compatible serverless output
+// and import.meta.env.VITE_* variables are correctly injected at build time.
+const nitroPreset = process.env["VERCEL"] === "1" ? "vercel" : "node-server";
+
 export default defineConfig({
   optimizeDeps: {
     // The TanStack Start plugin injects virtual modules (#tanstack-router-entry,
     // #tanstack-start-entry, tanstack-start-manifest:v) that esbuild cannot
-    // resolve during dependency pre-bundling — let Vite serve these modules
+    // resolve during dependency pre-bundling – let Vite serve these modules
     // directly instead of optimizing them.
     exclude: ["@tanstack/start-server-core", "@tanstack/react-start-server"],
   },
@@ -27,7 +32,7 @@ export default defineConfig({
       projects: ["./tsconfig.json"],
     }),
     tanstackStart(),
-    nitro(),
+    nitro({ preset: nitroPreset }),
     viteReact(),
   ],
 });
