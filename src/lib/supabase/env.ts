@@ -1,4 +1,4 @@
-/**
+﻿/**
  * QNT-0013 · Supabase environment contract.
  *
  * Three explicit states:
@@ -11,9 +11,11 @@
  * read here. SUPABASE_SERVICE_ROLE_KEY is server-only and never touches this
  * module's public surface — it must never be imported by the browser bundle.
  *
- * Import-safe on both sides: on the client, `import.meta.env` carries the
- * VITE_ values; on the server, Bun reads them from the same VITE_ prefix so
- * the SSR render of auth pages matches the client.
+ * Import-safe on both sides:
+ *   - Client: import.meta.env carries the VITE_ values (replaced at build time).
+ *   - Server (Nitro/SSR): import.meta.env is undefined at runtime, so we fall
+ *     back to process.env. Vercel injects VITE_SUPABASE_* into process.env
+ *     for server functions, so both environments are covered.
  */
 export type SupabaseEnvState =
   | 'configured'
@@ -35,11 +37,33 @@ function looksLikeUrl(value: string): boolean {
   }
 }
 
-/** Raw VITE_ values (public by design). Empty on the server when unset. */
+/**
+ * Read VITE_ vars from import.meta.env (client, replaced at build time) or
+ * from process.env (server/Nitro runtime). The fallback ensures the SSR
+ * render matches the client when Vercel injects VITE_SUPABASE_* at runtime.
+ */
 function raw(): { url: string | null; key: string | null } {
-  const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? null;
-  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? null;
-  return { url: url && url.trim() !== '' ? url.trim() : null, key: key && key.trim() !== '' ? key.trim() : null };
+  // Build-time replacement (client bundle, or SSR bundle when vars were set
+  // at Vite build time).
+  const metaUrl = (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? undefined;
+  const metaKey = (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? undefined;
+
+  // Runtime fallback for Nitro server functions: process.env is always
+  // available in Node/Bun and is populated by Vercel's serverless runtime.
+  const procUrl =
+    typeof process !== 'undefined' ? (process.env['VITE_SUPABASE_URL'] ?? undefined) : undefined;
+  const procKey =
+    typeof process !== 'undefined'
+      ? (process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ?? undefined)
+      : undefined;
+
+  const url = metaUrl ?? procUrl ?? null;
+  const key = metaKey ?? procKey ?? null;
+
+  return {
+    url: url && url.trim() !== '' ? url.trim() : null,
+    key: key && key.trim() !== '' ? key.trim() : null,
+  };
 }
 
 export function getSupabaseEnv(): SupabaseEnv {
