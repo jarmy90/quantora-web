@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import type { PublicStrategy } from '../domain/publicStrategy';
-import { fmtNum, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
+import { fmtNum, fmtPeriod, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
 
 /**
@@ -12,10 +12,17 @@ export function EquitySpark({ points }: { points: number[] }) {
   const max = Math.max(...points);
   const range = max - min || 1;
   const poly = points
-    .map((p, i) => `${(i / (points.length - 1)) * 300},${65 - ((p - min) / range) * 55}`)
+    .map((p, i) => `${(i / (points.length - 1)) * 300},${100 - ((p - min) / range) * 88}`)
     .join(' ');
   return (
-    <svg className="curve" viewBox="0 0 300 65" preserveAspectRatio="none" aria-hidden="true">
+    <svg className="curve" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={`fill-${points.length}`} x1="0" x2="0" y1="0" y2="1">
+          <stop stopColor="var(--cyan)" stopOpacity=".18" />
+          <stop offset="1" stopColor="var(--cyan)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon fill={`url(#fill-${points.length})`} points={`0,100 ${poly} 300,100`} />
       <polyline fill="none" stroke="var(--cyan)" strokeWidth="2" points={poly} />
     </svg>
   );
@@ -48,6 +55,7 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
   const m = s.metrics ?? {};
   const curve = s.equity?.points.map((p) => p.equity) ?? [];
   const score = s.score?.value;
+  const scoreConfidence = s.score?.confidence;
   const pointsUnit = s.performanceUnit === 'points';
   const net = pointsUnit ? m.netPoints : m.netUsd;
   const dd = pointsUnit ? m.maxDrawdownPoints : m.maxDrawdownUsd;
@@ -67,20 +75,28 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
         }`
       : '—';
 
+  const scoreWidth = score !== undefined ? `${Math.max(0, Math.min(100, score))}%` : '0%';
+
   const inner = (
     <>
       <div className="strategy-top">
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <span className="badge">
             {t('catalog.publishedStrategy')}
             {s.market ? ` · ${s.market}` : ''}
             {s.instrument ? ` · ${s.instrument}` : ''}
           </span>
-          <h3 style={{ margin: '14px 0 4px', fontSize: 17 }}>{s.name}</h3>
+          <h3 style={{ margin: '10px 0 3px', fontSize: 17, letterSpacing: '-.02em' }}>{s.name}</h3>
           <div className="tag">{s.tagline}</div>
-          {s.version && (
-            <div className="tag" style={{ marginTop: 4 }}>
-              v{s.version}
+          {s.period && (
+            <div className="card-meta">
+              <span className="card-meta-item">{fmtPeriod(s.period.start, s.period.end)}</span>
+              {s.period.timeframe && (
+                <>
+                  <span className="card-meta-sep">·</span>
+                  <span className="card-meta-item">{s.period.timeframe}</span>
+                </>
+              )}
             </div>
           )}
           <div className="card-chips">
@@ -88,12 +104,25 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
             <span className="status-chip historical">{t('catalog.historicalBacktest')}</span>
           </div>
         </div>
-        <span style={{ color: 'var(--cyan)', fontSize: 20 }} aria-hidden="true">
-          ↗
-        </span>
       </div>
+
       <EquitySpark points={curve} />
-      <div className="stats">
+
+      {score !== undefined && (
+        <div className="score-bar">
+          <span className="score-bar-label">{score}</span>
+          <div className="score-bar-track">
+            <div className="score-bar-fill" style={{ width: scoreWidth }} />
+          </div>
+          {scoreConfidence !== undefined && (
+            <span className="score-bar-label" style={{ minWidth: 'auto', fontSize: 10, color: '#65717d' }}>
+              {Math.round(scoreConfidence * 100)}%
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="premium-stats">
         <div>
           <small>{t('detail.netResult')}</small>
           <strong style={{ color: net !== undefined && net > 0 ? 'var(--green)' : undefined }}>
@@ -106,12 +135,8 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
         </div>
         <div>
           <small>{t('detail.score')}</small>
-          <strong style={{ color: 'var(--lime)' }}>
-            {score ?? '—'}
-          </strong>
+          <strong style={{ color: 'var(--lime)' }}>{score ?? '—'}</strong>
         </div>
-      </div>
-      <div className="stats" style={{ marginTop: 10 }}>
         <div>
           <small>{t('detail.totalTrades')}</small>
           <strong>{m.trades !== undefined ? fmtNum(m.trades) : '—'}</strong>
@@ -125,6 +150,7 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
           <strong style={{ color: 'var(--amber)' }}>{ddValue}</strong>
         </div>
       </div>
+
       {s.costsApplied === false && <p className="cost-note">{t('card.costsNotIncluded')}</p>}
     </>
   );
