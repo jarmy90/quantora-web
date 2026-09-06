@@ -290,3 +290,19 @@
     gap: 10px;
   }
 }
+
+
+/* Align strategy cards equal height and bottom CTA */
+.real-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.real-card .card-cta {
+  margin-top: auto;
+}
+
+.strategy-top {
+  min-height: 120px;
+}
