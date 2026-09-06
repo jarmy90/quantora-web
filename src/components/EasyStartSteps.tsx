@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+﻿import { Link } from '@tanstack/react-router';
 import { t } from '../i18n';
 
 export type EasyStartMode = 'full' | 'compact' | 'preview';
@@ -16,19 +16,18 @@ export function EasyVisual({ step, hide = false }: { step: 1 | 2 | 3; hide?: boo
       : step === 2
         ? t('easy.installTitle')
         : t('easy.testTitle');
-  const common = {
-    width: '100%',
-    height: 150,
-    viewBox: '0 0 360 150',
-    role: 'img' as const,
-    'aria-label': hide ? undefined : label,
-    'aria-hidden': hide ? true : undefined,
-  };
 
   if (step === 1) {
     // DOWNLOAD: a generic package box with file rows.
     return (
-      <svg {...common}>
+      <svg
+        width="100%"
+        height={150}
+        viewBox="0 0 360 150"
+        role="img"
+        aria-label={hide ? undefined : label}
+        aria-hidden={hide ? true : undefined}
+      >
         <rect x="16" y="20" width="148" height="112" rx="12" fill="#141b26" stroke="#2a3a4c" />
         <rect x="36" y="42" width="108" height="16" rx="4" fill="#1e2936" />
         <circle cx="58" cy="50" r="4" fill="#a3f04b" />
@@ -47,31 +46,86 @@ export function EasyVisual({ step, hide = false }: { step: 1 | 2 | 3; hide?: boo
   }
 
   if (step === 2) {
-    // INSTALL: folders breadcrumb + arrow into the Experts folder.
+    // INSTALL: clear 4-node horizontal pipeline:
+    // [.ex5 file] --> [Open MetaTrader 5] --> [File > Open Data Folder] --> [MQL5/Experts ★]
     return (
-      <svg {...common}>
-        {[
-          [20, 84, 64],
-          [92, 60, 64, 2],
-          [164, 36, 64, 3],
-          [236, 60, 64, 4],
-        ].map(([x, y, w]: number[], i) => (
-          <rect key={i} x={x as number} y={y as number} width={w as number} height="34" rx="8" fill="#141b26" stroke="#2a3a4c" />
-        ))}
-        <text x="34" y="106" fontSize="11" fill="#7c8998" fontFamily="DM Mono, monospace">MT5</text>
-        <text x="105" y="82" fontSize="11" fill="#7c8998" fontFamily="DM Mono, monospace">MQL5</text>
-        <text x="177" y="58" fontSize="11" fill="#a3f04b" fontFamily="DM Mono, monospace">Experts</text>
-        <path d="M72 101 h14 v-22 h14" stroke="#3a4c60" strokeWidth="2" fill="none" />
-        <path d="M188 53 h14 v13 h14" stroke="#a3f04b" strokeWidth="2" fill="none" />
-        <circle cx="306" cy="77" r="13" fill="#15301a" stroke="#a3f04b" />
-        <path d="M301 77 h10 M306 72 v10" stroke="#a3f04b" strokeWidth="2" />
+      <svg
+        width="100%"
+        height={150}
+        viewBox="0 0 760 150"
+        role="img"
+        aria-label={hide ? undefined : label}
+        aria-hidden={hide ? true : undefined}
+        style={{ display: 'block' }}
+      >
+        {/* ── Node 1: .ex5 File ── */}
+        <g transform="translate(10, 37)">
+          <rect width="154" height="76" rx="10" fill="#0f1720" stroke="#2a3a4c" strokeWidth="1.5" />
+          {/* file icon */}
+          <rect x="12" y="12" width="24" height="28" rx="4" fill="#1a2717" stroke="#a3f04b" strokeWidth="1.2" />
+          <path d="M26 25 l6 0 M26 31 l6 0" stroke="#a3f04b" strokeWidth="1.5" strokeLinecap="round" />
+          <text x="46" y="28" fontSize="13" fontWeight="700" fill="#a3f04b" fontFamily="DM Mono, monospace">.ex5</text>
+          <text x="12" y="57" fontSize="11" fill="#5a7080" fontFamily="Manrope, sans-serif">Compiled EA file</text>
+        </g>
+
+        {/* ── Arrow 1 → 2 ── */}
+        <line x1="164" y1="75" x2="192" y2="75" stroke="#3d5468" strokeWidth="2" strokeDasharray="5 3" />
+        <polygon points="190,70 200,75 190,80" fill="#3d5468" />
+
+        {/* ── Node 2: MetaTrader 5 ── */}
+        <g transform="translate(200, 37)">
+          <rect width="160" height="76" rx="10" fill="#0f1720" stroke="#2a3a4c" strokeWidth="1.5" />
+          {/* MT5 icon placeholder */}
+          <rect x="12" y="12" width="26" height="26" rx="6" fill="#152130" stroke="#4a9eff" strokeWidth="1.2" />
+          <text x="14" y="30" fontSize="11" fontWeight="800" fill="#4a9eff" fontFamily="DM Mono, monospace">MT5</text>
+          <text x="48" y="28" fontSize="12" fontWeight="700" fill="#d4e4f4" fontFamily="Manrope, sans-serif">MetaTrader 5</text>
+          <text x="12" y="57" fontSize="11" fill="#5a7080" fontFamily="Manrope, sans-serif">Open the platform</text>
+        </g>
+
+        {/* ── Arrow 2 → 3 ── */}
+        <line x1="360" y1="75" x2="388" y2="75" stroke="#3d5468" strokeWidth="2" strokeDasharray="5 3" />
+        <polygon points="386,70 396,75 386,80" fill="#3d5468" />
+
+        {/* ── Node 3: File > Open Data Folder ── */}
+        <g transform="translate(396, 37)">
+          <rect width="178" height="76" rx="10" fill="#0f1720" stroke="#2a3a4c" strokeWidth="1.5" />
+          {/* folder icon */}
+          <rect x="12" y="14" width="22" height="16" rx="3" fill="#1a2717" stroke="#72d9ff" strokeWidth="1.2" />
+          <rect x="10" y="20" width="26" height="16" rx="3" fill="#152130" stroke="#72d9ff" strokeWidth="1.2" />
+          <text x="44" y="28" fontSize="11" fontWeight="700" fill="#72d9ff" fontFamily="DM Mono, monospace">File › Open Data</text>
+          <text x="12" y="50" fontSize="11" fill="#5a7080" fontFamily="Manrope, sans-serif">Navigate to MQL5</text>
+          <text x="12" y="63" fontSize="11" fill="#5a7080" fontFamily="Manrope, sans-serif">folder on your PC</text>
+        </g>
+
+        {/* ── Arrow 3 → 4 (lime = destination reached) ── */}
+        <line x1="574" y1="75" x2="598" y2="75" stroke="#a3f04b" strokeWidth="2.5" />
+        <polygon points="596,70 608,75 596,80" fill="#a3f04b" />
+
+        {/* ── Node 4: MQL5/Experts (destination) ── */}
+        <g transform="translate(608, 27)">
+          <rect width="144" height="96" rx="12" fill="#0b1a08" stroke="#a3f04b" strokeWidth="2" />
+          {/* destination badge */}
+          <rect x="0" y="0" width="144" height="22" rx="12" fill="#1a3012" />
+          <rect x="0" y="11" width="144" height="11" fill="#1a3012" />
+          <text x="72" y="15" textAnchor="middle" fontSize="9" fontWeight="800" fill="#a3f04b" letterSpacing="1.5" fontFamily="DM Mono, monospace">DESTINATION</text>
+          <text x="14" y="48" fontSize="14" fontWeight="800" fill="#ffffff" fontFamily="DM Mono, monospace">MQL5/</text>
+          <text x="14" y="64" fontSize="14" fontWeight="800" fill="#a3f04b" fontFamily="DM Mono, monospace">Experts</text>
+          <text x="14" y="82" fontSize="11" fill="#6aaa30" fontFamily="Manrope, sans-serif">Paste .ex5 here ✓</text>
+        </g>
       </svg>
     );
   }
 
   // TEST IN DEMO: a chart with a clearly labelled Demo account.
   return (
-    <svg {...common}>
+    <svg
+      width="100%"
+      height={150}
+      viewBox="0 0 360 150"
+      role="img"
+      aria-label={hide ? undefined : label}
+      aria-hidden={hide ? true : undefined}
+    >
       <rect x="16" y="20" width="220" height="112" rx="12" fill="#0d131a" stroke="#2a3a4c" />
       <rect x="26" y="116" width="200" height="8" rx="3" fill="#1e2936" />
       <polyline points="40,96 70,88 96,92 122,70 150,76 176,56 210,64" fill="none" stroke="#a3f04b" strokeWidth="2" />

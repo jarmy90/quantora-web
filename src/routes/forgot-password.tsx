@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { isSupabaseConfigured } from '../lib/supabase/env';
+﻿import { createFileRoute, Link } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { isSupabaseConfiguredSafe } from '../lib/supabase/env';
 import { AuthCard } from '../components/AuthCard';
 import { AuthForm } from '../components/AuthForm';
 import { AuthNotConfigured } from '../components/AuthNotConfigured';
@@ -20,9 +21,12 @@ export const Route = createFileRoute('/forgot-password')({
 });
 
 function ForgotPasswordPage() {
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  useEffect(() => { setConfigured(isSupabaseConfiguredSafe()); }, []);
+
   return (
     <AuthCard eyebrow={t('auth.eyebrow')} title={t('forgot.title')} body={t('forgot.body')}>
-      {!isSupabaseConfigured() ? <AuthNotConfigured /> : null}
+      {configured === false ? <AuthNotConfigured /> : null}
       <AuthForm mode="forgot" />
       <div className="auth-links">
         <Link to="/login">{t('forgot.backToLogin')}</Link>
