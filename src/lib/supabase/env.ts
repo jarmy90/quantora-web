@@ -4,18 +4,16 @@
  * Three explicit states:
  *   - configured           both public variables present and well-formed
  *   - not_configured       a required variable is missing entirely
- *   - invalid_configuration a variable is present but malformed (e.g. the URL
- *                           does not parse as http(s))
+ *   - invalid_configuration a variable is present but malformed
  *
  * Only the PUBLIC pair (VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY) is
- * read here. SUPABASE_SERVICE_ROLE_KEY is server-only and never touches this
- * module's public surface — it must never be imported by the browser bundle.
+ * read here. These are replaced at Vite build-time in the client bundle.
  *
- * Import-safe on both sides:
- *   - Client: import.meta.env carries the VITE_ values (replaced at build time).
- *   - Server (Nitro/SSR): import.meta.env is undefined at runtime, so we fall
- *     back to process.env. Vercel injects VITE_SUPABASE_* into process.env
- *     for server functions, so both environments are covered.
+ * IMPORTANT: These vars are only present in the CLIENT bundle (import.meta.env
+ * is replaced at build time for client-side code). The SSR bundle does NOT have
+ * them because Vite's SSR build runs in a different context. Auth components
+ * must use useSupabaseConfigured() (client-only) instead of isSupabaseConfigured()
+ * to avoid SSR hydration mismatches.
  */
 export type SupabaseEnvState =
   | 'configured'
@@ -37,29 +35,10 @@ function looksLikeUrl(value: string): boolean {
   }
 }
 
-/**
- * Read VITE_ vars from import.meta.env (client, replaced at build time) or
- * from process.env (server/Nitro runtime). The fallback ensures the SSR
- * render matches the client when Vercel injects VITE_SUPABASE_* at runtime.
- */
+/** Raw VITE_ values — only valid in client bundle (replaced at build time). */
 function raw(): { url: string | null; key: string | null } {
-  // Build-time replacement (client bundle, or SSR bundle when vars were set
-  // at Vite build time).
-  const metaUrl = (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? undefined;
-  const metaKey = (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? undefined;
-
-  // Runtime fallback for Nitro server functions: process.env is always
-  // available in Node/Bun and is populated by Vercel's serverless runtime.
-  const procUrl =
-    typeof process !== 'undefined' ? (process.env['VITE_SUPABASE_URL'] ?? undefined) : undefined;
-  const procKey =
-    typeof process !== 'undefined'
-      ? (process.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ?? undefined)
-      : undefined;
-
-  const url = metaUrl ?? procUrl ?? null;
-  const key = metaKey ?? procKey ?? null;
-
+  const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? null;
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? null;
   return {
     url: url && url.trim() !== '' ? url.trim() : null,
     key: key && key.trim() !== '' ? key.trim() : null,
@@ -77,9 +56,19 @@ export function getSupabaseEnv(): SupabaseEnv {
   return { state: 'configured', url, publishableKey: key };
 }
 
-/** Convenience: is auth ready to actually talk to Supabase? */
+/** Synchronous check — use only in CLIENT-ONLY code paths. */
 export function isSupabaseConfigured(): boolean {
   return getSupabaseEnv().state === 'configured';
+}
+
+/**
+ * SSR-safe check: returns null during SSR (unknown), true/false on the client.
+ * Use this in React components to avoid SSR/client hydration mismatches.
+ * The values are only available after the client bundle is evaluated.
+ */
+export function isSupabaseConfiguredSafe(): boolean | null {
+  if (typeof window === 'undefined') return null;
+  return isSupabaseConfigured();
 }
 
 /** Safe human summary — never includes keys. */

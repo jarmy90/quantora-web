@@ -1,5 +1,6 @@
-import { createFileRoute, Link, useSearch } from '@tanstack/react-router';
-import { isSupabaseConfigured } from '../lib/supabase/env';
+﻿import { createFileRoute, Link, useSearch } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { isSupabaseConfiguredSafe } from '../lib/supabase/env';
 import { AuthCard } from '../components/AuthCard';
 import { AuthForm } from '../components/AuthForm';
 import { AuthNotConfigured } from '../components/AuthNotConfigured';
@@ -21,7 +22,10 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const search = useSearch({ from: '/login' }) as { returnTo?: string };
-  if (!isSupabaseConfigured()) {
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  useEffect(() => { setConfigured(isSupabaseConfiguredSafe()); }, []);
+
+  if (configured === false) {
     return (
       <AuthCard eyebrow={t('auth.eyebrow')} title={t('login.title')} body={t('login.body')}>
         <AuthNotConfigured />
