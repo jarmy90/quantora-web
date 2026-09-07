@@ -360,6 +360,27 @@ export const enUS = {
   'easy.accountCta': 'Open Easy Start',
   'easy.compactCta': 'See how installation works',
   'easy.previewNote': 'This guide is informational. No product or license is active yet.',
+  'easy.slotTitle': 'MetaTrader 5 · visual step (authentic capture slot)',
+  'easy.slotBody':
+    'An authentic MetaTrader 5 capture will replace this placeholder when one is supplied. This is a documented slot, never a simulation of a live or account view.',
+  'easy.marketTitle': 'Open the market and timeframe your strategy uses',
+  'easy.marketBody':
+    'Every strategy charts a specific market and, when provided, a timeframe. Open exactly what your strategy specifies — nothing is assumed.',
+  'easy.marketStep1': 'Open the symbol your strategy indicates (see the strategy sheet).',
+  'easy.marketStep2': 'Select the required timeframe when one is specified for the strategy.',
+  'easy.marketStep3': 'If the sheet lists no timeframe, follow the strategy’s own configuration notes.',
+  'easy.marketTableStrategy': 'Strategy',
+  'easy.marketTableMarket': 'Market',
+  'easy.marketTableInstrument': 'Instrument',
+  'easy.marketTableTimeframe': 'Timeframe',
+  'easy.marketNotSpecified': '— see sheet',
+  'easy.marketNote': 'Timeframes are shown only when published in each strategy’s data. No market or timeframe is invented here.',
+  'easy.shotInstallAlt':
+    'MetaTrader 5: File → Open Data Folder → MQL5 → Experts, with the .ex5 placed inside Experts.',
+  'easy.shotMarketAlt':
+    'MetaTrader 5 chart open on the strategy’s symbol with the required timeframe selected.',
+  'easy.shotAttachAlt':
+    'MetaTrader 5: Expert Advisor dragged from Navigator onto the chart with Algo Trading enabled on a demo account.',
 
   // QNT-0015 · demo monitoring pilot
   'monitor.statusNotConnected': 'Not connected yet',
