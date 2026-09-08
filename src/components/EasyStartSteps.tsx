@@ -186,7 +186,20 @@ export function EasyStartSteps({
             </div>
           ))
         ) : (
-          <EasyVisual step={2} />
+          <ol className="easy-compact-steps">
+            <li>
+              <strong>{t('easy.compactStep1Title')}</strong>
+              <span>{t('easy.compactStep1Body')}</span>
+            </li>
+            <li>
+              <strong>{t('easy.compactStep2Title')}</strong>
+              <span>{t('easy.compactStep2Body')}</span>
+            </li>
+            <li>
+              <strong>{t('easy.compactStep3Title')}</strong>
+              <span>{t('easy.compactStep3Body')}</span>
+            </li>
+          </ol>
         )}
       </div>
       {mode === 'preview' ? (

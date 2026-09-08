@@ -34,21 +34,6 @@ function GuideStep({
   );
 }
 
-/**
- * Documented slot for an authentic MetaTrader 5 screenshot. A clearly
- * internal placeholder renders until a real capture is supplied — never a
- * simulation that could be mistaken for a live or account view.
- */
-function Mt5ShotSlot({ id, label }: { id: string; label: string }) {
-  return (
-    <div id={id} className="mt5-shot-slot" role="img" aria-label={label}>
-      <span className="slot-title">{t('easy.slotTitle')}</span>
-      <p className="mono">{t('easy.slotBody')}</p>
-      <p style={{ color: 'var(--muted)', fontSize: 11, lineHeight: 1.6 }}>{label}</p>
-    </div>
-  );
-}
-
 function OrderList({ items }: { items: string[] }) {
   return (
     <ol className="easy-ol">
@@ -86,7 +71,7 @@ function HowToInstall() {
             {t('easy.cta')} ↓
           </a>
           <ul className="easy-trust" style={{ marginTop: 26 }}>
-            {[t('easy.trustNoCoding'), t('easy.trustVisualGuide'), t('easy.trustDemo'), t('easy.trustMT5')].map((p) => (
+            {[t('easy.trustNoCoding'), t('easy.trustDemo'), t('easy.trustMT5')].map((p) => (
               <li key={p} className="badge">
                 ✓ {p}
               </li>
@@ -131,8 +116,6 @@ function HowToInstall() {
             <OrderList
               items={[t('easy.installTrouble1'), t('easy.installTrouble2'), t('easy.installTrouble3')]}
             />
-
-            <Mt5ShotSlot id="shot-1" label={t('easy.shotInstallAlt')} />
           </GuideStep>
 
           {/* Step 2 · Open the required market and timeframe */}
@@ -154,7 +137,7 @@ function HowToInstall() {
                       <td>{s.name}</td>
                       <td>{s.market ?? '—'}</td>
                       <td>{s.instrument ?? '—'}</td>
-                      <td>{s.period?.timeframe ? s.period.timeframe : t('easy.marketNotSpecified')}</td>
+                      <td>{s.period?.timeframe ? s.period.timeframe : t('easy.marketInDetails')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -163,7 +146,6 @@ function HowToInstall() {
             <p className="mono" style={{ fontSize: 12, marginTop: 10 }}>
               {t('easy.marketNote')}
             </p>
-            <Mt5ShotSlot id="shot-2" label={t('easy.shotMarketAlt')} />
           </GuideStep>
 
           {/* Step 3 · Attach the EA and start safely in demo */}
@@ -191,7 +173,6 @@ function HowToInstall() {
             <p className="mono" style={{ fontSize: 12.5, color: 'var(--amber)' }}>
               {t('easy.demoWarning')}
             </p>
-            <Mt5ShotSlot id="shot-3" label={t('easy.shotAttachAlt')} />
           </GuideStep>
         </div>
       </main>

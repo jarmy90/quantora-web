@@ -475,29 +475,29 @@
   }
 }
 
-/* ==== QNT-0021 · How to install redesign: MT5 screenshot slots ==== */
-.mt5-shot-slot {
-  border: 1px dashed #3a4c60;
-  border-radius: 10px;
-  background: #0d131a;
-  padding: 20px 18px;
-  margin-top: 16px;
+/* ==== QNT-0021 · Easy Installation compact text steps (strategy sheets) ==== */
+.easy-compact-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 4px;
+  display: grid;
+  gap: 12px;
 }
 
-.mt5-shot-slot .slot-title {
-  display: block;
-  color: var(--cyan);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+.easy-compact-steps li {
+  display: grid;
+  gap: 2px;
 }
 
-.mt5-shot-slot p {
+.easy-compact-steps strong {
+  color: var(--lime);
+  font-size: 13.5px;
+}
+
+.easy-compact-steps span {
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .strategy-market-table th,

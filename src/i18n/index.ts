@@ -298,7 +298,6 @@ export const enUS = {
   'easy.body': 'No programming required. Quantora guides you from download to a safe first test on a demo account.',
   'easy.cta': 'See the 3 steps',
   'easy.trustNoCoding': 'No coding required',
-  'easy.trustVisualGuide': 'Visual guide included',
   'easy.trustDemo': 'Start with a demo account',
   'easy.trustMT5': 'MetaTrader 5 compatible',
   'easy.warning': 'The installation guide explains the technical setup only. It does not guarantee performance, returns or suitability.',
@@ -358,11 +357,14 @@ export const enUS = {
   'easy.accountEyebrow': 'Installation guide',
   'easy.accountBody': 'Learn how Quantora strategies are installed before products and downloads become available.',
   'easy.accountCta': 'Open Easy Start',
-  'easy.compactCta': 'See how installation works',
+  'easy.compactCta': 'View installation guide',
+  'easy.compactStep1Title': 'Install',
+  'easy.compactStep1Body': 'Place the supplied EX5 file in MetaTrader 5.',
+  'easy.compactStep2Title': 'Configure',
+  'easy.compactStep2Body': 'Open the required market and timeframe, then load the recommended settings.',
+  'easy.compactStep3Title': 'Start in demo',
+  'easy.compactStep3Body': 'Attach the EA to the chart, enable Algo Trading and test it first in a demo account.',
   'easy.previewNote': 'This guide is informational. No product or license is active yet.',
-  'easy.slotTitle': 'MetaTrader 5 · visual step (authentic capture slot)',
-  'easy.slotBody':
-    'An authentic MetaTrader 5 capture will replace this placeholder when one is supplied. This is a documented slot, never a simulation of a live or account view.',
   'easy.marketTitle': 'Open the market and timeframe your strategy uses',
   'easy.marketBody':
     'Every strategy charts a specific market and, when provided, a timeframe. Open exactly what your strategy specifies — nothing is assumed.',
@@ -373,14 +375,8 @@ export const enUS = {
   'easy.marketTableMarket': 'Market',
   'easy.marketTableInstrument': 'Instrument',
   'easy.marketTableTimeframe': 'Timeframe',
-  'easy.marketNotSpecified': '— see sheet',
+  'easy.marketInDetails': 'Shown in strategy details',
   'easy.marketNote': 'Timeframes are shown only when published in each strategy’s data. No market or timeframe is invented here.',
-  'easy.shotInstallAlt':
-    'MetaTrader 5: File → Open Data Folder → MQL5 → Experts, with the .ex5 placed inside Experts.',
-  'easy.shotMarketAlt':
-    'MetaTrader 5 chart open on the strategy’s symbol with the required timeframe selected.',
-  'easy.shotAttachAlt':
-    'MetaTrader 5: Expert Advisor dragged from Navigator onto the chart with Algo Trading enabled on a demo account.',
 
   // QNT-0015 · demo monitoring pilot
   'monitor.statusNotConnected': 'Not connected yet',
