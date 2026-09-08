@@ -1,8 +1,17 @@
 /**
- * Application localization boundary. English is intentionally the only active locale
- * for Phase 1; add another dictionary and register it in `messages` to extend this.
+ * Application localization boundary.
+ *
+ * Supported locales:
+ *   - 'en-US' — base catalog (also the safe fallback)
+ *   - 'es-ES' — Spanish dictionary with full key parity
+ * The active locale is fixed per SSR request (root route's beforeLoad) and seeded
+ * on the client from <html lang>. t()/languageTag() always read the active locale
+ * with English as the atomic per-key fallback.
  */
-export type Locale = 'en-US';
+import { getActiveLocale, type SupportedLocale } from './locale';
+import { esES } from './es-ES';
+
+export type Locale = SupportedLocale;
 export const defaultLocale: Locale = 'en-US';
 type MessageValue = string;
 export type MessageKey = keyof typeof enUS;
@@ -22,6 +31,7 @@ export const enUS = {
   'nav.signIn': 'Sign in',
   'nav.openMenu': 'Open navigation menu',
   'nav.closeMenu': 'Close navigation menu',
+  'nav.language': 'Language',
 
   'home.eyebrow': 'Expert Advisors, explained through evidence',
   'home.heroTitle': 'Find an Expert Advisor',
@@ -74,6 +84,7 @@ export const enUS = {
   'common.risk': 'Risk',
   'common.maxDD': 'Max DD',
   'common.mockDemo': 'Strategy catalog',
+  'common.notFound': 'Page not found',
 
   'catalog.title': 'Find your signal.',
   'catalog.body':
@@ -390,10 +401,13 @@ export const enUS = {
   'monitor.disclaimer':
     'A demo account is a simulated trading environment. Demo monitoring is not a real-account result, a guarantee or investment advice.',
 } as const satisfies Record<string, MessageValue>;
-export const messages: Record<Locale, Record<MessageKey, string>> = { 'en-US': enUS };
+export const messages: Record<Locale, Record<MessageKey, string>> = {
+  'en-US': enUS,
+  'es-ES': esES,
+};
 export function t(key: MessageKey): string {
-  return messages[defaultLocale][key];
+  return messages[getActiveLocale()][key] ?? enUS[key] ?? String(key);
 }
-export function languageTag(): string {
-  return defaultLocale;
+export function languageTag(): Locale {
+  return getActiveLocale();
 }

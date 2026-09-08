@@ -49,6 +49,9 @@ jobs:
       - name: Domain tests
         run: bun run scripts/test-validation.ts
 
+      - name: QNT-0021 I18N EN/ES contract tests
+        run: bun run scripts/test-qnt-0021-i18n.ts
+
       - name: Intake tests
         run: bun run scripts/test-strategy-intake.ts
 
