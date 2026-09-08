@@ -16,7 +16,21 @@ function Catalog() {
           <h1 style={{ fontSize: 'clamp(34px,5vw,56px)', letterSpacing: '-.06em', margin: '15px 0' }}>
             {t('catalog.title')}
           </h1>
-          <p className="muted">{t('catalog.body')}</p>
+          <p className="muted" style={{ fontSize: 16, lineHeight: 1.7, maxWidth: 760 }}>{t('catalog.body')}</p>
+          <div className="fact-band" style={{ marginTop: 24 }}>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{publicStrategies.length} {t('catalog.published').toLowerCase()}</span>
+            </div>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact2')}</span>
+            </div>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact3')}</span>
+            </div>
+          </div>
         </section>
 
         <section className="real-section" style={{ marginBottom: 70 }}>

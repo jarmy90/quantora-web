@@ -1,33 +1,35 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
-import { EasyStartSteps, EasyVisual } from '../components/EasyStartSteps';
+import { publicStrategies } from '../catalog';
 import { t } from '../i18n';
 import '../styles/app.css';
 
 function GuideStep({
   n,
   title,
-  visualStep,
+  intro,
   children,
 }: {
   n: string;
   title: string;
-  visualStep: 1 | 2 | 3;
+  intro?: string;
   children: React.ReactNode;
 }) {
   return (
     <section id={`step-${n}`} className="card guide-step" style={{ marginTop: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
         <span className="step-num mono" style={{ fontSize: 15 }}>
           Step {n}
         </span>
         <h2 style={{ fontSize: 22, margin: 0 }}>{title}</h2>
       </div>
+      {intro && (
+        <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.6, margin: '0 0 12px', maxWidth: 720 }}>
+          {intro}
+        </p>
+      )}
       {children}
-      <div style={{ marginTop: 16 }}>
-        <EasyVisual step={visualStep} />
-      </div>
     </section>
   );
 }
@@ -69,7 +71,7 @@ function HowToInstall() {
             {t('easy.cta')} ↓
           </a>
           <ul className="easy-trust" style={{ marginTop: 26 }}>
-            {[t('easy.trustNoCoding'), t('easy.trustVisualGuide'), t('easy.trustDemo'), t('easy.trustMT5')].map((p) => (
+            {[t('easy.trustNoCoding'), t('easy.trustDemo'), t('easy.trustMT5')].map((p) => (
               <li key={p} className="badge">
                 ✓ {p}
               </li>
@@ -80,32 +82,9 @@ function HowToInstall() {
           </p>
         </section>
 
-        <EasyStartSteps mode="full" />
-
-        <div id="steps" style={{ marginTop: 34 }}>
-          {/* Step 1 · Download */}
-          <GuideStep n="1" title={t('easy.downloadTitle')} visualStep={1}>
-            <p className="muted" style={{ fontSize: 14, lineHeight: 1.65, maxWidth: 720 }}>
-              {t('easy.downloadBody')}
-            </p>
-            <div className="package-card" style={{ marginTop: 14 }}>
-              <div className="file-row">{t('easy.packageEx5')}</div>
-              <div className="file-row">{t('easy.packageSet')}</div>
-              <div className="file-row">{t('easy.packageGuide')}</div>
-            </div>
-            <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
-              {t('easy.settingsNote')}
-            </p>
-            <p className="mono" style={{ fontSize: 12, color: 'var(--lime)' }}>
-              {t('easy.noCompile')}
-            </p>
-            <p className="muted" style={{ fontSize: 12.5, marginTop: 12 }}>
-              {t('easy.downloadCta')}
-            </p>
-          </GuideStep>
-
-          {/* Step 2 · Install in MT5 */}
-          <GuideStep n="2" title={t('easy.installTitle')} visualStep={2}>
+        <div id="steps" style={{ marginTop: 28 }}>
+          {/* Step 1 · Install the EA in MetaTrader 5 */}
+          <GuideStep n="1" title={t('easy.installTitle')} intro={t('easy.noCompile')}>
             <OrderList
               items={[
                 t('easy.installStep1'),
@@ -119,23 +98,62 @@ function HowToInstall() {
               ]}
             />
             <div className="path-chip mono">{t('easy.installPath')}</div>
-            <div style={{ marginTop: 14 }}>
-              <h3 style={{ fontSize: 16, margin: '0 0 8px' }}>{t('easy.installTroubleTitle')}</h3>
-              <OrderList
-                items={[t('easy.installTrouble1'), t('easy.installTrouble2'), t('easy.installTrouble3')]}
-              />
+
+            <h3 style={{ fontSize: 16, margin: '18px 0 8px' }}>{t('easy.downloadTitle')}</h3>
+            <div className="package-card" style={{ marginTop: 8 }}>
+              <div className="file-row">{t('easy.packageEx5')}</div>
+              <div className="file-row">{t('easy.packageSet')}</div>
+              <div className="file-row">{t('easy.packageGuide')}</div>
             </div>
+            <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
+              {t('easy.settingsNote')}
+            </p>
+            <p className="mono" style={{ fontSize: 12, color: 'var(--lime)' }}>
+              {t('easy.downloadCta')}
+            </p>
+
+            <h3 style={{ fontSize: 16, margin: '18px 0 8px' }}>{t('easy.installTroubleTitle')}</h3>
+            <OrderList
+              items={[t('easy.installTrouble1'), t('easy.installTrouble2'), t('easy.installTrouble3')]}
+            />
           </GuideStep>
 
-          {/* Step 3 · Test in demo */}
-          <GuideStep n="3" title={t('easy.testTitle')} visualStep={3}>
+          {/* Step 2 · Open the required market and timeframe */}
+          <GuideStep n="2" title={t('easy.marketTitle')} intro={t('easy.marketBody')}>
+            <OrderList items={[t('easy.marketStep1'), t('easy.marketStep2'), t('easy.marketStep3')]} />
+            <div className="dash-table-wrap" style={{ marginTop: 14 }}>
+              <table className="dash-table strategy-market-table">
+                <thead>
+                  <tr>
+                    <th>{t('easy.marketTableStrategy')}</th>
+                    <th>{t('easy.marketTableMarket')}</th>
+                    <th>{t('easy.marketTableInstrument')}</th>
+                    <th>{t('easy.marketTableTimeframe')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {publicStrategies.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.name}</td>
+                      <td>{s.market ?? '—'}</td>
+                      <td>{s.instrument ?? '—'}</td>
+                      <td>{s.period?.timeframe ? s.period.timeframe : t('easy.marketInDetails')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mono" style={{ fontSize: 12, marginTop: 10 }}>
+              {t('easy.marketNote')}
+            </p>
+          </GuideStep>
+
+          {/* Step 3 · Attach the EA and start safely in demo */}
+          <GuideStep n="3" title={t('easy.testTitle')} intro={t('easy.testIntro')}>
             <OrderList
               items={[
-                t('easy.testStep1'),
-                t('easy.testStep2'),
                 t('easy.testStep3'),
                 t('easy.testStep4'),
-                t('easy.testStep5'),
                 t('easy.testStep6'),
                 t('easy.testStep7'),
                 t('easy.testStep8'),

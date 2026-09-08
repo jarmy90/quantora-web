@@ -1,11 +1,11 @@
-import { Link } from '@tanstack/react-router';
+﻿import { Link } from '@tanstack/react-router';
 import { Logo } from './Logo';
 import { t } from '../i18n';
 
 /**
- * Global site footer. Reuses the Quantora logo, links to primary sections and
- * the placeholder legal pages, and keeps the demo / not-financial-advice notice
- * visible on every page.
+ * Global site footer. Reuses the Quantora logo, links to primary sections,
+ * account routes, and legal disclaimers. Keeps risk disclosures and clear
+ * non-financial advice notices visible on every page.
  */
 export function Footer() {
   return (
@@ -19,7 +19,14 @@ export function Footer() {
         <div className="footer-col">
           <h4>{t('footer.product')}</h4>
           <Link to="/strategies">{t('nav.strategies')}</Link>
-          <Link to="/dashboard">{t('nav.dashboard')}</Link>
+          <Link to="/strategies">{t('home.compare')}</Link>
+          <Link to="/how-to-install">{t('nav.install')}</Link>
+          <Link to="/register">{t('nav.createAccount')}</Link>
+        </div>
+        <div className="footer-col">
+          <h4>{t('footer.account')}</h4>
+          <Link to="/login">{t('nav.signIn')}</Link>
+          <Link to="/account">{t('nav.myAccount')}</Link>
         </div>
         <div className="footer-col">
           <h4>{t('footer.legal')}</h4>

@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+﻿import { Link, useRouterState } from '@tanstack/react-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from './Logo';
 import { t } from '../i18n';
@@ -9,12 +9,14 @@ type AuthState = 'loading' | 'guest' | 'user';
 /**
  * Global site header. Renders the Quantora logo, primary navigation and an
  * account area: "My account" + "Sign out" for signed-in visitors, or
- * "Sign in" + a primary "Create account" CTA for everyone else. The mock
- * dashboard is not promoted as a primary destination while it remains a
- * preview.
+ * "Sign in" + primary "Create account" CTA for everyone else. Sticky header
+ * with subtle backdrop blur and clean focus/keyboard accessibility.
  */
 export function Nav({ extra }: { extra?: ReactNode }) {
   const [auth, setAuth] = useState<AuthState>('loading');
+  const [scrolled, setScrolled] = useState(false);
+  const router = useRouterState();
+  const currentPath = router.location.pathname;
 
   useEffect(() => {
     let cancelled = false;
@@ -31,67 +33,73 @@ export function Nav({ extra }: { extra?: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   async function handleSignOut() {
     await signOut();
     window.location.href = '/';
   }
 
   return (
-    <header className="wrap site-header">
-      <nav className="nav" aria-label="Primary">
-        <Logo />
-        <div className="links">
-          <Link to="/">{t('nav.home')}</Link>
-          <Link to="/strategies">{t('nav.strategies')}</Link>
-          <Link to="/how-to-install">{t('nav.install')}</Link>
-          {auth === 'user' ? (
-            <Link to="/account">{t('nav.myAccount')}</Link>
-          ) : (
-            <Link to="/login">{t('nav.signIn')}</Link>
-          )}
-          {extra}
-        </div>
-        <div className="nav-actions">
-          {auth === 'user' ? (
-            <button type="button" className="btn nav-explore" onClick={handleSignOut}>
-              {t('account.signOut')}
-            </button>
-          ) : (
-            <Link className="btn primary nav-explore" to="/register">
-              {t('nav.createAccount')}
+    <header className={`site-header-wrap ${scrolled ? 'scrolled' : ''}`}>
+      <div className="wrap site-header-inner">
+        <nav className="nav" aria-label="Primary">
+          <Logo />
+          <div className="links">
+            <Link to="/" className={currentPath === '/' ? 'active' : ''}>
+              {t('nav.home')}
             </Link>
-          )}
-          <MobileMenu auth={auth} onSignOut={handleSignOut} extra={extra} />
-        </div>
-      </nav>
+            <Link to="/strategies" className={currentPath.startsWith('/strategies') ? 'active' : ''}>
+              {t('nav.strategies')}
+            </Link>
+            <a href="/#compare">{t('nav.howItWorks')}</a>
+            <Link to="/how-to-install" className={currentPath === '/how-to-install' ? 'active' : ''}>
+              {t('nav.install')}
+            </Link>
+            {extra}
+          </div>
+          <div className="nav-actions">
+            {auth === 'user' ? (
+              <>
+                <Link to="/account" className={`btn nav-link-btn ${currentPath === '/account' ? 'active' : ''}`}>
+                  {t('nav.myAccount')}
+                </Link>
+                <button type="button" className="btn nav-explore" onClick={handleSignOut}>
+                  {t('account.signOut')}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn nav-signin-btn">
+                  {t('nav.signIn')}
+                </Link>
+                <Link className="btn primary nav-explore" to="/register">
+                  {t('nav.createAccount')}
+                </Link>
+              </>
+            )}
+            <MobileMenu auth={auth} onSignOut={handleSignOut} extra={extra} />
+          </div>
+        </nav>
+      </div>
     </header>
   );
 }
 
 export function CatalogNav() {
-  return (
-    <header className="wrap site-header">
-      <nav className="nav" aria-label="Primary">
-        <Logo />
-        <div className="links">
-          <Link to="/">{t('nav.home')}</Link>
-          <Link to="/how-to-install">{t('nav.install')}</Link>
-        </div>
-        <div className="nav-actions">
-          <Link className="btn primary nav-explore" to="/register">
-            {t('nav.createAccount')}
-          </Link>
-          <MobileMenu auth="guest" onSignOut={async () => undefined} />
-        </div>
-      </nav>
-    </header>
-  );
+  return <Nav />;
 }
 
 /**
  * Accessible mobile navigation. Hidden on desktop; on small viewports it
- * replaces the header links with a toggle + panel. Closes on Escape, on
- * navigation, on the close button and on outside clicks.
+ * replaces header links with a toggle + drawer panel. Closes on Escape, on
+ * navigation, on close button and on outside clicks.
  */
 function MobileMenu({
   auth,
@@ -128,7 +136,6 @@ function MobileMenu({
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onClickOutside);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const close = () => {
@@ -163,6 +170,7 @@ function MobileMenu({
         >
           <Link to="/">{t('nav.home')}</Link>
           <Link to="/strategies">{t('nav.strategies')}</Link>
+          <a href="/#compare">{t('nav.howItWorks')}</a>
           <Link to="/how-to-install">{t('nav.install')}</Link>
           {auth === 'user' ? (
             <>
@@ -173,8 +181,10 @@ function MobileMenu({
             </>
           ) : (
             <>
-              <Link to="/register">{t('nav.createAccount')}</Link>
               <Link to="/login">{t('nav.signIn')}</Link>
+              <Link to="/register" className="btn primary mobile-cta">
+                {t('nav.createAccount')}
+              </Link>
             </>
           )}
           {extra}

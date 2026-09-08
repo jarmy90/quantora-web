@@ -97,3 +97,6 @@ jobs:
 
       - name: QNT-0020 public product truth tests
         run: bun run scripts/test-qnt-0020.ts
+
+      - name: QNT-0021 home and navigation tests
+        run: bun run scripts/test-qnt-0021.ts

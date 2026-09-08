@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+﻿import { createFileRoute, Link } from '@tanstack/react-router';
 import { publicStrategies } from '../catalog';
 import { PublicStrategyCard } from '../components/PublicStrategyCard';
 import { t } from '../i18n';
@@ -9,13 +9,7 @@ import '../styles/app.css';
 function Home() {
   return (
     <>
-      <Nav
-        extra={
-          <>
-            <a href="#compare">{t('home.compare')}</a>
-          </>
-        }
-      />
+      <Nav />
       <main>
         <section className="wrap hero">
           <div className="eyebrow">{t('home.eyebrow')}</div>
@@ -24,17 +18,36 @@ function Home() {
             <br />
             <span style={{ color: 'var(--lime)' }}>{t('home.heroAccent')}</span>
           </h1>
-          <p>{t('home.heroBody')}</p>
+          <p className="hero-body">{t('home.heroBody')}</p>
           <div className="actions">
             <Link className="btn primary" to="/strategies">
               {t('home.browse')}
             </Link>
-            <a className="btn" href="#catalog">
+            <a className="btn" href="#compare">
               {t('home.seeHow')}
             </a>
-            <Link className="btn" to="/register">
+            <Link className="btn btn-tertiary" to="/register">
               {t('nav.createAccount')}
             </Link>
+          </div>
+
+          <div className="fact-band">
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact1')}</span>
+            </div>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact2')}</span>
+            </div>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact3')}</span>
+            </div>
+            <div className="fact-item">
+              <span className="fact-dot" aria-hidden="true" />
+              <span>{t('home.fact4')}</span>
+            </div>
           </div>
         </section>
 
@@ -140,9 +153,9 @@ function Home() {
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Quantora — Strategies you can understand' },
+      { title: 'Quantora — Expert Advisors you can understand' },
       { name: 'description', content: t('seo.homeDescription') },
-      { property: 'og:title', content: 'Quantora — Strategies you can understand' },
+      { property: 'og:title', content: 'Quantora — Expert Advisors you can understand' },
       { property: 'og:description', content: t('seo.homeDescription') },
     ],
   }),
