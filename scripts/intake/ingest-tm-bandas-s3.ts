@@ -29,9 +29,12 @@ import { sha256File } from './pipeline.ts';
 
 const ROOT = process.cwd();
 const EVIDENCE_DIR = resolve(ROOT, 'strategy-intake/evidence/tm-bandas-s3');
+// Archived internally: TM Bandas S3 was withdrawn from the public catalog by
+// product owner decision (QNT-0021). The importer now writes the manifest to
+// the internal archive so ingestion never re-publicizes the strategy.
 export const TM_BANDAS_S3_MANIFEST_PATH = resolve(
   ROOT,
-  'public-strategies/manifests/tm-bandas-s3.manifest.json',
+  'strategy-intake/archive/tm-bandas-s3.manifest.json',
 );
 
 const EVIDENCE_REL = '../../strategy-intake/evidence/tm-bandas-s3';

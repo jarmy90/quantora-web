@@ -216,7 +216,7 @@ test('customer contract still admits nullable email/displayName', () => {
 
 test('no product leaves coming_soon and nothing commercial activates', () => {
   const products = buildCommercialCatalog();
-  assert(products.length === 4, 'four products must remain');
+  assert(products.length === 3, 'three products must remain');
   for (const product of products) {
     assert(product.productStatus === 'coming_soon', `${product.productId} must stay coming_soon`);
     assert(product.commercialDownloadEnabled === false, `${product.productId} download must stay disabled`);
@@ -258,7 +258,6 @@ test('no strategy or metric files were touched by this phase', () => {
     'first-triangle-adaptive',
     'first-triangle-gold-adaptive',
     'stochextreme-adaptive',
-    'tm-bandas-s3',
   ];
   for (const id of manifests) {
     JSON.parse(read(`public-strategies/manifests/${id}.manifest.json`)); // parses => intact JSON
