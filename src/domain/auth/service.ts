@@ -21,6 +21,7 @@ import { setResponseStatus } from '@tanstack/react-start-server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseEnv } from '../../lib/supabase/env';
+import { resolveSiteUrl } from '../../site';
 import { createSsrCookieAdapter, clearAllSessionCookies } from './ssr-cookies';
 import { validateEmail, validatePassword, validateDisplayName } from './validation';
 import type {
@@ -192,7 +193,10 @@ export class SupabaseAuthService implements AuthService {
 }
 
 function appOrigin(): string {
-  return (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'http://localhost:3000';
+  // Auth email links (signup confirmation, password recovery) must land on the
+  // canonical domain. VITE_SITE_URL keeps precedence for other environments;
+  // the fallback is the canonical production URL, never a bare localhost.
+  return resolveSiteUrl(import.meta.env.VITE_SITE_URL as string | undefined);
 }
 
 /** Request-scoped singleton so server functions share one service instance. */
