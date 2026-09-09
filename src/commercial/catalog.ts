@@ -1,7 +1,7 @@
 /**
  * QNT-0012 · Safe commercial catalog.
  *
- * Derived from the four public strategies (never duplicated in components).
+ * Derived from the published public strategies (never duplicated in components).
  * Exposes only commercially safe fields: productId, strategyId, displayName,
  * productStatus, deliveryFormat, commercialDownloadEnabled and derived
  * availability. No sources, paths, vault references, filenames, hashes,

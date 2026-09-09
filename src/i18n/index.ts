@@ -1,8 +1,17 @@
 /**
- * Application localization boundary. English is intentionally the only active locale
- * for Phase 1; add another dictionary and register it in `messages` to extend this.
+ * Application localization boundary.
+ *
+ * Supported locales:
+ *   - 'en-US' — base catalog (also the safe fallback)
+ *   - 'es-ES' — Spanish dictionary with full key parity
+ * The active locale is fixed per SSR request (root route's beforeLoad) and seeded
+ * on the client from <html lang>. t()/languageTag() always read the active locale
+ * with English as the atomic per-key fallback.
  */
-export type Locale = 'en-US';
+import { getActiveLocale, type SupportedLocale } from './locale';
+import { esES } from './es-ES';
+
+export type Locale = SupportedLocale;
 export const defaultLocale: Locale = 'en-US';
 type MessageValue = string;
 export type MessageKey = keyof typeof enUS;
@@ -22,6 +31,7 @@ export const enUS = {
   'nav.signIn': 'Sign in',
   'nav.openMenu': 'Open navigation menu',
   'nav.closeMenu': 'Close navigation menu',
+  'nav.language': 'Language',
 
   'home.eyebrow': 'Expert Advisors, explained through evidence',
   'home.heroTitle': 'Find an Expert Advisor',
@@ -30,13 +40,13 @@ export const enUS = {
     'Compare published strategies through historical results, risk, trading costs and a consistent Quantora Score, then learn how each EA fits into MetaTrader 5.',
   'home.browse': 'Explore strategies',
   'home.seeHow': 'How it works',
-  'home.fact1': '4 published strategies',
+  'home.fact1': '3 published strategies',
   'home.fact2': 'Historical results',
   'home.fact3': 'Risk and cost disclosure',
   'home.fact4': 'No programming required',
-  'home.realStrategies': 'Four published strategies',
+  'home.realStrategies': 'Three published strategies',
   'home.realStrategiesBody':
-    'Explore four published, rules-based systems with historical results, risk metrics, costs, limitations and a consistently calculated Quantora Score.',
+    'Explore three published, rules-based systems with historical results, risk metrics, costs, limitations and a consistently calculated Quantora Score.',
   'home.viewStrategy': 'View strategy',
   'home.compare': 'Compare strategies',
   'home.compareEyebrow': 'A consistent evaluation method',
@@ -74,12 +84,13 @@ export const enUS = {
   'common.risk': 'Risk',
   'common.maxDD': 'Max DD',
   'common.mockDemo': 'Strategy catalog',
+  'common.notFound': 'Page not found',
 
   'catalog.title': 'Find your signal.',
   'catalog.body':
     'Compare transparent, rules-based systems built for different markets and risk profiles.',
   'catalog.eyebrow': 'Strategy catalog',
-  'catalog.published': 'Four published strategies',
+  'catalog.published': 'Published strategies',
   'catalog.publishedStrategy': 'Published strategy',
   'catalog.historicalBacktest': 'Historical backtest',
   'catalog.comingSoon': 'Early access',
@@ -390,10 +401,13 @@ export const enUS = {
   'monitor.disclaimer':
     'A demo account is a simulated trading environment. Demo monitoring is not a real-account result, a guarantee or investment advice.',
 } as const satisfies Record<string, MessageValue>;
-export const messages: Record<Locale, Record<MessageKey, string>> = { 'en-US': enUS };
+export const messages: Record<Locale, Record<MessageKey, string>> = {
+  'en-US': enUS,
+  'es-ES': esES,
+};
 export function t(key: MessageKey): string {
-  return messages[defaultLocale][key];
+  return messages[getActiveLocale()][key] ?? enUS[key] ?? String(key);
 }
-export function languageTag(): string {
-  return defaultLocale;
+export function languageTag(): Locale {
+  return getActiveLocale();
 }

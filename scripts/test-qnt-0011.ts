@@ -29,11 +29,10 @@ const EXPECTED_PRODUCTS: Record<string, string> = {
   'first-triangle-adaptive': 'first-triangle-ustec-m30',
   'first-triangle-gold-adaptive': 'first-triangle-gold-m15',
   'stochextreme-adaptive': 'stochextreme-ustec',
-  'tm-bandas-s3': 'tm-bandas-s3-keeper',
 };
 
-// 1. Public catalog: exactly the four published strategies, no stochextreme-gold.
-test('catalog has exactly the four published strategies', () => {
+// 1. Public catalog: exactly the three published strategies, no TM Bandas.
+test('catalog has exactly the three published strategies', () => {
   const ids = publicStrategies.map((s) => s.id).sort();
   assert(
     JSON.stringify(ids) ===
@@ -41,7 +40,6 @@ test('catalog has exactly the four published strategies', () => {
         'first-triangle-adaptive',
         'first-triangle-gold-adaptive',
         'stochextreme-adaptive',
-        'tm-bandas-s3',
       ]),
     `unexpected catalog ids: ${ids.join(', ')}`,
   );
@@ -49,11 +47,15 @@ test('catalog has exactly the four published strategies', () => {
     !publicStrategies.some((s) => s.id.includes('stochextreme-gold')),
     'stochextreme-gold must not appear in the public catalog',
   );
+  assert(
+    !publicStrategies.some((s) => s.id.includes('tm-bandas')),
+    'tm-bandas-s3 must not appear in the public catalog (owner decision)',
+  );
 });
 
 // 2. Product states are present and safe for every published strategy.
-test('all four strategies are coming_soon with commercialDownloadEnabled=false', () => {
-  assert(publicStrategies.length === 4, 'expected 4 public strategies');
+test('all three strategies are coming_soon with commercialDownloadEnabled=false', () => {
+  assert(publicStrategies.length === 3, 'expected 3 public strategies');
   for (const s of publicStrategies) {
     assert(s.productStatus === 'coming_soon', `${s.id} productStatus must be coming_soon`);
     assert(
@@ -192,7 +194,6 @@ test('metrics in catalog match manifest results (no metric changes)', () => {
     'first-triangle-adaptive',
     'first-triangle-gold-adaptive',
     'stochextreme-adaptive',
-    'tm-bandas-s3',
   ];
   for (const id of manifests) {
     const manifest = JSON.parse(read(`public-strategies/manifests/${id}.manifest.json`));

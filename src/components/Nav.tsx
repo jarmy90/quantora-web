@@ -2,6 +2,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from './Logo';
 import { t } from '../i18n';
+import {
+  getActiveLocale,
+  htmlLangForLocale,
+  persistLocaleCookie,
+  setActiveLocale,
+  toLocale,
+  type LocaleTag,
+} from '../i18n/locale';
 import { getAuthStatus, signOut } from '../domain/auth/server';
 
 type AuthState = 'loading' | 'guest' | 'user';
@@ -65,6 +73,7 @@ export function Nav({ extra }: { extra?: ReactNode }) {
             {extra}
           </div>
           <div className="nav-actions">
+            <LanguageSwitch />
             {auth === 'user' ? (
               <>
                 <Link to="/account" className={`btn nav-link-btn ${currentPath === '/account' ? 'active' : ''}`}>
@@ -94,6 +103,52 @@ export function Nav({ extra }: { extra?: ReactNode }) {
 
 export function CatalogNav() {
   return <Nav />;
+}
+
+/**
+ * QNT-0021 · EN/ES language selector.
+ *
+ * Two discreet text buttons (no flags), keyboard accessible via aria-pressed,
+ * active state perceptible beyond color (filled + pressed semantics). Writing
+ * the choice persists it in the `quantora_locale` cookie; the reload makes the
+ * server re-render in the selected language (no flash, no hydration mismatch).
+ */
+function LanguageSwitch() {
+  const locale = getActiveLocale();
+  const active: LocaleTag = locale === 'es-ES' ? 'es' : 'en';
+  const choose = (tag: LocaleTag) => () => {
+    if (tag === active) return;
+    setActiveLocale(toLocale(tag));
+    persistLocaleCookie(tag);
+    window.location.reload();
+  };
+  return (
+    <div
+      className="lang-switch"
+      role="group"
+      aria-label={t('nav.language')}
+      data-current-lang={htmlLangForLocale(locale)}
+    >
+      <button
+        type="button"
+        className="lang-btn"
+        aria-pressed={active === 'en'}
+        aria-label="English"
+        onClick={choose('en')}
+      >
+        EN
+      </button>
+      <button
+        type="button"
+        className="lang-btn"
+        aria-pressed={active === 'es'}
+        aria-label="Spanish"
+        onClick={choose('es')}
+      >
+        ES
+      </button>
+    </div>
+  );
 }
 
 /**
@@ -188,6 +243,7 @@ function MobileMenu({
             </>
           )}
           {extra}
+          <LanguageSwitch />
         </div>
       )}
     </>

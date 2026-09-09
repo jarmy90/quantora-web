@@ -8,7 +8,7 @@
  * data; impossibility of presenting backtest as demo and demo as verified
  * live; no invented balances/returns; feature flag off by default; checkout,
  * payments, downloads and licenses still disabled; an unambiguous DEMO label;
- * no sensitive fields; routes/Easy Start intact; the four-strategy catalog
+ * no sensitive fields; routes/Easy Start intact; the published-strategy catalog
  * intact; and safe handling of unknown strategy ids.
  */
 import { readFileSync } from 'node:fs';
@@ -55,7 +55,6 @@ const EXPECTED_IDS = [
   'first-triangle-adaptive',
   'first-triangle-gold-adaptive',
   'stochextreme-adaptive',
-  'tm-bandas-s3',
 ];
 
 // ---------------------------------------------------------------------------
@@ -265,7 +264,7 @@ test('DEMO_MONITORING_ENABLED is off by default', () => {
 // ---------------------------------------------------------------------------
 test('checkout, payments, downloads and licenses remain disabled', () => {
   const cat = buildCommercialCatalog();
-  assert(cat.length === 4, 'catalog still has four products');
+  assert(cat.length === 3, 'catalog still has three products');
   for (const p of cat) {
     assert(p.productStatus === 'coming_soon', `${p.productId} stays coming_soon`);
     assert(p.availability.canStartCheckout === false, `${p.productId} checkout disabled`);
@@ -320,9 +319,9 @@ test('Easy Start, routes and account protection are untouched', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 13. The four-strategy public catalog continues to work.
+// 13. The published-strategy catalog (three strategies) continues to work.
 // ---------------------------------------------------------------------------
-test('the four real strategies continue to be published', () => {
+test('the published strategies continue to be published', () => {
   const ids = publicStrategies.map((s) => s.id).sort();
   assert(JSON.stringify(ids) === JSON.stringify([...EXPECTED_IDS].sort()), `catalog ids changed: ${ids.join(', ')}`);
   for (const s of publicStrategies) {

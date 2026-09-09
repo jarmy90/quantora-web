@@ -55,12 +55,13 @@ assert(homeContent.includes("to=\"/strategies\""), 'Hero CTA should point to /st
 assert(homeContent.includes("to=\"/register\""), 'Hero CTA should point to /register');
 assert(homeContent.includes("to=\"/how-to-install\""), 'Easy Installation CTA should point to /how-to-install');
 
-// 12. 4 published strategies continue to be rendered
-assert(publicStrategies.length === 4, 'Should have exactly 4 published strategies');
+// 12. 3 published strategies continue to be rendered
+assert(publicStrategies.length === 3, 'Should have exactly 3 published strategies');
+assert(!publicStrategies.some((s) => s.id === 'tm-bandas-s3'), 'TM Bandas S3 must be unpublished');
 
 // 13. No metrics or manifests modified
 const manifestCount = fs.readdirSync(path.join(process.cwd(), 'public-strategies/manifests')).filter(f => f.endsWith('.json')).length;
-assert(manifestCount === 4, 'Should preserve exactly 4 manifest files');
+assert(manifestCount === 3, 'Should preserve exactly 3 manifest files');
 
 // 14. Payments not enabled
 assert(!homeContent.includes("PAYMENTS_ENABLED = true"), 'Payments should not be enabled on home page');
