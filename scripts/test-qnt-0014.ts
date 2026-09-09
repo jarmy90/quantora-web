@@ -71,9 +71,9 @@ test('no performance promise, no transaction or download affordance', () => {
   assert(i18n.includes('Download becomes available with an active product and license'), 'download clearly deferred');
 });
 
-test('all four products stay coming_soon and non-downloadable', () => {
+test('all three products stay coming_soon and non-downloadable', () => {
   const cat = buildCommercialCatalog();
-  assert(cat.length === 4, `expected 4 products, got ${cat.length}`);
+  assert(cat.length === 3, `expected 3 products, got ${cat.length}`);
   for (const p of cat) {
     assert(p.productStatus === 'coming_soon', `${p.productId} must be coming_soon`);
     assert(p.commercialDownloadEnabled === false, `${p.productId} download must be disabled`);

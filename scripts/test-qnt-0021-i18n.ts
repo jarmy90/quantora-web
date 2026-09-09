@@ -17,11 +17,12 @@
  * 11. `<html lang>` bound to the resolved active locale
  * 12. no IP/country geolocation
  * 13. SSR-safe browser access (no window/document/navigator on the server)
- * 14. strategy metrics and catalog manifests are not modified
+ * 14. catalog is exactly the three published strategies (TM Bandas S3
+ *     unpublished) and remaining metrics match their manifests
  */
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { publicStrategies } from '../src/catalog';
 import { enUS, languageTag, t } from '../src/i18n';
 import { esES } from '../src/i18n/es-ES';
 import {
@@ -218,14 +219,42 @@ check('13. SSR-safe browser access', () => {
   assert(!server.includes('document.') && !server.includes('navigator.'), 'server module must not touch browser globals');
 });
 
-// 14. Strategy data and metrics are untouched.
-check('14. strategy data and catalog untouched', () => {
-  const status = execFileSync(
-    'git',
-    ['status', '--porcelain', '--', 'public-strategies', 'src/catalog.ts'],
-    { encoding: 'utf8' },
-  ).trim();
-  assert(status.length === 0, `strategy data must not be modified: ${status || '(none)'}`);
+// 14. Catalog contract after the TM Bandas S3 unpublish (QNT-0021 launch):
+// exactly three public strategies and remaining metrics intact vs manifests.
+check('14. three published strategies with manifest-intact metrics', () => {
+  const expectedIds = [
+    'first-triangle-adaptive',
+    'first-triangle-gold-adaptive',
+    'stochextreme-adaptive',
+  ].sort();
+  const ids = publicStrategies.map((s) => s.id).sort();
+  assert(
+    JSON.stringify(ids) === JSON.stringify(expectedIds),
+    `public catalog must be exactly the three published strategies: ${ids.join(', ')}`,
+  );
+  assert(
+    !publicStrategies.some((s) => s.id === 'tm-bandas-s3'),
+    'TM Bandas S3 must be unpublished by product owner decision',
+  );
+  for (const id of expectedIds) {
+    const manifest = JSON.parse(readText(`public-strategies/manifests/${id}.manifest.json`));
+    const strategy = publicStrategies.find((s) => s.id === id)!;
+    const metrics = strategy.metrics ?? {};
+    const source = manifest.results?.metrics ?? {};
+    for (const [key, value] of Object.entries(source) as [string, number][]) {
+      if (typeof value === 'number' && Number.isFinite(value) && metrics[key] !== undefined) {
+        assert(metrics[key] === value, `metric "${key}" changed for ${id} (${metrics[key]} vs ${value})`);
+      }
+    }
+  }
+  assert(
+    !fs.existsSync(path.join(process.cwd(), 'public-strategies/manifests/tm-bandas-s3.manifest.json')),
+    'withdrawn manifest must not remain in the public manifests directory',
+  );
+  assert(
+    fs.existsSync(path.join(process.cwd(), 'strategy-intake/archive/tm-bandas-s3.manifest.json')),
+    'withdrawn manifest must be preserved in the internal archive',
+  );
 });
 
 // 15. t()/languageTag() follow the active locale.

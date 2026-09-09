@@ -35,9 +35,9 @@ const monitorCard = read('src/components/DemoMonitoringCard.tsx');
 const dash = read('src/routes/dashboard.tsx');
 
 // ---------------------------------------------------------------------------
-// 1. The four strategies are published.
+// 1. Exactly three strategies are published (TM Bandas S3 is unpublished).
 // ---------------------------------------------------------------------------
-test('the four real strategies are published and carry metrics + equity', () => {
+test('the published strategies are exactly three and carry metrics + equity', () => {
   const ids = publicStrategies.map((s) => s.id).sort();
   assert(
     JSON.stringify(ids) ===
@@ -45,7 +45,6 @@ test('the four real strategies are published and carry metrics + equity', () => 
         'first-triangle-adaptive',
         'first-triangle-gold-adaptive',
         'stochextreme-adaptive',
-        'tm-bandas-s3',
       ]),
     `unexpected catalog ids: ${ids.join(', ')}`,
   );
@@ -202,7 +201,6 @@ test('strategy metrics still match their manifests (no data changes)', () => {
     'first-triangle-adaptive',
     'first-triangle-gold-adaptive',
     'stochextreme-adaptive',
-    'tm-bandas-s3',
   ];
   for (const id of ids) {
     const manifest = JSON.parse(read(`public-strategies/manifests/${id}.manifest.json`));

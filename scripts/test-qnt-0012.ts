@@ -44,9 +44,9 @@ function assert(condition: unknown, message: string): asserts condition {
 // Derived commercial catalog
 // ---------------------------------------------------------------------------
 
-test('exactly four commercial products are derived, distinct from strategy ids', () => {
+test('exactly three commercial products are derived, distinct from strategy ids', () => {
   const products = buildCommercialCatalog();
-  assert(products.length === 4, `expected 4 products, got ${products.length}`);
+  assert(products.length === 3, `expected 3 products, got ${products.length}`);
   const ids = products.map((p) => p.productId).sort();
   assert(
     JSON.stringify(ids) ===
@@ -54,7 +54,6 @@ test('exactly four commercial products are derived, distinct from strategy ids',
         'first-triangle-gold-m15',
         'first-triangle-ustec-m30',
         'stochextreme-ustec',
-        'tm-bandas-s3-keeper',
       ]),
     `unexpected product ids: ${ids.join(', ')}`,
   );
@@ -300,15 +299,15 @@ test('Customer email and displayName are nullable until identity is chosen', () 
 // Strategies and metrics stay intact
 // ---------------------------------------------------------------------------
 
-test('the four public strategies and their metrics remain unchanged', () => {
+test('the three public strategies and their metrics remain unchanged', () => {
   const ids = publicStrategies.map((s) => s.id).sort();
-  assert(ids.length === 4, `expected 4 strategies, got ${ids.length}`);
+  assert(ids.length === 3, `expected 3 strategies, got ${ids.length}`);
   assert(!ids.includes('stochextreme-gold'), 'stochextreme-gold must not be public');
+  assert(!ids.includes('tm-bandas-s3'), 'tm-bandas-s3 must not be public');
   const manifests = [
     'first-triangle-adaptive',
     'first-triangle-gold-adaptive',
     'stochextreme-adaptive',
-    'tm-bandas-s3',
   ];
   for (const id of manifests) {
     const manifest = JSON.parse(read(`public-strategies/manifests/${id}.manifest.json`));
