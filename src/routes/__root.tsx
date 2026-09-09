@@ -3,6 +3,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useLocation,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -15,6 +16,7 @@ import {
   setActiveLocale,
 } from "../i18n/locale";
 import { resolveLocaleForRequest } from "../i18n/server";
+import { absoluteUrl } from "../site";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -53,9 +55,20 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   const lang = htmlLangForLocale(getActiveLocale());
+  const locale = getActiveLocale();
+  const canonical = absoluteUrl(useLocation().pathname);
+  const ogLocale = locale === "es-ES" ? "es_ES" : "en_US";
+  const ogAlternateLocale = locale === "es-ES" ? "en_US" : "es_ES";
   return (
     <html lang={lang}>
       <head>
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:site_name" content="Quantora" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content={ogLocale} />
+        <meta property="og:locale:alternate" content={ogAlternateLocale} />
+        <meta name="twitter:card" content="summary" />
         <HeadContent />
       </head>
       <body>
