@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Nav } from '../components/Nav';
+import { BillingHistory } from '../components/BillingHistory';
 import { Footer } from '../components/Footer';
 import { getAuthStatus, signOut } from '../domain/auth/server';
 import { t } from '../i18n';
@@ -91,6 +92,11 @@ function AccountPage() {
           <h2>{t('account.licenses')}</h2>
           <p>{t('account.licensesEmpty')}</p>
         </div>
+        <div className="auth-box" data-testid="billing-history">
+          <h2>{t('billing.title')}</h2>
+          <BillingHistory />
+        </div>
+
         <div className="auth-box">
           <h2>{t('account.billing')}</h2>
           <p>{t('account.billingEmpty')}</p>
