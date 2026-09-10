@@ -415,6 +415,27 @@ export const esES: Record<string, string> = {
   'monitor.body':
     'Para esta estrategia estÃ¡ preparado un mÃ³dulo de monitoreo en demo claramente etiquetado. TodavÃ­a no hay ninguna conexiÃ³n real con MetaTrader, por lo que nada se reporta como en vivo.',
   'monitor.unavailableReason': 'No hay datos de monitoreo en demo para esta estrategia.',
+  'checkout.testBadge': 'Modo de prueba — sin cargo real.',
+  'checkout.title': 'Obtener esta estrategia (pago de prueba)',
+  'checkout.body': 'Pago de prueba. Elige compra (300 EUR pago único) o alquiler (10 EUR al mes). El acceso solo se concede tras la confirmación de pago firmada — nunca desde esta página.',
+  'checkout.buy': 'Comprar 300 \u20AC',
+  'checkout.rent': 'Alquilar 10 \u20AC/mes',
+  'checkout.redirecting': 'Redirigiendo\u2026',
+  'checkout.unavailable': 'El pago no está disponible ahora mismo. Inténtalo de nuevo más tarde.',
+  'checkout.signInRequired': 'Inicia sesión para continuar con el pago.',
+  'checkout.successTitle': 'Pago recibido (modo de prueba)',
+  'checkout.successBody': 'Tu pago de prueba se ha recibido. El acceso aparece en tu cuenta solo tras procesar la confirmación de pago firmada — esta página por sí sola no concede nada.',
+  'checkout.goAccount': 'Ir a tu cuenta',
+  'checkout.cancelTitle': 'Pago cancelado',
+  'checkout.cancelBody': 'No se ha cobrado nada. Puedes reiniciar el pago de prueba desde la página de la estrategia cuando quieras.',
+  'billing.title': 'Historial de facturación',
+  'billing.empty': 'Aún no hay pagos de prueba. Los pagos completados aparecerán aquí tras la confirmación.',
+  'billing.status.pending': 'pendiente',
+  'billing.status.paid': 'pagado',
+  'billing.status.active': 'activo',
+  'billing.status.cancelled': 'cancelado',
+  'billing.status.refunded': 'reembolsado',
+
   'monitor.disclaimer':
     'Una cuenta demo es un entorno de trading simulado. El monitoreo en demo no es un resultado de cuenta real, una garantÃ­a ni un consejo de inversiÃ³n.',
 };

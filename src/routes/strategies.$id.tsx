@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { findPublicStrategy } from '../catalog';
 import type { PublicStrategy } from '../domain/publicStrategy';
 import type { EquityPoint } from '../domain/types';
+import { getCommercialCatalog } from '../commercial/server';
+import { CheckoutCtas } from '../components/CheckoutCtas';
 import { fmtDate, fmtNum, fmtNumDec, fmtPct, fmtPeriod, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
 import { Logo } from '../components/Logo';
@@ -98,6 +100,18 @@ function RealEquityChart({ points, unit }: { points: EquityPoint[]; unit: 'point
 }
 
 function RealDetail({ s }: { s: PublicStrategy }) {
+  const [paymentsOn, setPaymentsOn] = useState(false);
+  const [paymentsChecked, setPaymentsChecked] = useState(false);
+  if (!paymentsChecked) {
+    setPaymentsChecked(true);
+    void (async () => {
+      try {
+        const catalog = await getCommercialCatalog();
+        if (catalog.flags.paymentsEnabled) setPaymentsOn(true);
+      } catch {
+      }
+    })();
+  }
   const m = s.metrics ?? {};
   const score = s.score;
   const pointsUnit = s.performanceUnit === 'points';
@@ -251,6 +265,8 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>{t('easy.installBlockTitle')}</h2>
           <EasyStartSteps mode="compact" asLinkTo="/how-to-install" />
         </section>
+
+        {paymentsOn && <CheckoutCtas productId={s.productId ?? s.id} />}
 
         <section id="how-it-works" className="card" style={{ marginTop: 15 }}>
           <div className="eyebrow" style={{ marginBottom: 12 }}>

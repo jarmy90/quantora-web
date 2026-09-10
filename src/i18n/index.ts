@@ -398,6 +398,27 @@ export const enUS = {
   'monitor.body':
     'A clearly labelled demo monitoring module is prepared for this strategy. No real MetaTrader connection is active yet, so nothing is reported as live.',
   'monitor.unavailableReason': 'No demo monitoring data is available for this strategy.',
+  'checkout.testBadge': 'Test mode — no real charge.',
+  'checkout.title': 'Get this strategy (test checkout)',
+  'checkout.body': 'Test checkout only. Choose purchase (300 EUR one-time) or rental (10 EUR per month). Access is granted only after the signed payment confirmation — never from this page.',
+  'checkout.buy': 'Buy 300 \u20AC',
+  'checkout.rent': 'Rent 10 \u20AC/mo',
+  'checkout.redirecting': 'Redirecting\u2026',
+  'checkout.unavailable': 'Checkout is unavailable right now. Please try again later.',
+  'checkout.signInRequired': 'Sign in to continue to checkout.',
+  'checkout.successTitle': 'Payment received (test mode)',
+  'checkout.successBody': 'Your test payment was received. Access appears in your account only after the signed payment confirmation is processed — this page alone grants nothing.',
+  'checkout.goAccount': 'Go to your account',
+  'checkout.cancelTitle': 'Checkout cancelled',
+  'checkout.cancelBody': 'Nothing was charged. You can restart the test checkout from the strategy page at any time.',
+  'billing.title': 'Billing history',
+  'billing.empty': 'No test payments yet. Completed test checkouts will appear here after confirmation.',
+  'billing.status.pending': 'pending',
+  'billing.status.paid': 'paid',
+  'billing.status.active': 'active',
+  'billing.status.cancelled': 'cancelled',
+  'billing.status.refunded': 'refunded',
+
   'monitor.disclaimer':
     'A demo account is a simulated trading environment. Demo monitoring is not a real-account result, a guarantee or investment advice.',
 } as const satisfies Record<string, MessageValue>;

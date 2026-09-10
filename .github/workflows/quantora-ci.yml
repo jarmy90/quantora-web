@@ -55,6 +55,9 @@ jobs:
       - name: QNT-0021 SEO canonical tests
         run: bun run scripts/test-qnt-0021-seo.ts
 
+      - name: QNT-0025 Stripe Test Mode contract tests
+        run: bun run scripts/test-qnt-0025-stripe-test.ts
+
       - name: Intake tests
         run: bun run scripts/test-strategy-intake.ts
 

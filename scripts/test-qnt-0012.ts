@@ -326,14 +326,18 @@ test('the three public strategies and their metrics remain unchanged', () => {
 // UI readiness
 // ---------------------------------------------------------------------------
 
-test('real strategy UI has no active Buy/Rent/Checkout/Pay/Download', () => {
+test('real strategy UI gates checkout behind the payments flag', () => {
   const detail = read('src/routes/strategies.$id.tsx');
   const start = detail.indexOf('function RealDetail');
   const end = detail.indexOf('function MockDetail');
   const realSection = detail.slice(start, end);
-  for (const forbidden of ['Checkout', 'Pay now', '<LicensePicker']) {
+  // Unconditional checkout stays forbidden: CTAs may only render behind the
+  // server-resolved payments flag (paymentsOn && ...).
+  for (const forbidden of ['Pay now', '<LicensePicker']) {
     assert(!realSection.includes(forbidden), `real detail must not contain "${forbidden}"`);
   }
+  assert(realSection.includes('paymentsOn'), 'checkout CTAs must be gated by the payments flag');
+  assert(realSection.includes('getCommercialCatalog'), 'flag must come from the server catalog payload');
 });
 
 test('dashboard remains a marked preview and shows Account access: not enabled', () => {
