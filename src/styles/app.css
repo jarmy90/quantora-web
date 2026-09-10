@@ -473,6 +473,11 @@
   .curve {
     height: 80px;
   }
+  /* Strategy card lists (Home + catalog) stack full-width on mobile:
+     this must come AFTER the 1024px rule so it wins the cascade. */
+  .grid {
+    grid-template-columns: 1fr;
+  }
   .premium-stats {
     grid-template-columns: 1fr;
     gap: 10px;
