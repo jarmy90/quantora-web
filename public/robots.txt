@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /dashboard
+
+Sitemap: https://www.quantoramt5.com/sitemap.xml
