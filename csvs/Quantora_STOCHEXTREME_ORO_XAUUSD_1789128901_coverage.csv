@@ -1,0 +1,2 @@
+run_id,symbol,first_tick,last_tick,first_usable_signal_time,ticks_processed,work_bars_seen,warmup_complete
+STOCHEXTREME_ORO_XAUUSD_1789128901,XAUUSD,2026.09.11 13:15:01,2026.09.11 13:15:11,2026.09.11 13:15:01,26,0,true

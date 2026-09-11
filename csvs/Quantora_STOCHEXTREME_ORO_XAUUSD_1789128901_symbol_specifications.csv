@@ -1,0 +1,2 @@
+run_id,broker,server,account_currency,symbol,description,digits,point,tick_size,tick_value,tick_value_profit,tick_value_loss,contract_size,volume_min,volume_max,volume_step,stops_level,freeze_level,calc_mode,profit_currency,margin_currency,generated_at
+STOCHEXTREME_ORO_XAUUSD_1789128901,IC Markets (EU) Ltd,ICMarketsEU-MT5-5,EUR,XAUUSD,Gold vs US Dollar,2,0.01,0.01,0.8623217149854269,0.8623217149854269,0.8623812069887372,100.0,0.01,100.0,0.01,0,0,0,USD,XAU,2026.09.11 13:15:01

@@ -1,0 +1,2 @@
+run_id,status,strategy_version,symbol,calculation_mode,execution_mode,start_time,end_time,ticks_processed,closed_trades,structural_wins,structural_losses,net_profit,profit_factor,max_drawdown_absolute,max_drawdown_percent,warnings
+STOCHEXTREME_ORO_XAUUSD_1751328000,COMPLETED,2.27,XAUUSD,LIVE_INTRABAR,REAL_ORDERS,2025.07.01 01:00:00,2026.09.10 23:58:59,88570573,531,342,189,22575.610000000004,1.1121416995652293,17147.42,54.998357629773835,none
