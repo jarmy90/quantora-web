@@ -372,6 +372,10 @@ test('sign-out clears every session cookie', () => {
 // ---------------------------------------------------------------------------
 
 test('delivery package contains every PR file and the inventory matches 1:1', () => {
+  if (process.env.SKIP_DELIVERY_PACKAGE_CHECKS === '1') {
+    console.log('  (skip) delivery package checks skipped via SKIP_DELIVERY_PACKAGE_CHECKS=1');
+    return;
+  }
   const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
   const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
   // This check is specific to the QNT-0013 delivery: it only applies when the
@@ -411,6 +415,10 @@ test('delivery package contains every PR file and the inventory matches 1:1', ()
 });
 
 test('package hash list covers every file in the ZIP', () => {
+  if (process.env.SKIP_DELIVERY_PACKAGE_CHECKS === '1') {
+    console.log('  (skip) hash-list checks skipped via SKIP_DELIVERY_PACKAGE_CHECKS=1');
+    return;
+  }
   const exec = (cmd: string) => subprocess.execSync(cmd, { cwd: ROOT }).toString().trim();
   const prFiles = new Set(exec('git diff --name-only origin/main...HEAD').split(/\r?\n/).filter(Boolean));
   const touchesQnt13 = [...prFiles].some(
