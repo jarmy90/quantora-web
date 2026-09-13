@@ -1,4 +1,4 @@
-﻿/**
+/**
  * QNT-0013 · Supabase environment contract.
  *
  * Three explicit states:
@@ -59,15 +59,8 @@ function raw(): { url: string | null; key: string | null } {
       key: key && key.trim() !== '' ? key.trim() : null,
     };
   }
-  const meta = (() => {
-    try {
-      return (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
-    } catch {
-      return undefined;
-    }
-  })();
-  const url = meta?.VITE_SUPABASE_URL ?? null;
-  const key = meta?.VITE_SUPABASE_PUBLISHABLE_KEY ?? null;
+  const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? null;
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? null;
   return {
     url: url && url.trim() !== '' ? url.trim() : null,
     key: key && key.trim() !== '' ? key.trim() : null,
