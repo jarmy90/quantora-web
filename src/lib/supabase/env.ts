@@ -6,6 +6,11 @@
  *   - not_configured       a required variable is missing entirely
  *   - invalid_configuration a variable is present but malformed
  *
+ * CLIENT bundle: `import.meta.env.VITE_*` is replaced at Vite build time.
+ * SERVER bundle (`@tanstack/react-start` + `serve.ts`): values are read at
+ * runtime from `process.env` (Vercel injects VITE_* + server-only vars into
+ * the deployed runtime; a plain `vercel.json` env or `.env` covers the
+ * self-hosted `serve.ts`).
  * Only the PUBLIC pair (VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY) is
  * read here. These are replaced at Vite build-time in the client bundle.
  *
@@ -35,10 +40,34 @@ function looksLikeUrl(value: string): boolean {
   }
 }
 
-/** Raw VITE_ values — only valid in client bundle (replaced at build time). */
+/**
+ * Raw auth env values, split by execution context:
+ * - On the server (SSR + server functions under Node/Vercel): read
+ *   `process.env` at runtime. This is REQUIRED because Vite statically
+ *   replaces `import.meta.env.*` in the server bundle at build time, so
+ *   values injected only at deploy-time would otherwise read as undefined.
+ * - In the browser: read the Vite-replaced `import.meta.env.VITE_*`.
+ */
 function raw(): { url: string | null; key: string | null } {
-  const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? null;
-  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ?? null;
+  const isServer = typeof window === 'undefined';
+  if (isServer) {
+    const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+    const url = proc?.VITE_SUPABASE_URL ?? proc?.SUPABASE_URL ?? null;
+    const key = proc?.VITE_SUPABASE_PUBLISHABLE_KEY ?? proc?.SUPABASE_ANON_KEY ?? null;
+    return {
+      url: url && url.trim() !== '' ? url.trim() : null,
+      key: key && key.trim() !== '' ? key.trim() : null,
+    };
+  }
+  const meta = (() => {
+    try {
+      return (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    } catch {
+      return undefined;
+    }
+  })();
+  const url = meta?.VITE_SUPABASE_URL ?? null;
+  const key = meta?.VITE_SUPABASE_PUBLISHABLE_KEY ?? null;
   return {
     url: url && url.trim() !== '' ? url.trim() : null,
     key: key && key.trim() !== '' ? key.trim() : null,
