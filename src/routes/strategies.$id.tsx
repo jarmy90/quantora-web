@@ -264,6 +264,11 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           <div className="eyebrow" style={{ marginBottom: 12 }}>{t('easy.installBlockEyebrow')}</div>
           <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>{t('easy.installBlockTitle')}</h2>
           <EasyStartSteps mode="compact" asLinkTo="/how-to-install" />
+          <p style={{ marginTop: 14 }}>
+            <a href="/Quantora_MT5_Guia_Instalacion_EA.pdf" download="Quantora_MT5_Guia_Instalacion_EA.pdf">
+              {t('easy.pdfCta')} ↓
+            </a>
+          </p>
         </section>
 
         {paymentsOn && <CheckoutCtas productId={s.productId ?? s.id} />}

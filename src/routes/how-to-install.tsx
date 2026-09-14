@@ -70,6 +70,19 @@ function HowToInstall() {
           <a className="btn primary" href="#steps" style={{ marginTop: 20 }}>
             {t('easy.cta')} ↓
           </a>
+          <div style={{ marginTop: 14 }}>
+            <a
+              className="btn"
+              href="/Quantora_MT5_Guia_Instalacion_EA.pdf"
+              download="Quantora_MT5_Guia_Instalacion_EA.pdf"
+              style={{ textDecoration: 'none' }}
+            >
+              ↓ {t('easy.pdfCta')}
+            </a>
+            <span className="muted" style={{ fontSize: 13.5, marginLeft: 10 }}>
+              {t('easy.pdfHelp')}
+            </span>
+          </div>
           <ul className="easy-trust" style={{ marginTop: 26 }}>
             {[t('easy.trustNoCoding'), t('easy.trustDemo'), t('easy.trustMT5')].map((p) => (
               <li key={p} className="badge">

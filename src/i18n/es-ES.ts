@@ -314,6 +314,8 @@ export const esES: Record<string, string> = {
   'easy.body':
     'Sin necesidad de programar. Quantora te guía desde la descarga hasta la primera prueba segura en una cuenta demo.',
   'easy.cta': 'Ver los 3 pasos',
+  'easy.pdfCta': 'Descargar guía de instalación (PDF)',
+  'easy.pdfHelp': 'Guía paso a paso con capturas que puedes guardar.',
   'easy.trustNoCoding': 'Sin necesidad de programar',
   'easy.trustDemo': 'Empieza con una cuenta demo',
   'easy.trustMT5': 'Compatible con MetaTrader 5',
