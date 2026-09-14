@@ -205,7 +205,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             <span className="badge">{t('detail.historicalBacktest')}</span>
             {s.version && <span className="badge">{t('detail.version')} {s.version}</span>}
             {s.market && <span className="badge">{t('detail.market')}: {s.market}</span>}
-            {s.instrument && <span className="badge">{t('detail.instrument')}: {s.instrument}</span>}
             {s.period && <span className="badge">{fmtPeriod(s.period.start, s.period.end)}</span>}
           </div>
         </section>
@@ -276,7 +275,6 @@ function RealDetail({ s }: { s: PublicStrategy }) {
             {s.market && (
               <li>
                 {t('detail.market')}: {s.market}
-                {s.instrument ? ` (${s.instrument})` : ''}
               </li>
             )}
             {(s.rules ?? []).map((rule) => (

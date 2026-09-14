@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-09T08:15:09.853Z",
+  "generatedAt": "2026-09-14T07:44:25.489Z",
   "strategies": [
     {
       "id": "first-triangle-adaptive",
       "name": "First Triangle Adaptive",
       "version": "1.00",
-      "description": "Historical backtest of a systematic triangle-breakout model on Nasdaq-100 futures (AMP @ENQ). The model enters on the first alternating triangle signal, protects each position with a fixed 200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an opposite triangle signal. Results are reconstructed from the owner’s supplied trade history.",
+      "description": "Historical backtest of a systematic triangle-breakout model on Nasdaq-100 index futures (USTEC). The model enters on the first alternating triangle signal, protects each position with a fixed 200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an opposite triangle signal. Results are reconstructed from the owner's supplied trade history.",
       "tagline": "Rules-based triangle-breakout backtest on Nasdaq-100",
       "type": "Historical backtest",
       "market": "Nasdaq-100",
-      "instrument": "AMP @ENQ",
+      "instrument": "USTEC",
       "variant": "Long and short (FIRST_ALTERNATING_TRIANGLE)",
       "configuration": "FIRST_ALTERNATING_TRIANGLE / FIXED_200PTS / ADAPTIVE_MFE_GIVEBACK",
       "assets": [
-        "@ENQ"
+        "USTEC"
       ],
       "period": {
         "start": "2025-08-14T01:30:00Z",
@@ -835,7 +835,7 @@
       ],
       "limitations": [
         "Period analyzed: 2025-08-14 to 2026-08-07",
-        "Single market: Nasdaq-100 (AMP @ENQ)",
+        "Single market: Nasdaq-100 (USTEC)",
         "145 closed trades",
         "Commission: 1.20 USD per trade",
         "Maximum drawdown: 4,474.80 USD",
@@ -1999,15 +1999,15 @@
       "id": "stochextreme-adaptive",
       "name": "StochExtreme Adaptive",
       "version": "1.07",
-      "description": "Historical backtest of the StochExtreme Adaptive model on Nasdaq-100 futures (AMP @ENQ). The model arms on stochastic extremes, requires an opposite extreme before rearming, confirms the signal on a shorter timeframe, and exits by stop loss or an M30-close target. Results are reconstructed from the owner’s supplied closed-trade history (421 closed trades).",
+      "description": "Historical backtest of the StochExtreme Adaptive model on Nasdaq-100 index futures (USTEC). The model arms on stochastic extremes, requires an opposite extreme before rearming, confirms the signal on a shorter timeframe, and exits by stop loss or an M30-close target. Results are reconstructed from the owner's supplied closed-trade history (421 closed trades).",
       "tagline": "Stochastic-extreme intraday model on Nasdaq-100",
       "type": "Historical backtest",
       "market": "Nasdaq-100",
-      "instrument": "AMP @ENQ",
+      "instrument": "USTEC",
       "variant": "Long and short (Q_PINE_INTRABAR_ORIGIN)",
       "configuration": "SEA2575 / PERIOD_M30 / PERIOD_M3 confirm / 100pt stop",
       "assets": [
-        "@ENQ"
+        "USTEC"
       ],
       "period": {
         "start": "2025-08-01T00:00:00Z",
@@ -3876,7 +3876,7 @@
       ],
       "limitations": [
         "Period analyzed: 2025-08-01 to 2026-08-07",
-        "Single market: Nasdaq-100 (AMP @ENQ)",
+        "Single market: Nasdaq-100 (USTEC)",
         "421 closed trades (crosses, confirmations, cancelled signals and SESSION_BLOCKED are not counted)",
         "Commission/swap: 0.00 USD per trade (not applied in this export)",
         "Maximum drawdown: 4,690.00 USD (26.53%)",

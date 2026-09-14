@@ -187,7 +187,7 @@ export function buildStochExtremeManifest(evidenceDir: string = EVIDENCE_DIR): M
   ];
 
   const description =
-    'Historical backtest of the StochExtreme Adaptive model on Nasdaq-100 futures (AMP @ENQ). ' +
+    'Historical backtest of the StochExtreme Adaptive model on Nasdaq-100 index futures (USTEC). ' +
     'The model arms on stochastic extremes, requires an opposite extreme before rearming, confirms the ' +
     'signal on a shorter timeframe, and exits by stop loss or an M30-close target. Results are reconstructed ' +
     'from the owner\u2019s supplied closed-trade history (421 closed trades).';
@@ -198,7 +198,7 @@ export function buildStochExtremeManifest(evidenceDir: string = EVIDENCE_DIR): M
     tagline: 'Stochastic-extreme intraday model on Nasdaq-100',
     type: 'Historical backtest',
     market: 'Nasdaq-100',
-    instrument: 'AMP @ENQ',
+    instrument: 'USTEC',
     // QNT-0003H: versioned publication contract (beta). Costs were NOT applied
     // in this export (0.00 USD/trade is the recorded export value, not a
     // confirmed real cost), so costsApplied is explicitly false.
