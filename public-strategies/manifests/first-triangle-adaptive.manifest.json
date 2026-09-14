@@ -4,7 +4,7 @@
   "tagline": "Rules-based triangle-breakout backtest on Nasdaq-100",
   "type": "Historical backtest",
   "market": "Nasdaq-100",
-  "instrument": "AMP @ENQ",
+  "instrument": "USTEC",
   "publicationMode": "results",
   "filterVersion": "beta-1",
   "scoreVersion": "beta-1",
@@ -21,7 +21,7 @@
   ],
   "limitations": [
     "Period analyzed: 2025-08-14 to 2026-08-07",
-    "Single market: Nasdaq-100 (AMP @ENQ)",
+    "Single market: Nasdaq-100 (USTEC)",
     "145 closed trades",
     "Commission: 1.20 USD per trade",
     "Maximum drawdown: 4,474.80 USD",
@@ -825,7 +825,7 @@
       {
         "id": "first-triangle-adaptive",
         "name": "First Triangle Adaptive",
-        "description": "Historical backtest of a systematic triangle-breakout model on Nasdaq-100 futures (AMP @ENQ). The model enters on the first alternating triangle signal, protects each position with a fixed 200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an opposite triangle signal. Results are reconstructed from the owner’s supplied trade history.",
+        "description": "Historical backtest of a systematic triangle-breakout model on Nasdaq-100 index futures (USTEC). The model enters on the first alternating triangle signal, protects each position with a fixed 200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an opposite triangle signal. Results are reconstructed from the owner's supplied trade history.",
         "version": "1.00",
         "status": "active",
         "validationStatus": "owner_supplied_under_review",
@@ -848,10 +848,10 @@
     "assets": [
       {
         "id": "amp-enq",
-        "symbol": "@ENQ",
+        "symbol": "USTEC",
         "name": "Nasdaq-100",
         "assetClass": "future",
-        "exchange": "AMP"
+        "exchange": "CME"
       }
     ],
     "backtests": [],

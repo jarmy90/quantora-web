@@ -84,7 +84,6 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
           <span className="badge">
             {t('catalog.publishedStrategy')}
             {s.market ? ` · ${s.market}` : ''}
-            {s.instrument ? ` · ${s.instrument}` : ''}
           </span>
           <h3 style={{ margin: '10px 0 3px', fontSize: 17, letterSpacing: '-.02em' }}>{s.name}</h3>
           <div className="tag">{s.tagline}</div>

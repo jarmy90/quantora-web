@@ -149,7 +149,7 @@ export function buildFirstTriangleManifest(evidenceDir: string = EVIDENCE_DIR): 
   };
 
   const description =
-    'Historical backtest of a systematic triangle-breakout model on Nasdaq-100 futures (AMP @ENQ). ' +
+    'Historical backtest of a systematic triangle-breakout model on Nasdaq-100 index futures (USTEC). ' +
     'The model enters on the first alternating triangle signal, protects each position with a fixed ' +
     '200-point stop, and exits via an adaptive trailing rule based on maximum favorable excursion or an ' +
     'opposite triangle signal. Results are reconstructed from the owner\u2019s supplied trade history.';
@@ -160,7 +160,7 @@ export function buildFirstTriangleManifest(evidenceDir: string = EVIDENCE_DIR): 
     tagline: 'Rules-based triangle-breakout backtest on Nasdaq-100',
     type: 'Historical backtest',
     market: 'Nasdaq-100',
-    instrument: 'AMP @ENQ',
+    instrument: 'USTEC',
     // QNT-0003H: versioned publication contract (beta).
     publicationMode: 'results',
     filterVersion: 'beta-1',
