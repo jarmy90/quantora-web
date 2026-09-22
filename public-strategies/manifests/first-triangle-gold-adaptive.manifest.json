@@ -16,6 +16,24 @@
   "productId": "first-triangle-gold-m15",
   "productStatus": "coming_soon",
   "commercialDownloadEnabled": false,
+  "commercial": {
+    "plans": [
+      {
+        "billingModel": "purchase",
+        "billingInterval": "one_time",
+        "status": "active",
+        "priceAmountMinor": 30000,
+        "currency": "EUR"
+      },
+      {
+        "billingModel": "rental",
+        "billingInterval": "monthly",
+        "status": "active",
+        "priceAmountMinor": 1000,
+        "currency": "EUR"
+      }
+    ]
+  },
   "sourceTimezone": null,
   "timestampNormalization": "not_normalized",
   "rules": [

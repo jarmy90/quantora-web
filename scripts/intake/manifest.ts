@@ -87,6 +87,24 @@ export type Manifest = {
   productStatus?: 'not_listed' | 'coming_soon' | 'available' | 'paused' | 'deprecated';
   /** Whether commercial EA download is enabled for this product (false while demo-only). */
   commercialDownloadEnabled?: boolean;
+  /** QNT-0041 commercial plans (prices). Only active plans with a real price are public. */
+  commercial?: ManifestCommercial;
+};
+
+/** QNT-0041 · A billing modality declared in the manifest (price lives here, versioned). */
+export type ManifestPlan = {
+  billingModel: 'purchase' | 'rental';
+  billingInterval: 'one_time' | 'monthly' | 'quarterly' | 'annual';
+  /** Defaults to "draft": a draft plan has no price and is never published. */
+  status?: 'draft' | 'inactive' | 'active' | 'retired';
+  /** Integer minor units (e.g. 30000 = 300 EUR). Null/absent is never zero. */
+  priceAmountMinor?: number;
+  /** ISO 4217 code (three uppercase letters). */
+  currency?: string;
+};
+
+export type ManifestCommercial = {
+  plans?: ManifestPlan[];
 };
 
 export type ManifestIssue = {
@@ -252,6 +270,86 @@ export function validateManifest(value: unknown): ManifestIssue[] {
   }
   if (value.commercialDownloadEnabled !== undefined && typeof value.commercialDownloadEnabled !== 'boolean') {
     issues.push(error('commercialDownloadEnabled', 'Must be a boolean.'));
+  }
+
+  // QNT-0041 commercial plans: prices are versioned catalog data, never
+  // hand-written in components. Only "active" plans with a real price ever
+  // reach the public bundle; a draft plan carries no price at all.
+  if (value.commercial !== undefined) {
+    if (!isRecord(value.commercial)) {
+      issues.push(error('commercial', 'Must be an object.'));
+    } else {
+      const plans = (value.commercial as Record<string, unknown>).plans;
+      if (plans !== undefined && !Array.isArray(plans)) {
+        issues.push(error('commercial.plans', 'Must be an array.'));
+      } else if (Array.isArray(plans)) {
+        const seenModels = new Set<string>();
+        plans.forEach((plan, index) => {
+          const path = `commercial.plans[${index}]`;
+          if (!isRecord(plan)) {
+            issues.push(error(path, 'Must be an object.'));
+            return;
+          }
+          const model = plan.billingModel;
+          const interval = plan.billingInterval;
+          if (model !== 'purchase' && model !== 'rental') {
+            issues.push(error(`${path}.billingModel`, 'Must be "purchase" or "rental".'));
+          } else if (
+            interval !== 'one_time' &&
+            interval !== 'monthly' &&
+            interval !== 'quarterly' &&
+            interval !== 'annual'
+          ) {
+            issues.push(
+              error(`${path}.billingInterval`, 'Must be one_time, monthly, quarterly or annual.'),
+            );
+          } else if (model === 'purchase' ? interval !== 'one_time' : interval === 'one_time') {
+            issues.push(
+              error(
+                `${path}.billingInterval`,
+                `Invalid interval "${String(interval)}" for billing model "${String(model)}".`,
+              ),
+            );
+          } else if (seenModels.has(model)) {
+            issues.push(error(path, `Duplicate billing model "${model}".`));
+          } else {
+            seenModels.add(model);
+          }
+          const status = plan.status ?? 'draft';
+          if (!['draft', 'inactive', 'active', 'retired'].includes(status as string)) {
+            issues.push(error(`${path}.status`, 'Must be one of: draft, inactive, active, retired.'));
+          }
+          const amount = plan.priceAmountMinor;
+          if (amount !== undefined && (!Number.isInteger(amount) || (amount as number) < 0)) {
+            issues.push(
+              error(`${path}.priceAmountMinor`, 'Must be a non-negative integer in minor units.'),
+            );
+          }
+          const currency = plan.currency;
+          if (currency !== undefined && !(typeof currency === 'string' && /^[A-Z]{3}$/.test(currency))) {
+            issues.push(error(`${path}.currency`, 'Must be an ISO 4217 code (three uppercase letters).'));
+          }
+          if (status === 'active') {
+            if (!(typeof amount === 'number' && amount > 0)) {
+              issues.push(
+                error(
+                  `${path}.priceAmountMinor`,
+                  'An active plan must declare a positive price (null is never zero).',
+                ),
+              );
+            }
+            if (!(typeof currency === 'string' && /^[A-Z]{3}$/.test(currency))) {
+              issues.push(error(`${path}.currency`, 'An active plan must declare its currency.'));
+            }
+          }
+        });
+        if (plans.length > 0 && !isText(value.productId)) {
+          issues.push(
+            error('commercial.plans', 'productId is required to derive public plan identifiers.'),
+          );
+        }
+      }
+    }
   }
 
   if (value.evidence !== undefined) {

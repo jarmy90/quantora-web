@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T07:44:25.489Z",
+  "generatedAt": "2026-09-22T11:21:39.794Z",
   "strategies": [
     {
       "id": "first-triangle-adaptive",
@@ -849,7 +849,23 @@
       "performanceUnit": "usd",
       "productId": "first-triangle-ustec-m30",
       "productStatus": "coming_soon",
-      "commercialDownloadEnabled": false
+      "commercialDownloadEnabled": false,
+      "plans": [
+        {
+          "planId": "first-triangle-ustec-m30-purchase",
+          "billingModel": "purchase",
+          "billingInterval": "one_time",
+          "priceAmountMinor": 30000,
+          "currency": "EUR"
+        },
+        {
+          "planId": "first-triangle-ustec-m30-rental",
+          "billingModel": "rental",
+          "billingInterval": "monthly",
+          "priceAmountMinor": 1000,
+          "currency": "EUR"
+        }
+      ]
     },
     {
       "id": "first-triangle-gold-adaptive",
@@ -1993,7 +2009,23 @@
       "performanceUnit": "points",
       "productId": "first-triangle-gold-m15",
       "productStatus": "coming_soon",
-      "commercialDownloadEnabled": false
+      "commercialDownloadEnabled": false,
+      "plans": [
+        {
+          "planId": "first-triangle-gold-m15-purchase",
+          "billingModel": "purchase",
+          "billingInterval": "one_time",
+          "priceAmountMinor": 30000,
+          "currency": "EUR"
+        },
+        {
+          "planId": "first-triangle-gold-m15-rental",
+          "billingModel": "rental",
+          "billingInterval": "monthly",
+          "priceAmountMinor": 1000,
+          "currency": "EUR"
+        }
+      ]
     },
     {
       "id": "stochextreme-adaptive",
@@ -3891,7 +3923,23 @@
       "performanceUnit": "usd",
       "productId": "stochextreme-ustec",
       "productStatus": "coming_soon",
-      "commercialDownloadEnabled": false
+      "commercialDownloadEnabled": false,
+      "plans": [
+        {
+          "planId": "stochextreme-ustec-purchase",
+          "billingModel": "purchase",
+          "billingInterval": "one_time",
+          "priceAmountMinor": 30000,
+          "currency": "EUR"
+        },
+        {
+          "planId": "stochextreme-ustec-rental",
+          "billingModel": "rental",
+          "billingInterval": "monthly",
+          "priceAmountMinor": 1000,
+          "currency": "EUR"
+        }
+      ]
     }
   ]
 }

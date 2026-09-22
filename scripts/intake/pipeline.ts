@@ -10,8 +10,13 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import type { EquityPoint } from '../../src/domain/types.ts';
-import type { PublicStrategy, QuantoraScore } from '../../src/domain/publicStrategy.ts';
-import type { Manifest, ManifestEvidence, ManifestIssue } from './manifest.ts';
+import type { PublicPlan, PublicStrategy, QuantoraScore } from '../../src/domain/publicStrategy.ts';
+import type {
+  Manifest,
+  ManifestCommercial,
+  ManifestEvidence,
+  ManifestIssue,
+} from './manifest.ts';
 import { validateManifest } from './manifest.ts';
 import { computeQuantoraScore } from './scoring.ts';
 import { evaluatePublishFilter } from './filter.ts';
@@ -69,6 +74,8 @@ export type CatalogEntry = {
   productStatus?: 'not_listed' | 'coming_soon' | 'available' | 'paused' | 'deprecated';
   /** Whether commercial EA download is enabled for this product. */
   commercialDownloadEnabled?: boolean;
+  /** QNT-0041 public prices: only active plans with a real price land here. */
+  plans?: PublicPlan[];
   /** Publication filter outcome (internal — never part of the public catalog). */
   published?: boolean;
   filterReasons?: string[];
@@ -238,6 +245,8 @@ export function manifestToCatalogEntry(manifest: Manifest, evidence: ResolvedEvi
     productId: manifest.productId,
     productStatus: manifest.productStatus,
     commercialDownloadEnabled: manifest.commercialDownloadEnabled === true,
+    // QNT-0041 prices: only active plans with a real price ever leave here.
+    plans: toPublicPlans(manifest.commercial, manifest.productId),
   };
 
   // Faithful `results` (real owner deliveries) take precedence over the strict
@@ -374,7 +383,44 @@ export function toPublicStrategy(entry: CatalogEntry): PublicStrategy {
     productId: entry.productId,
     productStatus: entry.productStatus,
     commercialDownloadEnabled: entry.commercialDownloadEnabled === true,
+    // QNT-0041 repeated prices (display data only — checkout resolves amounts
+    // server-side and the client never sends a price back).
+    plans: entry.plans,
   };
+}
+
+/**
+ * QNT-0041 · Projects manifest plans into the public shape.
+ *
+ * A plan is public only when it is `active` AND carries a positive integer
+ * amount AND a currency; anything else (draft, retired, no price) is dropped
+ * instead of being rendered as 0 or "free". Plan identifiers are derived from
+ * the product so the catalog stays deterministic.
+ */
+export function toPublicPlans(
+  commercial: ManifestCommercial | undefined,
+  productId: string | undefined,
+): PublicPlan[] | undefined {
+  const declared = commercial?.plans ?? [];
+  if (declared.length === 0 || !productId) return undefined;
+  const active = declared
+    .filter((plan) => plan.status === 'active')
+    .filter(
+      (plan): plan is typeof plan & { priceAmountMinor: number; currency: string } =>
+        typeof plan.priceAmountMinor === 'number' &&
+        Number.isInteger(plan.priceAmountMinor) &&
+        plan.priceAmountMinor > 0 &&
+        typeof plan.currency === 'string' &&
+        /^[A-Z]{3}$/.test(plan.currency),
+    )
+    .map((plan) => ({
+      planId: `${productId}-${plan.billingModel}`,
+      billingModel: plan.billingModel,
+      billingInterval: plan.billingInterval,
+      priceAmountMinor: plan.priceAmountMinor,
+      currency: plan.currency,
+    }));
+  return active.length > 0 ? active : undefined;
 }
 
 /** Only strategies that passed the publication filter reach the public catalog. */

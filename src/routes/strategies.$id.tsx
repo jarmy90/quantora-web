@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import { Logo } from '../components/Logo';
 import { Footer } from '../components/Footer';
 import { EasyStartSteps } from '../components/EasyStartSteps';
+import { StrategyPricing } from '../components/StrategyPricing';
 import { DemoMonitoringCard } from '../components/DemoMonitoringCard';
 import '../styles/app.css';
 
@@ -265,6 +266,7 @@ function RealDetail({ s }: { s: PublicStrategy }) {
           <EasyStartSteps mode="compact" asLinkTo="/how-to-install" />
         </section>
 
+        <StrategyPricing plans={s.plans} variant="block" />
         {paymentsOn && <CheckoutCtas productId={s.productId ?? s.id} />}
 
         <section id="how-it-works" className="card" style={{ marginTop: 15 }}>
