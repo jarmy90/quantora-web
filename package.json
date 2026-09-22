@@ -30,7 +30,8 @@
     "test:qnt-0021-i18n": "bun run scripts/test-qnt-0021-i18n.ts",
     "test:qnt-0021-seo": "bun run scripts/test-qnt-0021-seo.ts",
     "test:qnt-0025-stripe-test": "bun run scripts/test-qnt-0025-stripe-test.ts",
-    "test:qnt-0041": "bun run scripts/test-qnt-0041-pricing-visible.ts"
+    "test:qnt-0041": "bun run scripts/test-qnt-0041-pricing-visible.ts",
+    "test:qnt-0042": "bun run scripts/test-qnt-0042-webhook-persistence.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
