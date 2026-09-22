@@ -4,9 +4,11 @@ Estado maestro del repositorio. Sin secretos.
 
 ## Estado actual
 
-- **Producto**: plataforma activa con **cuatro estrategias publicadas** (no demo, no beta, no revisión).
+- **Producto**: plataforma activa con **tres estrategias publicadas** (no demo, no beta, no revisión). `tm-bandas-s3` está despublicada (manifiesto archivado en `strategy-intake/archive/`).
 - **Publicación**: cualquier estrategia en el catálogo está aprobada para publicación. Los estados editoriales internos (verificado / no verificado / en revisión / owner supplied / reproducción independiente) nunca se muestran al público.
-- **Estado comercial**: pendiente por decisión; la presentación pública es "Early access · Get access updates" dirigida a crear cuenta (la waitlist no persiste datos y nunca afirma haberlos guardado). No hay precios, licencias, checkout ni descargas activos.
+- **Estado comercial**: decisión de precios tomada y **implementada en código, aún no visible al público**: compra 300 € pago único · alquiler 10 €/mes · EUR (`src/domain/payments/prices.ts`, QNT-0025). El catálogo sigue `coming_soon` con `commercialDownloadEnabled=false`, por lo que no hay precios, checkout ni descargas activos en producción. La presentación pública sigue siendo "Early access · Get access updates" (la waitlist no persiste datos y nunca afirma haberlos guardado).
+- **Submódulo**: `quantora-web` está integrado como submódulo Git dentro de `quantoraex5` (repo de binarios `.ex5`), pin `fc4f344`, ruta `quantora-web/`. Web y estrategias se versionan por separado.
+- **Dominio**: `https://www.quantoramt5.com` (canónico, Vercel); el ápex redirige 308 a `www`.
 - **Separación por origen (invariante)**: Backtest ≠ Demo monitoring ≠ Resultados de cuenta real.
 - **Costes en tarjetas**: nunca se muestran como badge; si `costsApplied=false` se renderiza la nota discreta "Backtest results exclude commission, spread, slippage and swap." antes del CTA. La ficha explica el tratamiento en el bloque "Trading costs" con formulaciones fieles a los datos.
 - **Metodología (única nota)**: "Trading costs are shown exactly as provided by each backtest…" en la sección How it works de las fichas.
@@ -17,10 +19,11 @@ Estado maestro del repositorio. Sin secretos.
 
 ## Estrategias publicadas
 
-1. `first-triangle-adaptive`
-2. `first-triangle-gold-adaptive`
-3. `stochextreme-adaptive`
-4. `tm-bandas-s3`
+1. `first-triangle-adaptive` — producto `first-triangle-ustec-m30` (`coming_soon`)
+2. `first-triangle-gold-adaptive` — producto `first-triangle-gold-m15` (`coming_soon`)
+3. `stochextreme-adaptive` — producto `stochextreme-ustec` (`coming_soon`)
+
+`tm-bandas-s3` quedó **despublicada** (manifiesto en `strategy-intake/archive/`).
 
 Fuente: `public-strategies/` → `public-strategies/catalog.json` (generado por `scripts/intake/`, sin campos editoriales en el bundle público).
 
@@ -28,11 +31,17 @@ Fuente: `public-strategies/` → `public-strategies/catalog.json` (generado por 
 
 | PR | Rama | Estado |
 | -- | ---- | ------ |
-| #18 | merge de reparación producción (Nitro SSR) | Fusionado (`d68b0f2`) |
-| #19 | `feat/easy-start-navigation` | Abierto, CI verde, revisión pendiente |
-| #20 | `feat/QNT-0020-public-product-truth` | Abierto, CI verde, revisión pendiente |
+| #18 | merge de reparación producción (Nitro SSR) | Fusionado |
+| #29 | `chore/QNT-hide-backtest-broker` | Fusionado (`fc4f344`, `main` actual) |
+| #1 (quantoraex5) | `chore/add-quantora-web-submodule` | Fusionado (`265eae4`) — submódulo `quantora-web/` |
 
-Reglas: no fusionar automáticamente; no tocar `product-plans`; no mezclar QNT-0016; no activar pagos/descargas; no escribir en Supabase; entregas como un único informe TXT (o ZIP `.zip.txt`).
+Auditoría de las 14 ramas sin mergear y decisión recomendada por rama:
+ver `docs/BRANCH_AUDIT.md` (QNT-0040).
+
+Reglas: no fusionar automáticamente; nunca mergear ramas con `.ex5/.mq5/.set/.dll`
+o ZIP con EAs (el CI lo bloquea); no tocar `product-plans`; no mezclar QNT-0016; no
+activar pagos/descargas sin la fase correspondiente cerrada; no escribir en
+Supabase; entregas como un único informe TXT (o ZIP `.zip.txt`).
 
 ## Validación QNT-0020
 

@@ -120,6 +120,25 @@ the previous one; nothing is merged or deployed automatically.
 
 ---
 
+## Fases posteriores (registro de estado real · QNT-0040)
+
+| Ticket | Alcance | Estado real |
+| ------ | ------- | ----------- |
+| QNT-0016 | Planes, compra y alquiler | Contratos y reglas implementados (`plan.ts`, `rules.ts`); **planes activos con precio, pendientes** |
+| QNT-0017 | Pasarela de pago y webhooks | **Parcial**: precios fijos server-side, Checkout (Stripe test o mock), verificación de firma del webhook e idempotencia implementados y testeados (`scripts/test-qnt-0025-stripe-test.ts`). **Falta**: ruta HTTP `POST /api/stripe/webhook` con raw body y **persistencia real** (hoy `memory-repositories.ts`) |
+| QNT-0018 | Licencias y entrega protegida | **Pendiente**: almacén privado + URL firmada + entitlement server-side + `DOWNLOADS_ENABLED` |
+| QNT-0025 | Stripe test mode (300 € / 10 €/mes) | **Implementado en test**: `src/domain/payments/prices.ts` (30000 / 1000 EUR), `server.ts`, `webhook.ts`, `checkout.success/cancel`, CTAs, i18n. `PAYMENTS_ENABLED=false` en producción |
+| QNT-0030 | Seller intake · marketplace "Drop your EA" | **Plan escrito**, no implementado: `docs/QNT-0030-seller-intake.md` (rama `docs/QNT-0030-seller-intake-plan`, 0 conflictos) |
+| QNT-0040 | Higiene de ramas | **Este PR**: `docs/BRANCH_AUDIT.md` + `MASTER.md` al día |
+| QNT-0041 | Precios visibles (300 € / 10 €/mes) | **Pendiente**: planes en manifiesto → catálogo público → UI de ficha y listado |
+| Fase SEO | Portal: JSON-LD, sitemap dinámico, hreflang, landings de intención | **Pendiente**. Base actual: canonical dinámico, `og:*`, `lang`, `robots.txt`, `sitemap.xml` estático (12 URLs), `src/site.ts` (`https://www.quantoramt5.com`) |
+
+**Precios vigentes** (no cambiar sin aprobación explícita del propietario):
+compra **300 €** pago único · alquiler **10 €/mes** · moneda **EUR** —
+`src/domain/payments/prices.ts`.
+
+---
+
 ## Visual goal (all phases)
 
 Professional and modern; fast comprehension; simple purchase/rental flow;
