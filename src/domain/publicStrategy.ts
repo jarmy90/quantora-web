@@ -45,6 +45,27 @@ export type ProductStatus =
   | 'paused'
   | 'deprecated';
 
+/**
+ * QNT-0041 · Public billing modality attached to a product.
+ *
+ * Plans are versioned catalog data produced by the intake pipeline from each
+ * manifest — never hand-written in components and never sent back by the
+ * client. Only `active` plans carrying a real price reach the public bundle:
+ * an absent plan means "no price is shown" (null is never rendered as 0 or
+ * "free"), and the amount is display-only (checkout resolves prices
+ * server-side).
+ */
+export type PublicPlan = {
+  /** Stable identifier derived from productId + billing model. */
+  planId: string;
+  billingModel: 'purchase' | 'rental';
+  billingInterval: 'one_time' | 'monthly' | 'quarterly' | 'annual';
+  /** Integer minor units (e.g. 30000 = 300 EUR). Always > 0 in public output. */
+  priceAmountMinor: number;
+  /** ISO 4217 code (e.g. "EUR"). */
+  currency: string;
+};
+
 export type PublicStrategy = {
   id: string;
   name: string;
@@ -80,6 +101,11 @@ export type PublicStrategy = {
   productStatus?: ProductStatus;
   /** Whether commercial EA download is enabled for this product (false while demo-only). */
   commercialDownloadEnabled?: boolean;
+  /**
+   * QNT-0041 public prices (display data only). Absent/empty means no price is
+   * rendered at all; checkout still resolves every amount server-side.
+   */
+  plans?: PublicPlan[];
 };
 
 export type PublicPeriod = {

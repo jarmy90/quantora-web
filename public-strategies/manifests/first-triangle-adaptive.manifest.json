@@ -14,6 +14,24 @@
   "productId": "first-triangle-ustec-m30",
   "productStatus": "coming_soon",
   "commercialDownloadEnabled": false,
+  "commercial": {
+    "plans": [
+      {
+        "billingModel": "purchase",
+        "billingInterval": "one_time",
+        "status": "active",
+        "priceAmountMinor": 30000,
+        "currency": "EUR"
+      },
+      {
+        "billingModel": "rental",
+        "billingInterval": "monthly",
+        "status": "active",
+        "priceAmountMinor": 1000,
+        "currency": "EUR"
+      }
+    ]
+  },
   "rules": [
     "Entry: FIRST_ALTERNATING_TRIANGLE signal (long and short)",
     "Stop: FIXED_200PTS (fixed 200-point stop)",

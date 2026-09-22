@@ -61,6 +61,12 @@ jobs:
       - name: Intake tests
         run: bun run scripts/test-strategy-intake.ts
 
+      - name: QNT-0041 public pricing tests
+        run: bun run scripts/test-qnt-0041-pricing-visible.ts
+
+      - name: QNT-0042 webhook and persistence tests
+        run: bun run scripts/test-qnt-0042-webhook-persistence.ts
+
       - name: Validate strategies
         run: bun run strategies:validate
 

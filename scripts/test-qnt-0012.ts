@@ -347,11 +347,35 @@ test('dashboard remains a marked preview and shows Account access: not enabled',
   assert(dash.includes('dashboard.notEnabledYet'), 'account access must be Not enabled yet');
 });
 
-test('public bundle carries no commercial capability activators', () => {
+test('public bundle carries prices but no commercial capability activators', () => {
   const raw = JSON.stringify(publicCatalog);
-  assert(!raw.includes('"planId"'), 'public bundle must not expose plans');
-  assert(!raw.includes('"paymentId"'), 'public bundle must not expose payments');
-  assert(!raw.includes('"licenseId"'), 'public bundle must not expose licenses');
+  // QNT-0041: the public bundle may carry read-only prices (planId,
+  // billingModel, billingInterval, priceAmountMinor, currency). Anything that
+  // activates a capability — payments, licenses, provider price ids, plan
+  // status or vault references — must never appear.
+  for (const needle of [
+    '"paymentId"',
+    '"licenseId"',
+    '"priceId"',
+    '"providerReference"',
+    '"status":"active"',
+  ]) {
+    assert(!raw.includes(needle), `public bundle must not contain "${needle}"`);
+  }
+  for (const strategy of publicCatalog.strategies) {
+    for (const plan of strategy.plans ?? []) {
+      assert(
+        Object.keys(plan).every((key) =>
+          ['planId', 'billingModel', 'billingInterval', 'priceAmountMinor', 'currency'].includes(key),
+        ),
+        `${strategy.id} exposes an unexpected plan field`,
+      );
+      assert(
+        plan.priceAmountMinor > 0 && plan.currency.length === 3,
+        `${strategy.id} plan must carry a usable price`,
+      );
+    }
+  }
 });
 
 let passed = 0;

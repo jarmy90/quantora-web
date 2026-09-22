@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import type { PublicStrategy } from '../domain/publicStrategy';
 import { fmtNum, fmtPeriod, fmtPoints, fmtSignedPoints, fmtSignedUsd, fmtUsd } from '../format';
 import { t } from '../i18n';
+import { StrategyPricing } from './StrategyPricing';
 
 /**
  * Small equity sparkline generated from the real equity points (never invented).
@@ -102,6 +103,7 @@ export function PublicStrategyCard({ s, cta = false }: { s: PublicStrategy; cta?
             <span className="status-chip published">{t('catalog.publishedStrategy')}</span>
             <span className="status-chip historical">{t('catalog.historicalBacktest')}</span>
           </div>
+          <StrategyPricing plans={s.plans} />
         </div>
       </div>
 
