@@ -67,6 +67,9 @@ jobs:
       - name: QNT-0042 webhook and persistence tests
         run: bun run scripts/test-qnt-0042-webhook-persistence.ts
 
+      - name: QNT-0043 protected delivery tests
+        run: bun run scripts/test-qnt-0043-protected-delivery.ts
+
       - name: Validate strategies
         run: bun run strategies:validate
 

@@ -11,7 +11,13 @@
  *   - idempotency by Stripe event id: an event is applied at most once;
  *   - fail closed: in production without a database there is NO ledger and the
  *     webhook refuses to record anything instead of granting access.
+ *
+ * QNT-0043 extends the contract with download access (license + entitlement),
+ * granted from paid orders only. Product state in Postgres comes from the
+ * products table; in memory the published catalog state is mirrored through
+ * `setMemoryProductState` (integration code outside the ledger).
  */
+import { RENTAL_PERIOD_MS } from '../delivery/access';
 import { resolveAppEnv } from '../../config';
 import { applyStripeWebhookEvent, type CheckoutRecord } from './checkout';
 
@@ -49,6 +55,39 @@ export interface PaymentLedger {
   hasProcessedEvent(eventId: string): Promise<boolean>;
   recordEvent(event: LedgerEvent): Promise<void>;
   applyEvent(event: LedgerEvent): Promise<LedgerApplyResult>;
+  /**
+   * QNT-0043 · Latest license with an entitlement for a product and customer.
+   * Returns null when access was never granted; the endpoint (not the UI)
+   * decides what "can download" means with `canFetchDownload`.
+   */
+  activeDownloadAccess(
+    customerAuthUserId: string,
+    productId: string,
+  ): Promise<{
+    license: { licenseId: string; orderId: string; status: string; expiresAt: string | null };
+    entitlement: { status: string; canDownload: boolean };
+  } | null>;
+  /**
+   * QNT-0043 · Grants a license + entitlement from a paid/active order.
+   * Idempotent per order: calling it for the same paid order twice keeps a
+   * single active license and entitlement.
+   */
+  grantAccessFromOrder(orderId: string, rentalPeriodMs?: number): Promise<void>;
+  /**
+   * QNT-0043 · Product commercial state used by the endpoint (catalog state
+   * is what can currently be activated in the database).
+   */
+  productState(productId: string): Promise<{
+    status: string;
+    commercialDownloadEnabled: boolean;
+  } | null>;
+  /** QNT-0043 · Appends an audit row for every served download. */
+  recordDownloadDownloaded(
+    customerAuthUserId: string,
+    productId: string,
+    licenseId: string | null,
+    orderId: string | null,
+  ): Promise<void>;
 }
 
 /**
@@ -75,13 +114,29 @@ export async function applyEventWith(
   const next = applyStripeWebhookEvent(record, { eventId: event.eventId, type: event.type });
   await ledger.saveOrder(next.record);
   await ledger.recordEvent(event);
+  // QNT-0043: every successfully applied event that settles money grants (or
+  // refreshes) the matching license + entitlement.
+  if (next.applied) {
+    await ledger.grantAccessFromOrder(event.orderId);
+  }
   return { ok: true, applied: next.applied, record: next.record, duplicate: false };
 }
+
+/** QNT-0043 · In-memory download access (license + entitlement per order). */
+type DownloadAccess = {
+  customerAuthUserId: string;
+  productId: string;
+  license: { licenseId: string; orderId: string; status: string; expiresAt: string | null };
+  entitlement: { status: string; canDownload: boolean };
+};
 
 /** In-memory ledger: tests and local development only (nothing survives a restart). */
 export function createMemoryLedger(): PaymentLedger {
   const orders = new Map<string, CheckoutRecord>();
   const events = new Set<string>();
+  const accesses = new Map<string, DownloadAccess>();
+  const licensesByOrder = new Map<string, string>();
+  const downloads: { customerAuthUserId: string; productId: string; occurredAt: string }[] = [];
 
   const ledger: PaymentLedger = {
     kind: 'memory',
@@ -129,10 +184,77 @@ export function createMemoryLedger(): PaymentLedger {
     async applyEvent(event) {
       return applyEventWith(ledger, event);
     },
+
+    /**
+     * QNT-0043 · Latest license with an entitlement for a product and customer.
+     * Used by the download endpoint: the newest access wins.
+     */
+    async activeDownloadAccess(customerAuthUserId: string, productId: string) {
+      const latest = [...accesses.values()].reverse().find(
+        (access) => access.customerAuthUserId === customerAuthUserId && access.productId === productId,
+      );
+      if (!latest) return null;
+      return { license: latest.license, entitlement: latest.entitlement };
+    },
+
+    /**
+     * QNT-0043 · Grants a license + entitlement from a paid/active order.
+     * Idempotent per order: at most one license exists per order id.
+     */
+    async grantAccessFromOrder(orderId: string, rentalPeriodMs?: number) {
+      const record = orders.get(orderId);
+      const done = record && (record.status === 'paid' || record.status === 'active');
+      if (!record || !done) return;
+      if (licensesByOrder.has(orderId)) return;
+      const now = Date.now();
+      const expiresAt =
+        record.billingModel === 'rental'
+          ? new Date(now + (rentalPeriodMs ?? RENTAL_PERIOD_MS)).toISOString()
+          : null;
+      const access: DownloadAccess = {
+        customerAuthUserId: record.customerId,
+        productId: record.productId,
+        license: { licenseId: `lic_${record.orderId}`, orderId: record.orderId, status: 'active', expiresAt },
+        entitlement: { status: 'granted', canDownload: true },
+      };
+      accesses.set(access.license.licenseId, access);
+      licensesByOrder.set(orderId, access.license.licenseId);
+    },
+
+    /** QNT-0043 · Memory mirrors the catalog state set through setMemoryProductState. */
+    async productState(productId: string) {
+      const state = memoryExtras.get(ledger)?.[`productState:${productId}`] as
+        | { status: string; commercialDownloadEnabled: boolean }
+        | undefined;
+      return state ?? null;
+    },
+
+    /** QNT-0043 · Appends in-memory audit rows for every served download. */
+    async recordDownloadDownloaded(customerAuthUserId: string, productId: string) {
+      downloads.push({ customerAuthUserId, productId, occurredAt: new Date().toISOString() });
+    },
   };
 
   return ledger;
 }
+
+/**
+ * QNT-0043 · Mirrors the published catalog state into a memory ledger.
+ *
+ * Intended for development flows without a database (never production): the
+ * memory ledger has no products table, so integration code sets the same
+ * `status` / `commercialDownloadEnabled` the catalog advertises. Unknown
+ * products keep denying by default.
+ */
+export function setMemoryProductState(
+  ledger: PaymentLedger,
+  state: { productId: string; status: string; commercialDownloadEnabled: boolean },
+): void {
+  const key = `productState:${state.productId}`;
+  memoryExtras.set(ledger, { ...(memoryExtras.get(ledger) ?? {}), [key]: state });
+}
+
+const memoryExtras = new WeakMap<PaymentLedger, Record<string, unknown>>();
 
 let memoryLedger: PaymentLedger | null = null;
 

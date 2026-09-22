@@ -2,8 +2,10 @@ import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-ro
 import { useState } from 'react';
 import { Nav } from '../components/Nav';
 import { BillingHistory } from '../components/BillingHistory';
+import { CustomerDownloads } from '../components/CustomerDownloads';
 import { Footer } from '../components/Footer';
 import { getAuthStatus, signOut } from '../domain/auth/server';
+import { commercialCatalog } from '../commercial/catalog';
 import { t } from '../i18n';
 import '../styles/app.css';
 
@@ -86,7 +88,7 @@ function AccountPage() {
 
         <div className="auth-box">
           <h2>{t('account.strategies')}</h2>
-          <p>{t('account.strategiesEmpty')}</p>
+          <CustomerDownloads productIds={commercialCatalog.map((entry) => entry.productId)} />
         </div>
         <div className="auth-box">
           <h2>{t('account.licenses')}</h2>

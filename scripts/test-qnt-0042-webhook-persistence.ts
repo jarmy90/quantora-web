@@ -18,7 +18,15 @@ import {
   type CheckoutRecord,
   type CheckoutRecordStatus,
 } from '../src/domain/payments/checkout';
-import { createMemoryLedger, getPaymentLedger } from '../src/domain/payments/ledger';
+import { RENTAL_PERIOD_MS, canFetchDownload } from '../src/domain/delivery/access';
+import type { EntitlementStatus } from '../src/domain/commercial/entitlement';
+import type { LicenseStatus } from '../src/domain/commercial/license';
+import {
+  createMemoryLedger,
+  getMemoryLedger,
+  getPaymentLedger,
+  setMemoryProductState,
+} from '../src/domain/payments/ledger';
 import { verifyStripeSignature } from '../src/domain/payments/webhook';
 
 let failures = 0;
@@ -112,6 +120,100 @@ const mine = await ledger.listByCustomer('auth-user-1');
 check('customer history lists their own orders only', mine.length === 3);
 check('history is newest first', mine[0]!.createdAt >= mine[mine.length - 1]!.createdAt);
 check('another customer sees nothing', (await ledger.listByCustomer('someone-else')).length === 0);
+
+// ---------------------------------------------------------------------------
+// 2b. Download access: paid orders grant licenses, rules deny by default
+// ---------------------------------------------------------------------------
+const granted = await ledger.createOrder({
+  ...draft('purchase'),
+  customerAuthUserId: 'auth-buyer',
+  stripeSessionId: 'cs_grant_1',
+});
+await ledger.applyEvent({ eventId: 'evt_grant', type: 'checkout.session.completed', orderId: granted.orderId });
+await ledger.applyEvent({ eventId: 'evt_grant_replay', type: 'checkout.session.completed', orderId: granted.orderId });
+const buyerAccess = await ledger.activeDownloadAccess('auth-buyer', granted.productId);
+check('paid order grants one active license', buyerAccess?.license.status === 'active');
+check(
+  'granted entitlement allows downloads',
+  buyerAccess?.entitlement.status === 'granted' && buyerAccess?.entitlement.canDownload === true,
+);
+check(
+  'one-time purchase license has no expiry',
+  buyerAccess !== null && buyerAccess.license.expiresAt === null,
+);
+
+const rented = await ledger.createOrder({
+  ...draft('rental'),
+  customerAuthUserId: 'auth-renter',
+  stripeSessionId: 'cs_grant_2',
+});
+await ledger.applyEvent({ eventId: 'evt_grant_r', type: 'invoice.paid', orderId: rented.orderId });
+const renterAccess = await ledger.activeDownloadAccess('auth-renter', rented.productId);
+check('rental maps to an active license', renterAccess?.license.status === 'active');
+check(
+  'rental license carries a finite term',
+  renterAccess !== null &&
+    typeof renterAccess.license.expiresAt === 'string' &&
+    Date.parse(renterAccess.license.expiresAt) - Date.parse(rented.createdAt) === RENTAL_PERIOD_MS,
+);
+
+const canary = 'qnt-temp-product';
+const denied = canFetchDownload({
+  product: { status: 'coming_soon', commercialDownloadEnabled: false },
+  license: renterAccess?.license
+    ? { status: renterAccess.license.status as LicenseStatus, expiresAt: renterAccess.license.expiresAt }
+    : null,
+  entitlement: renterAccess
+    ? {
+        status: renterAccess.entitlement.status as EntitlementStatus,
+        canDownload: renterAccess.entitlement.canDownload,
+      }
+    : null,
+});
+check('coming_soon denies even a valid license', denied.allowed === false && denied.reason.includes('not available'));
+
+const live = {
+  product: { status: 'available' as const, commercialDownloadEnabled: true },
+  license: renterAccess?.license
+    ? { status: renterAccess.license.status as 'active', expiresAt: renterAccess.license.expiresAt }
+    : null,
+  entitlement: renterAccess
+    ? { status: renterAccess.entitlement.status as 'granted', canDownload: renterAccess.entitlement.canDownload }
+    : null,
+};
+check('available product with an active grant allows', canFetchDownload(live).allowed === true);
+
+const expired = canFetchDownload({
+  ...live,
+  license: live.license ? { ...live.license, expiresAt: new Date(Date.now() - 1000).toISOString() } : null,
+});
+check('expired rental denies', expired.allowed === false && expired.reason.includes('expired'));
+
+const suspended = canFetchDownload({
+  ...live,
+  entitlement: { status: 'suspended', canDownload: true },
+});
+check('suspended entitlement denies', suspended.allowed === false && suspended.reason.includes('not granted'));
+
+const anonymous = canFetchDownload({ ...live, license: null });
+check('no license denies', anonymous.allowed === false && anonymous.reason.includes('no license'));
+
+const stranger = await ledger.activeDownloadAccess('nobody', canary);
+check('unknown customer has no access', stranger === null);
+
+// ---------------------------------------------------------------------------
+// 2c. Memory product state mirrors the published catalog in development
+// ---------------------------------------------------------------------------
+const mirrorLedger = createMemoryLedger();
+await mirrorLedger.applyEvent({
+  eventId: 'evt_dev',
+  type: 'checkout.session.completed',
+  orderId: 'no-order-here',
+});
+setMemoryProductState(mirrorLedger, { productId: canary, status: 'available', commercialDownloadEnabled: true });
+check('mirrored product state resolves', (await mirrorLedger.productState(canary))?.status === 'available');
+check('unknown products deny by default', (await mirrorLedger.productState('anything-else')) === null);
+check('the memory fallback is not the production path', getMemoryLedger().kind === 'memory');
 
 // ---------------------------------------------------------------------------
 // 3. Fail closed: production without a database has no ledger at all
