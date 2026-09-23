@@ -1,0 +1,6 @@
+{
+  "first-triangle-ustec-m30": "Quantora_Triangulo_USTEC_M30_v27.ex5",
+  "first-triangle-gold-m15": "Quantora_Triangulo_Oro_M15_v27.ex5",
+  "stochextreme-ustec": null,
+  "_notes": "Set the .ex5 filename for stochextreme-ustec and confirm the two guesses above. The vault dir defaults to C:/Users/profesor/quantoraex5 (override with EA_VAULT_DIR)."
+}

@@ -298,6 +298,9 @@ export const esES: Record<string, string> = {
   'account.eyebrow': 'Cuenta',
   'account.strategies': 'Tus estrategias',
   'account.strategiesEmpty': 'Todavía no tienes estrategias activas.',
+  // QNT-0043 descargas del cliente: estado honesto hasta que exista una descarga concedida.
+  'account.downloadsEmpty': 'Todavía no hay descargas disponibles. Las compras y alquileres aparecen aquí una vez confirmado su pago.',
+  'account.downloadCta': 'Descargar para MT5',
   'account.licenses': 'Licencias',
   'account.licensesEmpty': 'No hay licencias disponibles.',
   'account.billing': 'Facturación',

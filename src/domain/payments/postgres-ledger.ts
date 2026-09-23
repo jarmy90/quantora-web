@@ -13,6 +13,7 @@
  *   cancelled/expired -> cancelled                       | refunded -> refunded
  */
 import { sql } from '../../db';
+import { RENTAL_PERIOD_MS } from '../delivery/access';
 import type { CheckoutRecord, CheckoutRecordStatus } from './checkout';
 import { applyEventWith, type LedgerEvent, type LedgerOrderDraft, type PaymentLedger } from './ledger';
 
@@ -234,6 +235,100 @@ export function createPostgresLedger(_url?: string): PaymentLedger {
 
     async applyEvent(event: LedgerEvent) {
       return applyEventWith(ledger, event);
+    },
+
+    /**
+     * QNT-0043 · Latest license with an entitlement for a product and customer.
+     * Used by the download endpoint: the newest access wins.
+     */
+    async activeDownloadAccess(customerAuthUserId: string, productId: string) {
+      const rows = (await sql()`
+        SELECT l.license_id, l.order_id, l.status AS license_status, l.expires_at,
+               e.status AS entitlement_status, e.can_download
+        FROM customers c
+        JOIN licenses l ON l.customer_id = c.customer_id
+        JOIN products p ON p.id = l.product_ref AND p.product_id = ${productId}
+        LEFT JOIN entitlements e ON e.license_id = l.license_id
+        WHERE c.auth_user_id = ${customerAuthUserId}
+        ORDER BY l.created_at DESC
+        LIMIT 1
+      `) as Row[];
+      if (rows.length === 0) return null;
+      const row = rows[0];
+      return {
+        license: {
+          licenseId: text(row.license_id),
+          orderId: text(row.order_id),
+          status: text(row.license_status),
+          expiresAt: iso(row.expires_at, '') === '' ? null : iso(row.expires_at, ''),
+        },
+        entitlement: {
+          status: text(row.entitlement_status),
+          canDownload: row.can_download === true,
+        },
+      };
+    },
+
+    /**
+     * QNT-0043 · Grants a license + entitlement from a paid/active order.
+     * Idempotent per order: a second call for the same order id refreshes
+     * nothing and keeps a single active license and entitlement.
+     */
+    async grantAccessFromOrder(orderId: string, rentalPeriodMs?: number) {
+      if (!isUuid(orderId)) return;
+      const period = rentalPeriodMs ?? RENTAL_PERIOD_MS;
+      await sql()`
+        WITH settled AS (
+          SELECT o.order_id, o.customer_id, o.product_ref, o.billing_model, o.status
+          FROM orders o
+          WHERE o.order_id = ${orderId} AND o.status = 'paid'
+          LIMIT 1
+        ),
+        license AS (
+          INSERT INTO licenses (customer_id, product_ref, order_id, status, starts_at, expires_at)
+          SELECT s.customer_id, s.product_ref, s.order_id, 'active', now(),
+                 CASE WHEN s.billing_model = 'rental' THEN now() + (${period}::bigint * INTERVAL '1 millisecond') ELSE NULL END
+          FROM settled s
+          ON CONFLICT DO NOTHING
+          RETURNING license_id, customer_id, product_ref
+        )
+        INSERT INTO entitlements (customer_id, product_ref, license_id, status, can_download, can_view_customer_content)
+        SELECT license.customer_id, license.product_ref, license.license_id, 'granted', true, false
+        FROM license
+        ON CONFLICT DO NOTHING
+      `;
+    },
+
+    /** QNT-0043 · Database product state from the products table. */
+    async productState(productId: string) {
+      const rows = (await sql()`
+        SELECT status, commercial_download_enabled
+        FROM products
+        WHERE product_id = ${productId}
+        LIMIT 1
+      `) as Row[];
+      if (rows.length === 0) return null;
+      return {
+        status: text(rows[0].status),
+        commercialDownloadEnabled: rows[0].commercial_download_enabled === true,
+      };
+    },
+
+    /** QNT-0043 · Appends an audit row for every served download. */
+    async recordDownloadDownloaded(
+      customerAuthUserId: string,
+      productId: string,
+      licenseId: string | null,
+      orderId: string | null,
+    ) {
+      const customers = (await sql()`
+        SELECT customer_id FROM customers WHERE auth_user_id = ${customerAuthUserId} LIMIT 1
+      `) as Row[];
+      const customerId = customers.length > 0 ? text(customers[0].customer_id) : null;
+      await sql()`
+        INSERT INTO download_events (customer_id, product_id, license_id, order_id)
+        VALUES (${customerId}, ${productId}, ${isUuid(licenseId) ? licenseId : null}, ${isUuid(orderId) ? orderId : null})
+      `;
     },
   };
 

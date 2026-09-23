@@ -293,6 +293,9 @@ export const enUS = {
   'account.eyebrow': 'Account',
   'account.strategies': 'Your strategies',
   'account.strategiesEmpty': 'You have no active strategies yet.',
+  // QNT-0043 customer downloads: honest empty state until a granted download exists.
+  'account.downloadsEmpty': 'No downloads available yet. Purchases and rentals appear here once their payment is confirmed.',
+  'account.downloadCta': 'Download for MT5',
   'account.licenses': 'Licenses',
   'account.licensesEmpty': 'No licenses available.',
   'account.billing': 'Billing',

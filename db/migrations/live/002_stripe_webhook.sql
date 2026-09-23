@@ -71,6 +71,12 @@ WHERE p.product_id IN ('first-triangle-ustec-m30', 'first-triangle-gold-m15', 's
       WHERE pl.product_ref = p.id AND pl.billing_model = v.billing_model
   );
 
+-- 5) Idempotency for grant-per-order without a natural unique key: at most one
+--    row per order keeps repeated webhook deliveries from ever duplicating a
+--    license or an entitlement.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_licenses_unique_order ON licenses (order_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_entitlements_unique_license ON entitlements (license_id);
+
 -- 5) RLS closed by default and privileges revoked, consistent with 001.
 ALTER TABLE stripe_events ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON stripe_events FROM anon, authenticated;
