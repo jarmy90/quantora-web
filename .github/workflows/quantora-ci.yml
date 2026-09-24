@@ -70,6 +70,9 @@ jobs:
       - name: QNT-0043 protected delivery tests
         run: bun run scripts/test-qnt-0043-protected-delivery.ts
 
+      - name: QNT-0045 online licence tests
+        run: bun run scripts/test-qnt-0045-online-license.ts
+
       - name: Validate strategies
         run: bun run strategies:validate
 

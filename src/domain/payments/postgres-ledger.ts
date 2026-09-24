@@ -13,7 +13,9 @@
  *   cancelled/expired -> cancelled                       | refunded -> refunded
  */
 import { sql } from '../../db';
+import type { LicenseStatus } from '../commercial/license';
 import { RENTAL_PERIOD_MS } from '../delivery/access';
+import { newLicenseKey, normalizeLicenseKey, validateLicense } from '../licenses/validation';
 import type { CheckoutRecord, CheckoutRecordStatus } from './checkout';
 import { applyEventWith, type LedgerEvent, type LedgerOrderDraft, type PaymentLedger } from './ledger';
 
@@ -277,6 +279,7 @@ export function createPostgresLedger(_url?: string): PaymentLedger {
     async grantAccessFromOrder(orderId: string, rentalPeriodMs?: number) {
       if (!isUuid(orderId)) return;
       const period = rentalPeriodMs ?? RENTAL_PERIOD_MS;
+      const licenseKey = newLicenseKey(() => crypto.randomUUID().replace(/-/g, ''));
       await sql()`
         WITH settled AS (
           SELECT o.order_id, o.customer_id, o.product_ref, o.billing_model, o.status
@@ -285,9 +288,10 @@ export function createPostgresLedger(_url?: string): PaymentLedger {
           LIMIT 1
         ),
         license AS (
-          INSERT INTO licenses (customer_id, product_ref, order_id, status, starts_at, expires_at)
+          INSERT INTO licenses (customer_id, product_ref, order_id, status, starts_at, expires_at, license_key, activations, max_activations)
           SELECT s.customer_id, s.product_ref, s.order_id, 'active', now(),
-                 CASE WHEN s.billing_model = 'rental' THEN now() + (${period}::bigint * INTERVAL '1 millisecond') ELSE NULL END
+                 CASE WHEN s.billing_model = 'rental' THEN now() + (${period}::bigint * INTERVAL '1 millisecond') ELSE NULL END,
+                 ${licenseKey}, 0, 1
           FROM settled s
           ON CONFLICT DO NOTHING
           RETURNING license_id, customer_id, product_ref
@@ -329,6 +333,75 @@ export function createPostgresLedger(_url?: string): PaymentLedger {
         INSERT INTO download_events (customer_id, product_id, license_id, order_id)
         VALUES (${customerId}, ${productId}, ${isUuid(licenseId) ? licenseId : null}, ${isUuid(orderId) ? orderId : null})
       `;
+    },
+
+    /** QNT-0045 · Licences (with key) belonging to a customer, newest first. */
+    async listLicenses(customerAuthUserId: string) {
+      const rows = (await sql()`
+        SELECT l.license_id, l.status, l.expires_at, l.license_key, l.bound_account, p.product_id
+        FROM customers c
+        JOIN licenses l ON l.customer_id = c.customer_id
+        JOIN products p ON p.id = l.product_ref
+        WHERE c.auth_user_id = ${customerAuthUserId}
+        ORDER BY l.created_at DESC
+        LIMIT 50
+      `) as Row[];
+      return rows.map((row) => ({
+        licenseId: text(row.license_id),
+        productId: text(row.product_id),
+        licenseKey: textOrNull(row.license_key),
+        status: text(row.status),
+        expiresAt: textOrNull(row.expires_at) === null ? null : iso(row.expires_at, ''),
+        boundAccount: row.bound_account === null || row.bound_account === undefined ? null : text(row.bound_account),
+      }));
+    },
+
+    /**
+     * QNT-0045 · Validates the EA key and binds it to the first account that
+     * uses it. Expiry comes from the server clock, never from the EA machine.
+     */
+    async validateLicenseKey({ licenseKey, account }) {
+      const key = normalizeLicenseKey(licenseKey);
+      if (!key) {
+        return validateLicense({ license: null, account });
+      }
+      const rows = (await sql()`
+        SELECT license_id, status, expires_at, bound_account, activations, max_activations
+        FROM licenses
+        WHERE license_key = ${key}
+        LIMIT 1
+      `) as Row[];
+      const row = rows[0];
+      const decision = validateLicense({
+        license: row
+          ? {
+              status: text(row.status) as LicenseStatus,
+              expiresAt: textOrNull(row.expires_at) === null ? null : iso(row.expires_at, ''),
+              boundAccount: row.bound_account === null || row.bound_account === undefined ? null : text(row.bound_account),
+              activations: numOrNull(row.activations) ?? 0,
+              maxActivations: numOrNull(row.max_activations),
+            }
+          : null,
+        account,
+      });
+      if (row && decision.valid) {
+        const licenseId = text(row.license_id);
+        if (decision.bind) {
+          await sql()`
+            UPDATE licenses
+            SET bound_account = ${String(account).trim()},
+                activations = activations + 1,
+                last_seen_at = now(),
+                updated_at = now()
+            WHERE license_id = ${licenseId} AND bound_account IS NULL
+          `;
+        } else {
+          await sql()`
+            UPDATE licenses SET last_seen_at = now(), updated_at = now() WHERE license_id = ${licenseId}
+          `;
+        }
+      }
+      return decision;
     },
   };
 

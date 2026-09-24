@@ -18,6 +18,8 @@
  * `setMemoryProductState` (integration code outside the ledger).
  */
 import { RENTAL_PERIOD_MS } from '../delivery/access';
+import type { LicenseStatus } from '../commercial/license';
+import { newLicenseKey, normalizeLicenseKey, validateLicense } from '../licenses/validation';
 import { resolveAppEnv } from '../../config';
 import { applyStripeWebhookEvent, type CheckoutRecord } from './checkout';
 
@@ -42,6 +44,16 @@ export type LedgerOrderDraft = {
   amountMinor: number;
   currency: string;
   stripeSessionId: string | null;
+};
+
+/** QNT-0045 · A customer's licence as shown in the account area. */
+export type CustomerLicense = {
+  licenseId: string;
+  productId: string;
+  licenseKey: string | null;
+  status: string;
+  expiresAt: string | null;
+  boundAccount: string | null;
 };
 
 export interface PaymentLedger {
@@ -88,6 +100,17 @@ export interface PaymentLedger {
     licenseId: string | null,
     orderId: string | null,
   ): Promise<void>;
+  /** QNT-0045 · Licences (with their key) belonging to a customer. */
+  listLicenses(customerAuthUserId: string): Promise<CustomerLicense[]>;
+  /**
+   * QNT-0045 · Validates an EA-supplied key for an MT5 account. The first
+   * account that succeeds claims the licence (anti-sharing); later attempts
+   * from any other account are rejected. Expiry is decided by the server clock.
+   */
+  validateLicenseKey(input: {
+    licenseKey: string;
+    account: string;
+  }): Promise<import('../licenses/validation').LicenseValidationResult>;
 }
 
 /**
@@ -122,11 +145,21 @@ export async function applyEventWith(
   return { ok: true, applied: next.applied, record: next.record, duplicate: false };
 }
 
-/** QNT-0043 · In-memory download access (license + entitlement per order). */
+/** QNT-0043/0045 · In-memory download + licence access (one record per order). */
 type DownloadAccess = {
   customerAuthUserId: string;
   productId: string;
-  license: { licenseId: string; orderId: string; status: string; expiresAt: string | null };
+  license: {
+    licenseId: string;
+    orderId: string;
+    status: string;
+    expiresAt: string | null;
+    /** QNT-0045 · Key shown to the customer and validated by the EA. */
+    licenseKey: string;
+    boundAccount: string | null;
+    activations: number;
+    maxActivations: number;
+  };
   entitlement: { status: string; canDownload: boolean };
 };
 
@@ -214,7 +247,16 @@ export function createMemoryLedger(): PaymentLedger {
       const access: DownloadAccess = {
         customerAuthUserId: record.customerId,
         productId: record.productId,
-        license: { licenseId: `lic_${record.orderId}`, orderId: record.orderId, status: 'active', expiresAt },
+        license: {
+          licenseId: `lic_${record.orderId}`,
+          orderId: record.orderId,
+          status: 'active',
+          expiresAt,
+          licenseKey: newLicenseKey(() => crypto.randomUUID().replace(/-/g, '')),
+          boundAccount: null,
+          activations: 0,
+          maxActivations: 1,
+        },
         entitlement: { status: 'granted', canDownload: true },
       };
       accesses.set(access.license.licenseId, access);
@@ -232,6 +274,50 @@ export function createMemoryLedger(): PaymentLedger {
     /** QNT-0043 · Appends in-memory audit rows for every served download. */
     async recordDownloadDownloaded(customerAuthUserId: string, productId: string) {
       downloads.push({ customerAuthUserId, productId, occurredAt: new Date().toISOString() });
+    },
+
+    /** QNT-0045 · Licences (with key) of a customer, newest first. */
+    async listLicenses(customerAuthUserId: string) {
+      return [...accesses.values()]
+        .filter((access) => access.customerAuthUserId === customerAuthUserId)
+        .reverse()
+        .map((access) => ({
+          licenseId: access.license.licenseId,
+          productId: access.productId,
+          licenseKey: access.license.licenseKey,
+          status: access.license.status,
+          expiresAt: access.license.expiresAt,
+          boundAccount: access.license.boundAccount,
+        }));
+    },
+
+    /**
+     * QNT-0045 · Validates the EA key for an account and binds it on first use.
+     * The server clock decides expiry; a shared key stops working because the
+     * licence is already bound to the first account that used it.
+     */
+    async validateLicenseKey({ licenseKey, account }) {
+      const key = normalizeLicenseKey(licenseKey);
+      const found = key
+        ? [...accesses.values()].find((access) => access.license.licenseKey === key)
+        : undefined;
+      const decision = validateLicense({
+        license: found
+          ? {
+              status: found.license.status as LicenseStatus,
+              expiresAt: found.license.expiresAt,
+              boundAccount: found.license.boundAccount,
+              activations: found.license.activations,
+              maxActivations: found.license.maxActivations,
+            }
+          : null,
+        account,
+      });
+      if (decision.valid && decision.bind && found) {
+        found.license.boundAccount = String(account).trim();
+        found.license.activations += 1;
+      }
+      return decision;
     },
   };
 

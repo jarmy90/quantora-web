@@ -301,6 +301,11 @@ export const esES: Record<string, string> = {
   // QNT-0043 descargas del cliente: estado honesto hasta que exista una descarga concedida.
   'account.downloadsEmpty': 'Todavía no hay descargas disponibles. Las compras y alquileres aparecen aquí una vez confirmado su pago.',
   'account.downloadCta': 'Descargar para MT5',
+  // QNT-0045 licencias: clave y vigencia mostradas automáticamente tras el pago.
+  'licenses.validUntil': 'válida hasta',
+  'licenses.perpetual': 'perpetua (compra única)',
+  'licenses.inactive': 'no activa',
+  'licenses.boundTo': 'vinculada a la cuenta MT5',
   'account.licenses': 'Licencias',
   'account.licensesEmpty': 'No hay licencias disponibles.',
   'account.billing': 'Facturación',

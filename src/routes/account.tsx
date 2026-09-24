@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Nav } from '../components/Nav';
 import { BillingHistory } from '../components/BillingHistory';
 import { CustomerDownloads } from '../components/CustomerDownloads';
+import { MyLicenses } from '../components/MyLicenses';
 import { Footer } from '../components/Footer';
 import { getAuthStatus, signOut } from '../domain/auth/server';
 import { commercialCatalog } from '../commercial/catalog';
@@ -92,7 +93,7 @@ function AccountPage() {
         </div>
         <div className="auth-box">
           <h2>{t('account.licenses')}</h2>
-          <p>{t('account.licensesEmpty')}</p>
+          <MyLicenses />
         </div>
         <div className="auth-box" data-testid="billing-history">
           <h2>{t('billing.title')}</h2>

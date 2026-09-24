@@ -296,6 +296,11 @@ export const enUS = {
   // QNT-0043 customer downloads: honest empty state until a granted download exists.
   'account.downloadsEmpty': 'No downloads available yet. Purchases and rentals appear here once their payment is confirmed.',
   'account.downloadCta': 'Download for MT5',
+  // QNT-0045 licences: key + validity shown automatically after payment.
+  'licenses.validUntil': 'valid until',
+  'licenses.perpetual': 'perpetual (one-time purchase)',
+  'licenses.inactive': 'not active',
+  'licenses.boundTo': 'linked to MT5 account',
   'account.licenses': 'Licenses',
   'account.licensesEmpty': 'No licenses available.',
   'account.billing': 'Billing',
